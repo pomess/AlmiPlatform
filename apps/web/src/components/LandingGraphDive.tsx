@@ -111,11 +111,12 @@ export function LandingGraphDive() {
               <stop offset="0%" stopColor="oklch(0.55 0.15 175 / 0.18)" />
               <stop offset="80%" stopColor="oklch(0.55 0.15 175 / 0)" />
             </radialGradient>
-            {/* Subtle mint-tinted edge gradient that brightens at ends */}
+            {/* Mint-tinted edge gradient that brightens at the midpoint —
+                tuned for visibility on the light landing surface. */}
             <linearGradient id="kg-edge" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="oklch(0.65 0.13 175 / 0.10)" />
-              <stop offset="50%" stopColor="oklch(0.78 0.14 175 / 0.32)" />
-              <stop offset="100%" stopColor="oklch(0.65 0.13 175 / 0.10)" />
+              <stop offset="0%" stopColor="oklch(0.55 0.15 175 / 0.20)" />
+              <stop offset="50%" stopColor="oklch(0.55 0.15 175 / 0.55)" />
+              <stop offset="100%" stopColor="oklch(0.55 0.15 175 / 0.20)" />
             </linearGradient>
             {/* Bloom filter applied to nodes — produces a halo around the
                 solid disc so the graph reads as luminous. */}
@@ -128,8 +129,6 @@ export function LandingGraphDive() {
             </filter>
           </defs>
 
-          {/* Background vignette */}
-          <ellipse cx="50" cy="32" rx="58" ry="32" fill="url(#kg-vignette)" />
 
           {/* Edges */}
           <g className="kg-edges">
@@ -161,11 +160,12 @@ export function LandingGraphDive() {
                   transform={`translate(${n.x}, ${n.y})`}
                   className={`kg-node kg-node--${n.layer}`}
                 >
-                  {/* Outer soft halo */}
+                  {/* Outer soft halo — slightly stronger than the dark
+                      version so it still reads on the light surface. */}
                   <circle
-                    r={n.r * 2.2}
+                    r={n.r * 2.0}
                     fill={color}
-                    opacity="0.10"
+                    opacity="0.14"
                     filter="url(#kg-bloom)"
                   />
                   {/* Mid ring */}
