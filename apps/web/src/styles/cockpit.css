@@ -3615,6 +3615,23 @@ body { overflow: hidden; }
   transform-origin: 16px 64px;
   animation: dashboard-locus-ring 2.4s ease-out infinite;
 }
+.dashboard-pharma-pin--dot,
+.dashboard-pharma-pin--dot svg {
+  overflow: visible;
+}
+.dashboard-pharma-pin--dot {
+  filter: drop-shadow(0 0 3px oklch(0.62 0.22 25 / 0.35));
+}
+.dashboard-pharma-pin--dot .pharma-pin-anchor {
+  fill: oklch(0.70 0.22 25 / 0.75);
+}
+.dashboard-pharma-pin--dot .pharma-pin-home-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  stroke-width: 0.8;
+  stroke: oklch(0.70 0.22 25 / 0.4);
+  animation-duration: 3.4s;
+}
 
 /* Almirall home pin — mint. */
 .dashboard-pharma-pin--home {

@@ -9,7 +9,7 @@ import {
   ALMIRALL_HQ,
   COMPETITORS,
   makeAlmirallMarker,
-  makeCompetitorMarker,
+  makeCompetitorDotMarker,
 } from "../lib/pharma";
 
 const STYLE_URL =
@@ -97,12 +97,11 @@ export function LandingGlobeMock() {
       // never grows even after the parent flex container settles.
       map.resize();
 
-      // Drop the same pin set the dashboard uses.
       makeAlmirallMarker()
         .setLngLat([ALMIRALL_HQ.lng, ALMIRALL_HQ.lat])
         .addTo(map);
       COMPETITORS.forEach((c) =>
-        makeCompetitorMarker(c).setLngLat([c.lng, c.lat]).addTo(map),
+        makeCompetitorDotMarker(c).setLngLat([c.lng, c.lat]).addTo(map),
       );
 
       if (reduceMotion) return;

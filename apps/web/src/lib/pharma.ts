@@ -68,6 +68,19 @@ export function makeCompetitorMarker(c: Competitor): maplibregl.Marker {
   return makePharmaMarker(c.name, c.city, "rival");
 }
 
+export function makeCompetitorDotMarker(c: Competitor): maplibregl.Marker {
+  const el = document.createElement("div");
+  el.className = "dashboard-pharma-pin dashboard-pharma-pin--rival dashboard-pharma-pin--dot";
+  el.title = `${c.name} — ${c.city}`;
+  el.innerHTML = `
+    <svg viewBox="-16 -16 32 32" width="32" height="32" overflow="visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="0" cy="0" r="2" class="pharma-pin-anchor" />
+      <circle cx="0" cy="0" r="5" class="pharma-pin-home-ring" />
+    </svg>
+  `;
+  return new maplibregl.Marker({ element: el, anchor: "center" });
+}
+
 export function makeAlmirallMarker(): maplibregl.Marker {
   return makePharmaMarker(ALMIRALL_HQ.name, "Barcelona", "home");
 }
