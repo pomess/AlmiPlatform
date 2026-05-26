@@ -2,6 +2,7 @@
 // Reuses the existing Landing.css classes; swaps copy + preview for pharma.
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { LandingGlobeMock } from "../components/LandingGlobeMock";
 import "./Landing.css";
 
 const BOOT_MESSAGES = [
@@ -243,11 +244,11 @@ export function Landing() {
             </button>
             <a
               className="ghost"
-              href="#preview"
+              href="#section-1"
               onClick={(e) => {
                 e.preventDefault();
                 document
-                  .getElementById("preview")
+                  .getElementById("section-1")
                   ?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
             >
@@ -262,152 +263,29 @@ export function Landing() {
         </div>
       </section>
 
-      {/* LIVE PREVIEW */}
-      <section className="hero" id="preview" style={{ minHeight: "auto", padding: "0 24px 80px" }}>
+      {/* SECTION 01 — Bullseye demo + value cards */}
+      <section
+        id="section-1"
+        className="hero"
+        style={{ minHeight: "auto", padding: "40px 24px 0", scrollMarginTop: 96 }}
+      >
         <div className="preview-wrap" id="previewWrap">
           <div className="preview hud-frame" id="previewPanel">
-            <div className="preview-bar">
-              <div className="preview-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-              <div className="url">
-                <span className="accent">platform</span>.almirall /{" "}
-                <span className="mono">bullseye</span>
-              </div>
-              <div className="corner mono">DEMO PREVIEW</div>
-            </div>
-
-            <div className="pv-top">
-              <div className="pv-top-left">
-                <span className="pv-mark">A</span>
-                <span className="pv-wordmark">ALMIRALL</span>
-                <span className="pv-corner">
-                  <span className="pv-live"></span> ONLINE · COMPETITIVE INTEL
-                </span>
-              </div>
-              <nav className="pv-nav-pill">
-                <button>Chat</button>
-                <button>Dashboard</button>
-                <button className="active">Bullseye</button>
-                <button>Graph</button>
-                <button>Approvals</button>
-                <button>Brains</button>
-                <button>Settings</button>
-              </nav>
-              <div className="pv-top-right">
-                <span className="pv-brain-pill">
-                  <span
-                    className="pv-swatch"
-                    style={{ background: "var(--accent)" }}
-                  ></span>
-                  <span className="pv-brain-lbl">INDICATION</span>
-                  <span className="pv-brain-name">Atopic Dermatitis</span>
-                  <span className="pv-caret">▾</span>
-                </span>
-              </div>
-            </div>
-
-            <div
-              className="preview-body"
-              style={{ display: "grid", placeItems: "center", padding: "32px 40px 48px" }}
-            >
-              <div
-                style={{
-                  display: "grid",
-                  placeItems: "center",
-                  width: "100%",
-                  maxWidth: 720,
-                  aspectRatio: "1 / 1",
-                  position: "relative",
-                }}
-              >
-                <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%" }}>
-                  <defs>
-                    <radialGradient id="bullsg" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stopColor="oklch(0.82 0.16 175 / 0.22)" />
-                      <stop offset="70%" stopColor="oklch(0.82 0.16 175 / 0)" />
-                    </radialGradient>
-                  </defs>
-                  <circle cx="50" cy="50" r="50" fill="url(#bullsg)" />
-                  {[9, 18, 27, 36, 45].map((r) => (
-                    <circle
-                      key={r}
-                      cx="50"
-                      cy="50"
-                      r={r}
-                      fill="none"
-                      stroke="oklch(1 0 0 / 0.08)"
-                      strokeWidth="0.25"
-                    />
-                  ))}
-                  {[
-                    { brand: "Dupixent", company: "Sanofi", angle: -90, r: 9, color: "oklch(0.74 0.18 50)" },
-                    { brand: "Ebglyss", company: "Almirall", angle: -30, r: 9, color: "oklch(0.82 0.16 175)", almirall: true },
-                    { brand: "Adbry", company: "LEO", angle: 30, r: 9, color: "oklch(0.74 0.18 50)" },
-                    { brand: "Nemluvio", company: "Galderma", angle: 90, r: 9, color: "oklch(0.74 0.18 50)" },
-                    { brand: "Rinvoq", company: "AbbVie", angle: 150, r: 9, color: "oklch(0.84 0.16 90)" },
-                    { brand: "Cibinqo", company: "Pfizer", angle: 210, r: 9, color: "oklch(0.84 0.16 90)" },
-                    { brand: "Ph II asset", company: "—", angle: -60, r: 27, color: "oklch(0.84 0.16 90)" },
-                    { brand: "Ph III asset", company: "—", angle: 60, r: 18, color: "oklch(0.74 0.18 50)" },
-                  ].map((d) => {
-                    const rad = (d.angle * Math.PI) / 180;
-                    const x = 50 + d.r * Math.cos(rad);
-                    const y = 50 + d.r * Math.sin(rad);
-                    return (
-                      <g key={d.brand + d.angle}>
-                        {d.almirall && (
-                          <circle cx={x} cy={y} r="2.6" fill="none" stroke="var(--accent-bright)" strokeWidth="0.4" opacity="0.6" />
-                        )}
-                        <circle cx={x} cy={y} r="1.5" fill={d.color} />
-                      </g>
-                    );
-                  })}
-                  <text x="50" y="50.5" textAnchor="middle" fontSize="3" fill="oklch(1 0 0 / 0.5)" fontFamily="var(--font-mono)" letterSpacing="0.3">
-                    AD
-                  </text>
-                  {["Approved", "Phase III", "Phase II", "Phase I", "Preclinical"].map((p, i) => (
-                    <text
-                      key={p}
-                      x="50"
-                      y={50 - [9, 18, 27, 36, 45][i] + 1.5}
-                      textAnchor="middle"
-                      fontSize="1.6"
-                      fill="oklch(1 0 0 / 0.35)"
-                      fontFamily="var(--font-mono)"
-                      letterSpacing="0.15"
-                    >
-                      {p.toUpperCase()}
-                    </text>
-                  ))}
-                </svg>
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    textAlign: "center",
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 10.5,
-                    color: "var(--text-faint)",
-                    letterSpacing: "0.16em",
-                  }}
-                >
-                  6 ASSETS · 6 COMPANIES · ATOPIC DERMATITIS{" "}
-                  <span style={{ color: "var(--accent)" }}>· EBGLYSS HIGHLIGHTED</span>
-                </div>
-              </div>
+            <div className="preview-body preview-body--snapshot">
+              <img
+                className="preview-bullseye-snapshot"
+                src="/snapshots/bullseye-ad.png"
+                alt="Bullseye — atopic dermatitis competitive landscape"
+                loading="lazy"
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {/* VALUE STRIP */}
       <div className="section-head" style={{ marginTop: 40 }}>
         <h2>
-          Built for the <em>franchises Almirall actually runs.</em>
+          Every drug <em>in your sights.</em>
         </h2>
         <div className="meta">SECTION 01 / 03</div>
       </div>
@@ -451,12 +329,33 @@ export function Landing() {
         </div>
       </section>
 
-      {/* DEEP DIVES */}
-      <div className="section-head" style={{ marginTop: 80 }}>
+      {/* SECTION 02 — Dashboard globe showcase + deep dives */}
+      <div className="section-2-dark">
+      <div className="section-head" style={{ marginTop: 0, paddingTop: 80 }}>
         <h2>
           The three things <em>your franchise team</em> will use weekly.
         </h2>
         <div className="meta">SECTION 02 / 03</div>
+      </div>
+
+      <section className="strip">
+        <div className="strip-inner globe-showcase-wrap">
+          <article className="globe-showcase hud-frame fade-up">
+            <div className="globe-showcase-text">
+              <div className="ix">DASHBOARD · GLOBAL VIEW</div>
+              <h3>The competitive map. Pinned.</h3>
+              <p>
+                Almirall HQ at the centre. Every pharma running on Spanish soil — red on the
+                globe. Pull out to Europe and watch the whole field at once. Ask about any
+                drug or company and the camera flies to where it lives.
+              </p>
+            </div>
+            <div className="globe-showcase-visual">
+              <LandingGlobeMock />
+            </div>
+          </article>
+        </div>
+      </section>
       </div>
 
       <section className="deep">
@@ -652,8 +551,8 @@ export function Landing() {
               <svg className="graph-mock" viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <radialGradient id="rg" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="oklch(0.82 0.16 175 / 0.18)" />
-                    <stop offset="60%" stopColor="oklch(0.82 0.16 175 / 0)" />
+                    <stop offset="0%" stopColor="oklch(0.55 0.15 175 / 0.22)" />
+                    <stop offset="60%" stopColor="oklch(0.55 0.15 175 / 0)" />
                   </radialGradient>
                 </defs>
                 <g transform="translate(24, 0) scale(0.9, 0.85)">

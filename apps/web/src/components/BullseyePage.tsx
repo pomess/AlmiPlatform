@@ -1,8 +1,8 @@
 // Bullseye — radial competitive intelligence visualization
-// for Atopic Dermatitis (AD) and Hidradenitis Suppurativa (HS).
-import { useMemo, useState } from "react";
+// for Atopic Dermatitis (AD), Hidradenitis Suppurativa (HS), and Psoriasis (PSO).
+import { useCallback, useMemo, useRef, useState } from "react";
 
-type Indication = "AD" | "HS";
+type Indication = "AD" | "HS" | "PSO";
 type Phase = "Approved" | "Phase III" | "Phase II" | "Phase I" | "Preclinical";
 type Route = "SC" | "IV" | "Oral" | "Topical";
 type Modality = "mAb" | "Small molecule" | "Nanobody" | "Affibody" | "Bispecific";
@@ -71,6 +71,32 @@ const DRUGS: Drug[] = [
   // --- Preclinical ---
   { brand: "BMS-986340", inn: "BMS-986340", company: "Bristol Myers Squibb", target: "IL-13/TSLP", modality: "Bispecific", indication: "HS", status: "Preclinical", firstApproval: "—", route: "SC", notes: "Dual-target bispecific. Early IND-enabling studies.", phaseYears: { Preclinical: "2024" } },
   { brand: "REGN-7257", inn: "REGN-7257", company: "Regeneron", target: "IL-1β", modality: "mAb", indication: "HS", status: "Preclinical", firstApproval: "—", route: "SC", notes: "Anti-IL-1β. Precision approach to HS inflammation.", phaseYears: { Preclinical: "2023" } },
+
+  // ===================== Psoriasis =====================
+  // --- Approved ---
+  { brand: "Ilumetri", inn: "tildrakizumab", company: "Almirall / Sun Pharma", target: "IL-23p19", modality: "mAb", indication: "PSO", status: "Approved", firstApproval: "2018", route: "SC", notes: "Almirall holds EU rights. Anti-IL-23p19. Q12W maintenance.", phaseYears: { Preclinical: "2009", "Phase I": "2011", "Phase II": "2014", "Phase III": "2016", Approved: "2018" } },
+  { brand: "Skyrizi", inn: "risankizumab", company: "AbbVie", target: "IL-23p19", modality: "mAb", indication: "PSO", status: "Approved", firstApproval: "2019", route: "SC", notes: "Best-in-class IL-23. PASI 100 rates ~60%. Expanding into PsA, IBD.", phaseYears: { Preclinical: "2010", "Phase I": "2013", "Phase II": "2015", "Phase III": "2017", Approved: "2019" } },
+  { brand: "Tremfya", inn: "guselkumab", company: "Janssen", target: "IL-23p19", modality: "mAb", indication: "PSO", status: "Approved", firstApproval: "2017", route: "SC", notes: "First-in-class selective IL-23p19. Durable PASI response.", phaseYears: { Preclinical: "2009", "Phase I": "2012", "Phase II": "2014", "Phase III": "2016", Approved: "2017" } },
+  { brand: "Cosentyx", inn: "secukinumab", company: "Novartis", target: "IL-17A", modality: "mAb", indication: "PSO", status: "Approved", firstApproval: "2015", route: "SC", notes: "First IL-17A inhibitor. Broad label across PsO, PsA, axSpA.", phaseYears: { Preclinical: "2006", "Phase I": "2008", "Phase II": "2011", "Phase III": "2013", Approved: "2015" } },
+  { brand: "Taltz", inn: "ixekizumab", company: "Eli Lilly", target: "IL-17A", modality: "mAb", indication: "PSO", status: "Approved", firstApproval: "2016", route: "SC", notes: "High-affinity IL-17A. Rapid onset within 1 week.", phaseYears: { Preclinical: "2007", "Phase I": "2009", "Phase II": "2012", "Phase III": "2014", Approved: "2016" } },
+  { brand: "Bimzelx", inn: "bimekizumab", company: "UCB", target: "IL-17A/F", modality: "mAb", indication: "PSO", status: "Approved", firstApproval: "2023", route: "SC", notes: "Dual IL-17A/F. Highest PASI 100 rates in head-to-head trials.", phaseYears: { Preclinical: "2012", "Phase I": "2015", "Phase II": "2017", "Phase III": "2020", Approved: "2023" } },
+  { brand: "Stelara", inn: "ustekinumab", company: "Janssen", target: "IL-12/23", modality: "mAb", indication: "PSO", status: "Approved", firstApproval: "2009", route: "SC", notes: "Anti-IL-12/23 p40. Workhorse biologic. Biosimilars entering.", phaseYears: { Preclinical: "2001", "Phase I": "2004", "Phase II": "2005", "Phase III": "2007", Approved: "2009" } },
+  { brand: "Sotyktu", inn: "deucravacitinib", company: "Bristol Myers Squibb", target: "TYK2", modality: "Small molecule", indication: "PSO", status: "Approved", firstApproval: "2022", route: "Oral", notes: "First oral TYK2 inhibitor. Avoids JAK1/2/3 side effects.", phaseYears: { Preclinical: "2015", "Phase I": "2017", "Phase II": "2019", "Phase III": "2020", Approved: "2022" } },
+  // --- Phase III ---
+  { brand: "Tapinarof", inn: "tapinarof", company: "Dermavant", target: "AhR", modality: "Small molecule", indication: "PSO", status: "Approved", firstApproval: "2022", route: "Topical", notes: "Topical AhR agonist. Non-steroidal. Once-daily cream.", phaseYears: { Preclinical: "2014", "Phase I": "2016", "Phase II": "2018", "Phase III": "2020", Approved: "2022" } },
+  { brand: "JNJ-2113", inn: "JNJ-2113", company: "Janssen", target: "IL-23p19", modality: "Small molecule", indication: "PSO", status: "Phase III", firstApproval: "—", route: "Oral", notes: "Oral peptide IL-23 blocker. Game-changer if approved — oral biologic-like efficacy.", phaseYears: { Preclinical: "2018", "Phase I": "2020", "Phase II": "2022", "Phase III": "2024" } },
+  { brand: "Zasocitinib", inn: "zasocitinib", company: "Nimbus / Takeda", target: "TYK2", modality: "Small molecule", indication: "PSO", status: "Phase III", firstApproval: "—", route: "Oral", notes: "Allosteric TYK2 inhibitor. Taken from Nimbus for $6B.", phaseYears: { Preclinical: "2018", "Phase I": "2021", "Phase II": "2023", "Phase III": "2025" } },
+  { brand: "Sonelokimab", inn: "sonelokimab", company: "MoonLake", target: "IL-17A/F", modality: "Nanobody", indication: "PSO", status: "Phase III", firstApproval: "—", route: "SC", notes: "Trimeric nanobody. High PASI 90/100 in Phase IIb.", phaseYears: { Preclinical: "2016", "Phase I": "2018", "Phase II": "2020", "Phase III": "2023" } },
+  // --- Phase II ---
+  { brand: "DC-806", inn: "DC-806", company: "Bristol Myers Squibb", target: "TYK2", modality: "Small molecule", indication: "PSO", status: "Phase II", firstApproval: "—", route: "Oral", notes: "Next-gen oral TYK2 after Sotyktu. Improved potency.", phaseYears: { Preclinical: "2019", "Phase I": "2022", "Phase II": "2024" } },
+  { brand: "ESK-001", inn: "ESK-001", company: "Protagonist", target: "IL-17A", modality: "Small molecule", indication: "PSO", status: "Phase II", firstApproval: "—", route: "Oral", notes: "Oral cyclic peptide IL-17A inhibitor. Oral biologic concept.", phaseYears: { Preclinical: "2019", "Phase I": "2021", "Phase II": "2024" } },
+  { brand: "Izokibep", inn: "izokibep", company: "Acelyrin", target: "IL-17A", modality: "Affibody", indication: "PSO", status: "Phase II", firstApproval: "—", route: "SC", notes: "Small-format IL-17A. Also in PsA study.", phaseYears: { Preclinical: "2016", "Phase I": "2018", "Phase II": "2022" } },
+  // --- Phase I ---
+  { brand: "NIM-1324", inn: "NIM-1324", company: "Nimbus", target: "TYK2", modality: "Small molecule", indication: "PSO", status: "Phase I", firstApproval: "—", route: "Oral", notes: "Third-gen TYK2 candidate. Retained after Takeda deal.", phaseYears: { Preclinical: "2022", "Phase I": "2025" } },
+  { brand: "ABT-503", inn: "ABT-503", company: "AbbVie", target: "IL-23/IL-17", modality: "Bispecific", indication: "PSO", status: "Phase I", firstApproval: "—", route: "SC", notes: "Bispecific dual IL-23 + IL-17 blockade in one molecule.", phaseYears: { Preclinical: "2021", "Phase I": "2024" } },
+  // --- Preclinical ---
+  { brand: "COVA-322", inn: "COVA-322", company: "Covagen / Janssen", target: "TNF/IL-17A", modality: "Bispecific", indication: "PSO", status: "Preclinical", firstApproval: "—", route: "SC", notes: "Bispecific Fynomer. TNF + IL-17A dual targeting.", phaseYears: { Preclinical: "2023" } },
+  { brand: "PRV-300", inn: "PRV-300", company: "Provention Bio", target: "IL-15", modality: "mAb", indication: "PSO", status: "Preclinical", firstApproval: "—", route: "SC", notes: "Anti-IL-15. Targets tissue-resident memory T-cells.", phaseYears: { Preclinical: "2024" } },
 ];
 
 const PHASES: Phase[] = ["Preclinical", "Phase I", "Phase II", "Phase III", "Approved"];
@@ -99,6 +125,51 @@ export function BullseyePage() {
     DRUGS.find((d) => d.brand === "Ebglyss") ?? null,
   );
 
+  // Zoom/pan state
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const isPanning = useRef(false);
+  const panStart = useRef({ x: 0, y: 0 });
+  const panOrigin = useRef({ x: 0, y: 0 });
+
+  const viewBox = useMemo(() => {
+    const size = 100 / zoom;
+    const cx = 50 + pan.x - size / 2;
+    const cy = 50 + pan.y - size / 2;
+    return `${cx} ${cy} ${size} ${size}`;
+  }, [zoom, pan]);
+
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    setZoom((z) => Math.min(4, Math.max(1, z - e.deltaY * 0.002)));
+  }, []);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    isPanning.current = true;
+    panStart.current = { x: e.clientX, y: e.clientY };
+    panOrigin.current = { ...pan };
+  }, [pan]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isPanning.current) return;
+    const svgEl = (e.currentTarget as SVGElement);
+    const rect = svgEl.getBoundingClientRect();
+    const scale = 100 / zoom / rect.width;
+    const dx = (e.clientX - panStart.current.x) * scale;
+    const dy = (e.clientY - panStart.current.y) * scale;
+    setPan({ x: panOrigin.current.x - dx, y: panOrigin.current.y - dy });
+  }, [zoom]);
+
+  const handleMouseUp = useCallback(() => {
+    isPanning.current = false;
+  }, []);
+
+  const resetView = useCallback(() => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, []);
+
   const filtered = useMemo(
     () => DRUGS.filter((d) => d.indication === indication),
     [indication],
@@ -113,6 +184,7 @@ export function BullseyePage() {
   const indicationLabel: Record<Indication, string> = {
     AD: "Atopic Dermatitis",
     HS: "Hidradenitis Suppurativa",
+    PSO: "Psoriasis",
   };
 
   // Reserve a wedge at the top for phase labels ("cheese cut")
@@ -166,7 +238,7 @@ export function BullseyePage() {
 
           <div className="bullseye-controls">
             <div className="filter-seg">
-              {(["AD", "HS"] as Indication[]).map((id) => (
+              {(["AD", "HS", "PSO"] as Indication[]).map((id) => (
                 <button
                   key={id}
                   className={indication === id ? "active" : ""}
@@ -189,9 +261,17 @@ export function BullseyePage() {
 
           <div className="bull-chart-wrap">
             <div className="bull-chart-bg" />
+            {zoom > 1 && (
+              <button className="bull-zoom-reset" onClick={resetView}>Reset</button>
+            )}
             <svg
-              viewBox="0 0 100 100"
-              className="bull-svg"
+              viewBox={viewBox}
+              className={`bull-svg${isPanning.current ? " panning" : ""}`}
+              onWheel={handleWheel}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
               onClick={(e) => {
                 const t = e.target as SVGElement;
                 if (!t.closest(".bull-dot-group")) setSelected(null);

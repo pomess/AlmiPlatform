@@ -3190,6 +3190,31 @@ body { overflow: hidden; }
   height: 100%;
   display: block;
   z-index: 1;
+  cursor: grab;
+}
+.bull-svg.panning {
+  cursor: grabbing;
+}
+.bull-zoom-reset {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 5;
+  appearance: none;
+  border: 1px solid var(--border-hairline);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  padding: 5px 10px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.bull-zoom-reset:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
 }
 .bull-sector-line {
   stroke: oklch(1 0 0 / 0.06);
