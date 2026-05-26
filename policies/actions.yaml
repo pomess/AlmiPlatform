@@ -1,0 +1,45 @@
+# Action policy
+#
+# Pragmatic default per locked decisions (docs/09-locked-decisions.md):
+#   - read silently
+#   - ask before any send, write, or shell exec
+#   - refuse destructive
+
+default: ask
+
+allow_silently:
+  # memory / wiki
+  - search_wiki
+  - get_page
+  - get_graph
+  - run_lint
+  - update_hot_cache.append   # silent for appends only; see docs/11-hot-cache.md
+  # filesystem (read-only, scoped)
+  - read_file       # within configured allowlisted roots
+  - list_dir
+  # network (read-only, allowlisted hosts)
+  - http_get
+  # introspection
+  - get_calendar    # read
+  - get_inbox       # read
+
+require_approval:
+  - send_email
+  - send_message
+  - create_calendar_event
+  - update_calendar_event
+  - delete_calendar_event
+  - file_write       # outside ~/.kairos/sandbox/
+  - http_post
+  - shell_command
+  - ingest_text      # writing into a brain
+  - install_skill
+  - update_hot_cache.delete_section
+  - update_hot_cache.replace_section
+
+never:
+  - rm_rf
+  - format_disk
+  - curl_pipe_bash
+  - move_money
+  - delete_brain

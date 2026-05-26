@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Kairos — Decks</title>
+<link rel="stylesheet" href="deck.css" />
+<style>
+  body { min-height: 100vh; padding: 80px 24px; }
+  .wrap { max-width: 720px; margin: 0 auto; display: grid; gap: 32px; }
+  a.deck-link {
+    display: block; padding: 24px 28px;
+    border: 1px solid var(--border-hairline);
+    border-radius: 14px;
+    background: oklch(1 0 0 / 0.02);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: border-color 200ms, background 200ms;
+  }
+  a.deck-link:hover {
+    border-color: var(--border-accent);
+    background: oklch(0.62 0.15 260 / 0.04);
+  }
+  a.deck-link .ix {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--accent-bright);
+    margin-bottom: 8px;
+  }
+  a.deck-link h2 {
+    font-size: 28px; line-height: 1.1; letter-spacing: -0.02em;
+    font-weight: 500; margin-bottom: 8px;
+  }
+  a.deck-link p { color: var(--text-secondary); font-size: 15px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <div class="eyebrow"><span class="bar"></span> KAIROS DECKS</div>
+    <h1 class="title" style="font-size: 56px; margin-top: 16px">Pick a deck.</h1>
+    <p class="lead" style="margin-top: 14px">
+      Open in a browser. <strong>Print → Save as PDF</strong> at 1280×720,
+      no margins, background graphics on.
+    </p>
+  </div>
+
+  <a class="deck-link" href="pitch.html">
+    <div class="ix">01 · 10 SLIDES</div>
+    <h2>Pitch deck</h2>
+    <p>
+      For acquirer / partner conversations. Problem → wedge → product → moat
+      → market → plan → founder → caveats → ask.
+    </p>
+  </a>
+
+  <a class="deck-link" href="roadmap.html">
+    <div class="ix">02 · 11 SLIDES</div>
+    <h2>Roadmap deck</h2>
+    <p>
+      Internal-facing. Three horizons over 12 months. Where we are today,
+      ship-blockers for first paid customer, off-roadmap discipline, risks.
+    </p>
+  </a>
+</div>
+</body>
+</html>

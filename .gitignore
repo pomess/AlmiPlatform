@@ -1,0 +1,52 @@
+# --- Identity & policies ---
+identity/MEMORY.md          # LLM-maintained journal, regenerated; not stable for diffs
+policies/secrets.env
+policies/secrets.local.*
+
+# --- Data (SQLite, vault, etc) ---
+services/harness/data/
+data/
+vault/
+
+# --- Logs ---
+logs/*.jsonl
+logs/*.log
+
+# --- Sandbox ---
+sandbox/
+.kairos/
+.jarvis/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.env
+.python-version
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Node / web ---
+node_modules/
+dist/
+build/
+.next/
+.vite/
+*.local
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# --- Submodules' build artifacts ---
+services/**/dist/
+services/**/build/
+services/**/__pycache__/
