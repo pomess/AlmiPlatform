@@ -12,7 +12,9 @@ failures are isolated so a single dead source never breaks the brief.
 from __future__ import annotations
 
 import asyncio
+import html
 import logging
+import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
@@ -93,6 +95,25 @@ def _today_utc() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
+_TAG_RE = re.compile(r"<[^>]+>")
+_WS_RE = re.compile(r"\s+")
+
+
+def _clean_title(raw: str) -> str:
+    """Strip embedded HTML and decode entities from a feed title.
+
+    Some publishers (FiercePharma, Pharmaceutical Technology, etc.) wrap
+    titles in ``<a href=...>`` tags inside their RSS, which feedparser
+    returns verbatim. Without this scrub the React panel renders the raw
+    markup as text — the "weird code-looking news" the user reported.
+    """
+    if not raw:
+        return ""
+    no_tags = _TAG_RE.sub(" ", raw)
+    decoded = html.unescape(no_tags)
+    return _WS_RE.sub(" ", decoded).strip()
+
+
 def _parse_bytes(raw: bytes) -> list[dict]:
     """Parse one feed's bytes (sync — call via asyncio.to_thread).
 
@@ -102,7 +123,7 @@ def _parse_bytes(raw: bytes) -> list[dict]:
     entries = parsed.entries or []
     items: list[dict] = []
     for entry in entries[: ITEMS_PER_SOURCE * 2]:
-        title = (entry.get("title") or "").strip()
+        title = _clean_title(entry.get("title") or "")
         link = (entry.get("link") or "").strip()
         if not title or not link:
             continue
@@ -135,7 +156,7 @@ def _parse_video_candidates(raw: bytes) -> list[dict]:
     candidates: list[dict] = []
     for entry in parsed.entries or []:
         video_id = entry.get("yt_videoid") or ""
-        title = (entry.get("title") or "").strip()
+        title = _clean_title(entry.get("title") or "")
         if not video_id or not title:
             continue
         lower_title = title.lower()

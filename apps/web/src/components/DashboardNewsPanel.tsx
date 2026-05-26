@@ -254,14 +254,9 @@ export function DashboardNewsPanel() {
                           href={it.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          title={it.title}
+                          title={`${it.source} — ${it.title}`}
                         >
-                          <span className="dashboard-news-source">
-                            {it.source}
-                          </span>
-                          <span className="dashboard-news-headline">
-                            {it.title}
-                          </span>
+                          {it.title}
                         </a>
                       </li>
                     ))}
