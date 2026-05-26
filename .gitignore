@@ -6,7 +6,8 @@ policies/secrets.local.*
 # --- Data (SQLite, vault, etc) ---
 services/harness/data/
 data/
-vault/
+vault/local/Deloitte's Brain/
+vault/local/Bruno's Brain/
 
 # --- Logs ---
 logs/*.jsonl
