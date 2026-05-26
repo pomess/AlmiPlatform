@@ -1221,40 +1221,13 @@ body.on-landing .kg-stage {
   display: flex;
   justify-content: center;
 }
-body.on-landing .kg-svg {
+body.on-landing .kg-snapshot {
+  display: block;
   width: 100%;
   max-width: 1280px;
   height: auto;
-}
-
-body.on-landing .kg-edge {
-  stroke-width: 0.18;
-  fill: none;
-}
-
-body.on-landing .kg-label {
-  font-family: var(--font-sans, system-ui, sans-serif);
-  font-size: 1.7px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  fill: oklch(0.20 0.04 260);
-  paint-order: stroke;
-  stroke: oklch(0.985 0.003 240);
-  stroke-width: 0.55;
-  stroke-linejoin: round;
-}
-
-/* Indication anchors — bigger, darker labels so the AD/HS hubs read
-   as the primary spine. */
-body.on-landing .kg-node--index .kg-label {
-  font-size: 2.2px;
-  font-weight: 600;
-  fill: oklch(0.16 0.04 260);
-}
-/* Almirall hot nodes — labels picked out in the brand mint. */
-body.on-landing .kg-node--hot .kg-label {
-  font-weight: 600;
-  fill: oklch(0.42 0.12 175);
+  border-radius: var(--r-md);
+  box-shadow: 0 30px 80px -20px oklch(0.20 0.04 260 / 0.30);
 }
 
 @media (prefers-reduced-motion: reduce) {
