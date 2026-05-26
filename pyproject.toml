@@ -43,6 +43,8 @@ dependencies = [
     "aiosqlite>=0.22.1",
     # Postgres-canonical vault (phase 2 of ADR 0001)
     "asyncpg>=0.30",
+    # BioMCP data pipeline (fetch_biomcp.py) — pinned to final Python release
+    "biomcp-python==0.7.3",
 ]
 
 [project.optional-dependencies]
