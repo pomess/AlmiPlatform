@@ -1181,3 +1181,89 @@ body.on-landing .globe-pin--home .globe-pin-pulse {
     padding: 28px 24px;
   }
 }
+
+/* ============================================================
+   Knowledge-graph dive — sticky-scrub 3D fly-through
+   ============================================================ */
+body.on-landing .kg-section {
+  position: relative;
+  margin: 60px 0 0;
+  padding: 100px 24px 140px;
+  background:
+    radial-gradient(1200px 600px at 50% 35%, oklch(0.62 0.13 175 / 0.10), transparent 70%);
+}
+body.on-landing .kg-text {
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto 56px;
+}
+body.on-landing .kg-text .ix {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  color: oklch(0.55 0.15 175);
+  margin-bottom: 16px;
+}
+body.on-landing .kg-text h3 {
+  margin: 0 0 14px;
+  font-size: clamp(32px, 3.6vw, 44px);
+  font-weight: 500;
+  letter-spacing: -0.018em;
+  color: var(--text-primary);
+}
+body.on-landing .kg-text p {
+  margin: 0 auto;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+body.on-landing .kg-stage {
+  display: flex;
+  justify-content: center;
+}
+body.on-landing .kg-svg {
+  width: 100%;
+  max-width: 1280px;
+  height: auto;
+}
+
+body.on-landing .kg-edge {
+  stroke-width: 0.18;
+  fill: none;
+}
+
+body.on-landing .kg-label {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 1.7px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  fill: oklch(0.20 0.04 260);
+  paint-order: stroke;
+  stroke: oklch(0.985 0.003 240);
+  stroke-width: 0.55;
+  stroke-linejoin: round;
+}
+
+/* Indication anchors — bigger, darker labels so the AD/HS hubs read
+   as the primary spine. */
+body.on-landing .kg-node--index .kg-label {
+  font-size: 2.2px;
+  font-weight: 600;
+  fill: oklch(0.16 0.04 260);
+}
+/* Almirall hot nodes — labels picked out in the brand mint. */
+body.on-landing .kg-node--hot .kg-label {
+  font-weight: 600;
+  fill: oklch(0.42 0.12 175);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.on-landing .graph-dive {
+    height: auto;
+    min-height: 100vh;
+  }
+  body.on-landing .graph-dive-sticky {
+    position: relative;
+    height: 100vh;
+  }
+}
