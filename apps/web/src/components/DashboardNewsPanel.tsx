@@ -24,10 +24,10 @@ function buildIntroLine(): string {
   return `${greetingForHour(new Date().getHours())}. Today's headlines, below.`;
 }
 
-const CATEGORY_LABELS: { key: "world" | "tech" | "ai"; label: string }[] = [
-  { key: "world", label: "World" },
-  { key: "tech", label: "Tech" },
-  { key: "ai", label: "AI" },
+const CATEGORY_LABELS: { key: "pharma" | "derm" | "competitors"; label: string }[] = [
+  { key: "pharma", label: "Pharma" },
+  { key: "derm", label: "Dermatology" },
+  { key: "competitors", label: "Competitors" },
 ];
 
 function flattenSources(sources: NewsSource[] | undefined): {

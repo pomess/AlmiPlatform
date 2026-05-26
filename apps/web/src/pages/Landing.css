@@ -54,8 +54,8 @@ body.on-landing::-webkit-scrollbar-track {
 
     overflow-x: hidden;
     background:
-      radial-gradient(1200px 600px at 70% -10%, oklch(0.62 0.15 260 / 0.05), transparent 60%),
-      radial-gradient(900px 500px at 10% 110%, oklch(0.62 0.15 260 / 0.06), transparent 60%),
+      radial-gradient(1200px 600px at 70% -10%, oklch(0.82 0.16 175 / 0.07), transparent 60%),
+      radial-gradient(900px 500px at 10% 110%, oklch(0.82 0.16 175 / 0.08), transparent 60%),
       var(--bg-base);
     color: var(--text-primary);
   }
@@ -89,7 +89,8 @@ body.on-landing::-webkit-scrollbar-track {
 
   body.on-landing .brand { display: flex; align-items: center; gap: 10px; }
   body.on-landing .brand .mark {
-    width: 26px; height: 26px;
+    height: 26px;
+    width: auto;
     object-fit: contain;
     display: block;
   }
@@ -141,7 +142,7 @@ body.on-landing::-webkit-scrollbar-track {
     font-family: inherit;
     font-weight: 600; font-size: 12.5px;
     letter-spacing: 0.02em;
-    box-shadow: 0 0 0 1px oklch(0.88 0.19 260 / 0.3);
+    box-shadow: 0 0 0 1px oklch(0.88 0.18 175 / 0.4);
     transition: transform var(--t-fast) var(--ease-cinema), background var(--t-fast);
   }
   .enter-btn:hover { background: var(--accent-bright); transform: translateY(-1px); }
@@ -158,7 +159,7 @@ body.on-landing::-webkit-scrollbar-track {
     position: absolute; left: 50%; top: 36%; transform: translate(-50%,-50%);
     width: 1100px; height: 1100px; border-radius: 50%;
     background:
-      radial-gradient(closest-side, oklch(0.82 0.17 260 / 0.18), transparent 70%);
+      radial-gradient(closest-side, oklch(0.82 0.17 175 / 0.20), transparent 70%);
     filter: blur(20px);
     pointer-events: none;
     z-index: 0;
@@ -166,7 +167,7 @@ body.on-landing::-webkit-scrollbar-track {
   .hero-aurora.b {
     left: 80%; top: 70%;
     width: 700px; height: 700px;
-    background: radial-gradient(closest-side, oklch(0.55 0.14 260 / 0.18), transparent 70%);
+    background: radial-gradient(closest-side, oklch(0.62 0.13 175 / 0.20), transparent 70%);
   }
 
   .hero-grid {
@@ -273,7 +274,7 @@ body.on-landing::-webkit-scrollbar-track {
   }
   .preview::before {
     content: ""; position: absolute; inset: 0;
-    background: radial-gradient(800px 300px at 70% -10%, oklch(0.82 0.17 260 / 0.10), transparent 60%);
+    background: radial-gradient(800px 300px at 70% -10%, oklch(0.82 0.17 175 / 0.12), transparent 60%);
     pointer-events: none;
   }
   .preview-bar {
@@ -514,15 +515,15 @@ body.on-landing::-webkit-scrollbar-track {
   body.on-landing .pv-main .pv-link {
     color: var(--accent-bright);
     text-decoration: underline;
-    text-decoration-color: oklch(0.62 0.15 260 / 0.45);
+    text-decoration-color: oklch(0.62 0.13 175 / 0.55);
     text-decoration-thickness: 1px;
     text-underline-offset: 3px;
     transition: color var(--t-fast) var(--ease-cinema),
                 text-decoration-color var(--t-fast) var(--ease-cinema);
   }
   body.on-landing .pv-main .pv-link:hover {
-    color: oklch(0.82 0.13 260);
-    text-decoration-color: oklch(0.82 0.13 260 / 0.85);
+    color: oklch(0.62 0.13 175);
+    text-decoration-color: oklch(0.62 0.13 175 / 0.85);
   }
   .pv-think {
     align-self: flex-start;

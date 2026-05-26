@@ -56,9 +56,9 @@ export type NewsVideo = {
 };
 export type NewsBriefing = {
   fetched_at: string;
-  world: NewsSource[];
-  tech: NewsSource[];
-  ai: NewsSource[];
+  pharma: NewsSource[];
+  derm: NewsSource[];
+  competitors: NewsSource[];
   video: NewsVideo | null;
 };
 

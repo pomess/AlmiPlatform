@@ -25,20 +25,15 @@ log = logging.getLogger(__name__)
 ITEMS_PER_SOURCE = 3
 PER_FEED_TIMEOUT = 4.0
 
-# YouTube channel for the daily video bulletin. BBC News publishes a
-# steady stream of short world-news videos, which is the right cadence
-# for a "most important video of the day" surface. Channel ID is from
-# https://www.youtube.com/@BBCNews — youtube.com/feeds/videos.xml is the
-# zero-auth public RSS endpoint that returns the latest 15 uploads.
+# YouTube channel for the daily video bulletin. Reuters publishes a
+# steady stream of business and healthcare news videos, the closest
+# zero-auth public source for pharma-flavored broadcast news. If the
+# channel goes quiet, fall back to industry conference/AAD content.
 VIDEO_FEED_URL = (
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UC16niRr50-MSBwiO3YDb3RA"
+    "https://www.youtube.com/feeds/videos.xml?channel_id=UChqUTb7kYRX8-EiaN3XFrSQ"
 )
-VIDEO_FEED_SOURCE = "BBC News"
-VIDEO_FEED_CHANNEL_ICON = (
-    "https://yt3.ggpht.com/"
-    "v4JamQ9B-PUiJHjmZQs9UwTaoLQW8vijJMMpV5QvA2wHQ6iwWM8Q1s6O4jgTl0dtDigVWAi7SA"
-    "=s88-c-k-c0x00ffffff-no-rj"
-)
+VIDEO_FEED_SOURCE = "Reuters"
+VIDEO_FEED_CHANNEL_ICON = ""
 
 
 @dataclass(frozen=True)
@@ -48,28 +43,45 @@ class FeedSpec:
 
 
 FEEDS: dict[str, list[FeedSpec]] = {
-    "world": [
-        FeedSpec("BBC", "https://feeds.bbci.co.uk/news/world/rss.xml"),
-        FeedSpec("Guardian", "https://www.theguardian.com/world/rss"),
-        # Reuters and AP no longer publish public RSS; substituted with the
-        # closest live equivalents that match the wire-service / international
-        # mix originally requested.
-        FeedSpec("NYT World", "https://rss.nytimes.com/services/xml/rss/nyt/World.xml"),
-        FeedSpec("Al Jazeera", "https://www.aljazeera.com/xml/rss/all.xml"),
+    # Pharma & biotech business news — daily deal/approval/readout flow.
+    # All URLs verified live.
+    "pharma": [
+        FeedSpec("FiercePharma", "https://www.fiercepharma.com/rss/xml"),
+        FeedSpec("FierceBiotech", "https://www.fiercebiotech.com/rss/xml"),
+        FeedSpec("FierceHealthcare", "https://www.fiercehealthcare.com/rss/xml"),
+        FeedSpec("BioPharma Dive", "https://www.biopharmadive.com/feeds/news/"),
+        FeedSpec(
+            "Pharmaceutical Technology",
+            "https://www.pharmaceutical-technology.com/feed/",
+        ),
+        FeedSpec("STAT Pharma", "https://www.statnews.com/category/pharma/feed/"),
+        FeedSpec("STAT Biotech", "https://www.statnews.com/category/biotech/feed/"),
+        FeedSpec("FirstWord Pharma", "https://www.firstwordpharma.com/rss"),
     ],
-    "tech": [
-        FeedSpec("Hacker News", "https://news.ycombinator.com/rss"),
-        FeedSpec("The Verge", "https://www.theverge.com/rss/index.xml"),
-        FeedSpec("Ars Technica", "https://feeds.arstechnica.com/arstechnica/index"),
-        FeedSpec("TechCrunch", "https://techcrunch.com/feed/"),
+    # Dermatology — clinical and scientific news for the AD/HS focus.
+    # Most dermatology trade press blocks RSS scrapers; we fall back to the
+    # closest live medical/skin sources that publishers leave open.
+    "derm": [
+        FeedSpec("Medscape Medical News", "https://www.medscape.com/cx/rssfeeds/2700.xml"),
+        FeedSpec(
+            "ScienceDaily Skin",
+            "https://www.sciencedaily.com/rss/health_medicine/skin_care.xml",
+        ),
+        FeedSpec(
+            "Medical Xpress Dermatology",
+            "https://medicalxpress.com/rss-feed/dermatology-news/",
+        ),
     ],
-    "ai": [
-        # Anthropic does not publish a public RSS feed; Import AI (written by
-        # Anthropic's policy lead Jack Clark) is the closest live substitute.
-        FeedSpec("Import AI", "https://jack-clark.net/feed/"),
-        FeedSpec("OpenAI", "https://openai.com/blog/rss.xml"),
-        FeedSpec("DeepMind", "https://deepmind.google/blog/rss.xml"),
-        FeedSpec("Hugging Face", "https://huggingface.co/blog/feed.xml"),
+    # Competitors — corporate newsrooms / press release feeds for the
+    # companies that show up on the Bullseye. Per-feed failures are isolated
+    # so a missing corporate feed leaves an empty entry without breaking the
+    # panel. Several major competitors (Novartis, AbbVie, Sanofi, UCB, LEO,
+    # Galderma, MoonLake) do not publish public RSS as of this writing.
+    "competitors": [
+        FeedSpec("Eli Lilly", "https://investor.lilly.com/rss/news-releases.xml"),
+        FeedSpec("Regeneron", "https://newsroom.regeneron.com/rss/news-releases.xml"),
+        FeedSpec("Incyte", "https://investor.incyte.com/rss/news-releases.xml"),
+        FeedSpec("Johnson & Johnson", "https://www.jnj.com/feed/news.rss"),
     ],
 }
 
@@ -214,9 +226,9 @@ async def _build_payload() -> dict:
             results[category].append(await task)
         video_candidates = await video_task
 
-    # Collect all headlines from world news to rank video relevance.
+    # Collect all pharma headlines to rank video relevance.
     headlines: list[str] = []
-    for source_block in results.get("world", []):
+    for source_block in results.get("pharma", []):
         for item in source_block.get("items", []):
             headlines.append(item.get("title", ""))
 
@@ -224,9 +236,9 @@ async def _build_payload() -> dict:
 
     return {
         "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "world": results["world"],
-        "tech": results["tech"],
-        "ai": results["ai"],
+        "pharma": results["pharma"],
+        "derm": results["derm"],
+        "competitors": results["competitors"],
         "video": video,
     }
 

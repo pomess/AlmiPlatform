@@ -22,10 +22,11 @@ function readCached(): NewsBriefing | null {
     const raw = localStorage.getItem(LS_PAYLOAD);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<NewsBriefing>;
-    // Reject cache entries from before the schema added `video`. Treating
-    // missing keys as "stale" lets the hook self-heal on field additions
-    // without forcing the user to clear localStorage.
+    // Reject cache entries from older schemas (pre-pharma pivot, pre-video).
+    // Treating missing keys as "stale" lets the hook self-heal on field
+    // additions without forcing the user to clear localStorage.
     if (!("video" in parsed)) return null;
+    if (!("pharma" in parsed)) return null;
     return parsed as NewsBriefing;
   } catch {
     return null;

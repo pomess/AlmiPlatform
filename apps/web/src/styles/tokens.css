@@ -16,7 +16,7 @@
   --border-hairline: oklch(1 0 0 / 0.06);
   --border-subtle: oklch(1 0 0 / 0.09);
   --border-medium: oklch(1 0 0 / 0.16);
-  --border-accent: oklch(0.70 0.13 260 / 0.55);
+  --border-accent: oklch(0.78 0.14 175 / 0.55);
 
   /* ----- text ----- */
   --text-primary: oklch(0.97 0.005 240);
@@ -25,14 +25,14 @@
   --text-faint: oklch(0.42 0.012 240);
   --text-on-accent: oklch(0.98 0.005 240);
 
-  /* ----- accent: navy (Greek) ----- */
-  --accent-hue: 260;
-  --accent: oklch(0.62 0.15 var(--accent-hue));
-  --accent-bright: oklch(0.72 0.16 var(--accent-hue));
-  --accent-dim: oklch(0.48 0.12 var(--accent-hue));
-  --accent-deep: oklch(0.32 0.09 var(--accent-hue));
-  --accent-glow: oklch(0.62 0.15 var(--accent-hue) / 0.32);
-  --accent-faint: oklch(0.62 0.15 var(--accent-hue) / 0.10);
+  /* ----- accent: Almirall mint (#00F0BE) ----- */
+  --accent-hue: 175;
+  --accent: oklch(0.82 0.16 var(--accent-hue));
+  --accent-bright: oklch(0.88 0.18 var(--accent-hue));
+  --accent-dim: oklch(0.62 0.13 var(--accent-hue));
+  --accent-deep: oklch(0.42 0.10 var(--accent-hue));
+  --accent-glow: oklch(0.82 0.16 var(--accent-hue) / 0.32);
+  --accent-faint: oklch(0.82 0.16 var(--accent-hue) / 0.10);
 
   /* secondary accents kept calm */
   --c-success: oklch(0.78 0.13 155);

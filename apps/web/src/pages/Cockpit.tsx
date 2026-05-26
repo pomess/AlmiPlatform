@@ -11,6 +11,7 @@ import {
 import { Rail } from "../components/Rail";
 import { GraphPage } from "../components/GraphPage";
 import { DashboardPage } from "../components/DashboardPage";
+import { BullseyePage } from "../components/BullseyePage";
 import {
   ApprovalsPage,
   BrainsPage,
@@ -24,6 +25,7 @@ import type { IngestPlan } from "../lib/api";
 type Route =
   | "chat"
   | "dashboard"
+  | "bullseye"
   | "graph"
   | "approvals"
   | "brains"
@@ -31,6 +33,7 @@ type Route =
 const ROUTES: Route[] = [
   "chat",
   "dashboard",
+  "bullseye",
   "graph",
   "approvals",
   "brains",
@@ -208,6 +211,11 @@ export function Cockpit() {
         {route === "dashboard" && (
           <div className="page">
             <DashboardPage />
+          </div>
+        )}
+        {route === "bullseye" && (
+          <div className="page">
+            <BullseyePage />
           </div>
         )}
         {route === "graph" && (
