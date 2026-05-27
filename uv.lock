@@ -597,6 +597,84 @@ wheels = [
 ]
 
 [[package]]
+name = "disease360"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "aiosqlite" },
+    { name = "asyncpg" },
+    { name = "biomcp-python" },
+    { name = "ddgs" },
+    { name = "deepagents" },
+    { name = "fastapi" },
+    { name = "feedparser" },
+    { name = "google-genai" },
+    { name = "httpx" },
+    { name = "langchain" },
+    { name = "langchain-core" },
+    { name = "langchain-google-genai" },
+    { name = "langchain-ollama" },
+    { name = "langgraph" },
+    { name = "langgraph-checkpoint-sqlite" },
+    { name = "langsmith" },
+    { name = "pydantic" },
+    { name = "python-dotenv" },
+    { name = "python-frontmatter" },
+    { name = "python-multipart" },
+    { name = "pyyaml" },
+    { name = "rich" },
+    { name = "sse-starlette" },
+    { name = "typer" },
+    { name = "tzdata" },
+    { name = "uvicorn", extra = ["standard"] },
+    { name = "watchfiles" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "aiosqlite", specifier = ">=0.22.1" },
+    { name = "asyncpg", specifier = ">=0.30" },
+    { name = "biomcp-python", specifier = "==0.7.3" },
+    { name = "ddgs", specifier = ">=9.0" },
+    { name = "deepagents", specifier = ">=0.5.3" },
+    { name = "fastapi", specifier = ">=0.115" },
+    { name = "feedparser", specifier = ">=6.0" },
+    { name = "google-genai", specifier = ">=1.0" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "langchain", specifier = ">=1.0,<2.0" },
+    { name = "langchain-core", specifier = ">=1.0,<2.0" },
+    { name = "langchain-google-genai", specifier = ">=2.1.0" },
+    { name = "langchain-ollama", specifier = ">=0.3.0" },
+    { name = "langgraph", specifier = ">=0.6,<2.0" },
+    { name = "langgraph-checkpoint-sqlite", specifier = ">=2.0" },
+    { name = "langsmith", specifier = ">=0.3.0" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.13" },
+    { name = "pydantic", specifier = ">=2.8" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.24" },
+    { name = "python-dotenv", specifier = ">=1.0" },
+    { name = "python-frontmatter", specifier = ">=1.1" },
+    { name = "python-multipart", specifier = ">=0.0.9" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "rich", specifier = ">=13.9" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.7" },
+    { name = "sse-starlette", specifier = ">=2.1" },
+    { name = "typer", specifier = ">=0.13" },
+    { name = "tzdata", specifier = ">=2024.2" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.32" },
+    { name = "watchfiles", specifier = ">=0.24" },
+]
+provides-extras = ["dev"]
+
+[[package]]
 name = "diskcache"
 version = "5.6.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1162,84 +1240,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/19/74/a633ee74eb36c44aa
 wheels = [
     { url = "https://files.pythonhosted.org/packages/41/45/1a4ed80516f02155c51f51e8cedb3c1902296743db0bbc66608a0db2814f/jsonschema_specifications-2025.9.1-py3-none-any.whl", hash = "sha256:98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe", size = 18437, upload-time = "2025-09-08T01:34:57.871Z" },
 ]
-
-[[package]]
-name = "kairos"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "aiosqlite" },
-    { name = "asyncpg" },
-    { name = "biomcp-python" },
-    { name = "ddgs" },
-    { name = "deepagents" },
-    { name = "fastapi" },
-    { name = "feedparser" },
-    { name = "google-genai" },
-    { name = "httpx" },
-    { name = "langchain" },
-    { name = "langchain-core" },
-    { name = "langchain-google-genai" },
-    { name = "langchain-ollama" },
-    { name = "langgraph" },
-    { name = "langgraph-checkpoint-sqlite" },
-    { name = "langsmith" },
-    { name = "pydantic" },
-    { name = "python-dotenv" },
-    { name = "python-frontmatter" },
-    { name = "python-multipart" },
-    { name = "pyyaml" },
-    { name = "rich" },
-    { name = "sse-starlette" },
-    { name = "typer" },
-    { name = "tzdata" },
-    { name = "uvicorn", extra = ["standard"] },
-    { name = "watchfiles" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "mypy" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "aiosqlite", specifier = ">=0.22.1" },
-    { name = "asyncpg", specifier = ">=0.30" },
-    { name = "biomcp-python", specifier = "==0.7.3" },
-    { name = "ddgs", specifier = ">=9.0" },
-    { name = "deepagents", specifier = ">=0.5.3" },
-    { name = "fastapi", specifier = ">=0.115" },
-    { name = "feedparser", specifier = ">=6.0" },
-    { name = "google-genai", specifier = ">=1.0" },
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "langchain", specifier = ">=1.0,<2.0" },
-    { name = "langchain-core", specifier = ">=1.0,<2.0" },
-    { name = "langchain-google-genai", specifier = ">=2.1.0" },
-    { name = "langchain-ollama", specifier = ">=0.3.0" },
-    { name = "langgraph", specifier = ">=0.6,<2.0" },
-    { name = "langgraph-checkpoint-sqlite", specifier = ">=2.0" },
-    { name = "langsmith", specifier = ">=0.3.0" },
-    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.13" },
-    { name = "pydantic", specifier = ">=2.8" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.24" },
-    { name = "python-dotenv", specifier = ">=1.0" },
-    { name = "python-frontmatter", specifier = ">=1.1" },
-    { name = "python-multipart", specifier = ">=0.0.9" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "rich", specifier = ">=13.9" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.7" },
-    { name = "sse-starlette", specifier = ">=2.1" },
-    { name = "typer", specifier = ">=0.13" },
-    { name = "tzdata", specifier = ">=2024.2" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.32" },
-    { name = "watchfiles", specifier = ">=0.24" },
-]
-provides-extras = ["dev"]
 
 [[package]]
 name = "kiwisolver"
