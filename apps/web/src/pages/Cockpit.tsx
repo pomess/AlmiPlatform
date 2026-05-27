@@ -98,6 +98,13 @@ export function Cockpit() {
     threadIdRef.current = threadId;
   }, [threadId]);
 
+  const handleWikilinkClick = useCallback(
+    (target: string) => {
+      navigate("/app/brains", { state: { brainId: brain?.id, pagePath: target } });
+    },
+    [navigate, brain],
+  );
+
   // Wrap resolve so an approval/denial automatically drops the harness's
   // post-resume reply into the active chat thread. Without this the user
   // approves on the Approvals page (or via the inline plan card) and the
@@ -189,6 +196,7 @@ export function Cockpit() {
               <ChatStream
                 items={items}
                 streaming={isStreaming}
+                onWikilinkClick={handleWikilinkClick}
                 footer={
                   inlinePlan ? (
                     <IngestPlanCard

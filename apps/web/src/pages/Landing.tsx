@@ -231,13 +231,13 @@ export function Landing() {
             <span className="mono">ALMIRALL · DERMATOLOGY COMPETITIVE INTELLIGENCE</span>
           </div>
           <h1 className="hero-title">
-            <span className="stack">Every drug. Every phase.</span>
-            <span className="accent">One bullseye.</span>
+            <span className="stack">Everything you need.</span>
+            <span className="accent">In one place.</span>
           </h1>
           <p className="hero-sub">
-            A live competitive-intelligence cockpit for Almirall's dermatology franchise. Track
-            every biologic and small molecule across atopic dermatitis and hidradenitis
-            suppurativa — rendered as a single radial map you can read in seconds.
+            A unified competitive-intelligence platform for Almirall's dermatology franchise.
+            Landscape maps, knowledge graphs, global dashboards — all connected, all live,
+            all in one place.
           </p>
           <div className="hero-cta">
             <button className="enter-btn" type="button" onClick={handleOpenApp}>

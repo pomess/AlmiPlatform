@@ -443,15 +443,31 @@ export function ChatStream({
   items,
   streaming,
   footer,
+  onWikilinkClick,
 }: {
   items: ChatMsg[];
   streaming: boolean;
   footer?: ReactNode;
+  onWikilinkClick?: (target: string) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (ref.current) ref.current.scrollTop = ref.current.scrollHeight;
   }, [items.length, streaming]);
+
+  useEffect(() => {
+    const root = ref.current;
+    if (!root || !onWikilinkClick) return;
+    function onClick(e: MouseEvent) {
+      const el = (e.target as HTMLElement).closest("a[data-wikilink]") as HTMLAnchorElement | null;
+      if (!el) return;
+      e.preventDefault();
+      const target = el.dataset.wikilink || "";
+      if (target) onWikilinkClick!(target);
+    }
+    root.addEventListener("click", onClick);
+    return () => root.removeEventListener("click", onClick);
+  }, [onWikilinkClick]);
 
   // Collapse consecutive tool messages into a single group block.
   // Key the group by the index of its FIRST tool — stable as more tools
