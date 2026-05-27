@@ -25,7 +25,7 @@ import httpx
 log = logging.getLogger(__name__)
 
 ITEMS_PER_SOURCE = 3
-PER_FEED_TIMEOUT = 4.0
+PER_FEED_TIMEOUT = 12.0
 
 # YouTube channel for the daily video bulletin. Reuters publishes a
 # steady stream of business and healthcare news videos, the closest
@@ -80,9 +80,18 @@ FEEDS: dict[str, list[FeedSpec]] = {
     # breaking the panel. Where corporate RSS is unavailable or blocked,
     # we use Google News RSS as a reliable proxy.
     "competitors": [
-        FeedSpec("Eli Lilly", "https://investor.lilly.com/rss/news-releases.xml"),
-        FeedSpec("Regeneron", "https://newsroom.regeneron.com/rss/news-releases.xml"),
-        FeedSpec("Incyte", "https://investor.incyte.com/rss/news-releases.xml"),
+        FeedSpec(
+            "Eli Lilly",
+            "https://news.google.com/rss/search?q=%22Eli+Lilly%22+pharma&hl=en&gl=US&ceid=US:en",
+        ),
+        FeedSpec(
+            "Regeneron",
+            "https://news.google.com/rss/search?q=Regeneron+pharma+dermatology&hl=en&gl=US&ceid=US:en",
+        ),
+        FeedSpec(
+            "Incyte",
+            "https://news.google.com/rss/search?q=Incyte+pharma+dermatology&hl=en&gl=US&ceid=US:en",
+        ),
         FeedSpec(
             "Sanofi",
             "https://news.google.com/rss/search?q=Sanofi+pharma+dermatology&hl=en&gl=US&ceid=US:en",
