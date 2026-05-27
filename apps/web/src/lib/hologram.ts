@@ -10,7 +10,7 @@ import type { Competitor } from "./pharma";
 const LAYER_ID = "competitor-hologram";
 const HOLOGRAM_COLOR = 0x7be3ff;
 const FALLBACK_FOOTPRINT_M = { width: 60, depth: 40, height: 80 };
-const SEARCH_RADIUS_M = 200;
+const SEARCH_RADIUS_M = 80;
 
 type OsmNode = { type: "node"; id: number; lat: number; lon: number };
 type OsmWay = {
@@ -367,8 +367,9 @@ async function loadFootprints(c: Competitor): Promise<Footprint[]> {
     }
   }
 
-  footprintCache.set(c.name, out);
-  return out;
+  const selected = pickTargetBuilding(out);
+  footprintCache.set(c.name, selected);
+  return selected;
 }
 
 function projectRing(
@@ -422,6 +423,55 @@ function fallbackFootprint(): Footprint {
     ],
     heightM: FALLBACK_FOOTPRINT_M.height,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Building selection — pick the single target building from Overpass results
+// ---------------------------------------------------------------------------
+
+function pointInRing(ring: { x: number; y: number }[]): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i].x, yi = ring[i].y;
+    const xj = ring[j].x, yj = ring[j].y;
+    if ((yi > 0) !== (yj > 0) && 0 < (xj - xi) * (0 - yi) / (yj - yi) + xi) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+function ringArea(ring: { x: number; y: number }[]): number {
+  let area = 0;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    area += (ring[j].x + ring[i].x) * (ring[j].y - ring[i].y);
+  }
+  return Math.abs(area) / 2;
+}
+
+function ringCentroidDist(ring: { x: number; y: number }[]): number {
+  let cx = 0, cy = 0;
+  for (const p of ring) { cx += p.x; cy += p.y; }
+  cx /= ring.length;
+  cy /= ring.length;
+  return Math.hypot(cx, cy);
+}
+
+function pickTargetBuilding(footprints: Footprint[]): Footprint[] {
+  if (footprints.length <= 1) return footprints;
+
+  const containing = footprints.filter((fp) => pointInRing(fp.ringMeters));
+  if (containing.length === 1) return containing;
+  if (containing.length > 1) {
+    containing.sort((a, b) => ringArea(a.ringMeters) - ringArea(b.ringMeters));
+    return [containing[0]];
+  }
+
+  // None contains the origin — pick the nearest by centroid distance.
+  const sorted = [...footprints].sort(
+    (a, b) => ringCentroidDist(a.ringMeters) - ringCentroidDist(b.ringMeters),
+  );
+  return [sorted[0]];
 }
 
 // ---------------------------------------------------------------------------
