@@ -6,11 +6,12 @@
 import maplibregl from "maplibre-gl";
 import * as THREE from "three";
 import type { Competitor } from "./pharma";
+import { COMPETITORS } from "./pharma";
 
 const LAYER_ID = "competitor-hologram";
 const HOLOGRAM_COLOR = 0x7be3ff;
 const FALLBACK_FOOTPRINT_M = { width: 60, depth: 40, height: 80 };
-const SEARCH_RADIUS_M = 80;
+const SEARCH_RADIUS_M = 200;
 
 type OsmNode = { type: "node"; id: number; lat: number; lon: number };
 type OsmWay = {
@@ -135,24 +136,22 @@ export function attachHologramLayer(map: maplibregl.Map): HologramController {
     anchor = { lng: c.lng, lat: c.lat };
     startMs = performance.now();
     ensureLayer();
-
-    // Show a fallback box immediately so the hologram never appears to
-    // "miss" — even if Overpass is slow, blocked, or returns nothing.
     visible = true;
-    paintFootprints([fallbackFootprint()]);
 
-    // Upgrade to real OSM footprints when they arrive. If a newer show()
-    // came in while we were waiting, drop this result on the floor.
     try {
       const footprints = await loadFootprints(c);
       if (myToken !== showToken) return;
       if (footprints.length) {
         paintFootprints(footprints);
+      } else {
+        paintFootprints([fallbackFootprint()]);
       }
     } catch {
-      // Network/Overpass error — fallback is already on screen, nothing
-      // to do. Don't clear the scene; that's the bug we're fixing.
+      // Network/Overpass error — show fallback so something renders.
+      if (myToken !== showToken) return;
+      paintFootprints([fallbackFootprint()]);
     }
+    map.triggerRepaint();
   }
 
   function hide() {
@@ -172,6 +171,11 @@ export function attachHologramLayer(map: maplibregl.Map): HologramController {
     }
     renderer?.dispose();
     renderer = null;
+  }
+
+  // Preload all competitor footprints in the background so clicks are instant.
+  for (const comp of COMPETITORS) {
+    loadFootprints(comp).catch(() => {});
   }
 
   return { show, hide, dispose };
@@ -459,6 +463,12 @@ function ringCentroidDist(ring: { x: number; y: number }[]): number {
 
 function pickTargetBuilding(footprints: Footprint[]): Footprint[] {
   if (footprints.length <= 1) return footprints;
+
+  // Campus heuristic: few buildings in the radius means a business park —
+  // show them all. Dense urban (many results) means we're in a city block
+  // and should isolate the single target building.
+  const CAMPUS_THRESHOLD = 6;
+  if (footprints.length <= CAMPUS_THRESHOLD) return footprints;
 
   const containing = footprints.filter((fp) => pointInRing(fp.ringMeters));
   if (containing.length === 1) return containing;
