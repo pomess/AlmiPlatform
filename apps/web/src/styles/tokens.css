@@ -293,8 +293,8 @@ textarea:focus-visible,
   background: oklch(0.82 0.17 var(--accent-hue) / 0.18);
   border-color: var(--border-accent);
 }
-.wikilink::before { content: "[["; color: var(--accent-dim); font-family: var(--font-mono); font-size: 0.85em; }
-.wikilink::after { content: "]]"; color: var(--accent-dim); font-family: var(--font-mono); font-size: 0.85em; }
+.wikilink::before { content: none; }
+.wikilink::after { content: none; }
 
 /* density tags */
 [data-density="compact"] { --density: 0.85; }
