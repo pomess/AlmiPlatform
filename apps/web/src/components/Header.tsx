@@ -5,7 +5,6 @@ import type { DisplayBrain } from "../hooks/useBrains";
 type Tab = {
   id: string;
   label: string;
-  badge?: number | null;
 };
 
 interface HeaderProps {
@@ -15,7 +14,6 @@ interface HeaderProps {
   brains: DisplayBrain[];
   setBrain: (b: DisplayBrain) => void;
   dnd?: boolean;
-  pendingCount: number;
 }
 
 export function Header({
@@ -25,7 +23,6 @@ export function Header({
   brains,
   setBrain,
   dnd,
-  pendingCount,
 }: HeaderProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -50,7 +47,6 @@ export function Header({
     { id: "dashboard", label: "Dashboard" },
     { id: "bullseye", label: "Bullseye" },
     { id: "graph", label: "Graph" },
-    { id: "approvals", label: "Approvals", badge: pendingCount > 0 ? pendingCount : null },
     { id: "brains", label: "Brains" },
   ];
   const showBrain = ["chat", "graph", "brains"].includes(route);
@@ -81,7 +77,6 @@ export function Header({
             onClick={() => setRoute(t.id)}
           >
             {t.label}
-            {t.badge ? <span className="badge">{t.badge}</span> : null}
           </button>
         ))}
       </nav>

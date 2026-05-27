@@ -16,7 +16,7 @@ import html
 import logging
 import re
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import feedparser
@@ -75,15 +75,54 @@ FEEDS: dict[str, list[FeedSpec]] = {
         ),
     ],
     # Competitors — corporate newsrooms / press release feeds for the
-    # companies that show up on the Bullseye. Per-feed failures are isolated
-    # so a missing corporate feed leaves an empty entry without breaking the
-    # panel. Several major competitors (Novartis, AbbVie, Sanofi, UCB, LEO,
-    # Galderma, MoonLake) do not publish public RSS as of this writing.
+    # companies that show up on the Disease360 map. Per-feed failures are
+    # isolated so a missing corporate feed leaves an empty entry without
+    # breaking the panel. Where corporate RSS is unavailable or blocked,
+    # we use Google News RSS as a reliable proxy.
     "competitors": [
         FeedSpec("Eli Lilly", "https://investor.lilly.com/rss/news-releases.xml"),
         FeedSpec("Regeneron", "https://newsroom.regeneron.com/rss/news-releases.xml"),
         FeedSpec("Incyte", "https://investor.incyte.com/rss/news-releases.xml"),
-        FeedSpec("Johnson & Johnson", "https://www.jnj.com/feed/news.rss"),
+        FeedSpec(
+            "Sanofi",
+            "https://news.google.com/rss/search?q=Sanofi+pharma+dermatology&hl=en&gl=US&ceid=US:en",
+        ),
+        FeedSpec(
+            "Novartis",
+            "https://news.google.com/rss/search?q=Novartis+pharma+dermatology&hl=en&gl=US&ceid=US:en",
+        ),
+        FeedSpec(
+            "AbbVie",
+            "https://news.google.com/rss/search?q=AbbVie+pharma+dermatology&hl=en&gl=US&ceid=US:en",
+        ),
+        FeedSpec(
+            "Johnson & Johnson",
+            "https://news.google.com/rss/search?q=%22Johnson+%26+Johnson%22+pharma&hl=en&gl=US&ceid=US:en",
+        ),
+        FeedSpec(
+            "Roche",
+            "https://news.google.com/rss/search?q=Roche+pharma+dermatology&hl=en&gl=US&ceid=US:en",
+        ),
+        FeedSpec(
+            "AstraZeneca",
+            "https://news.google.com/rss/search?q=AstraZeneca+pharma&hl=en&gl=US&ceid=US:en",
+        ),
+        FeedSpec(
+            "Galderma",
+            "https://news.google.com/rss/search?q=Galderma+dermatology&hl=en&gl=US&ceid=US:en",
+        ),
+        FeedSpec(
+            "Pfizer",
+            "https://news.google.com/rss/search?q=Pfizer+pharma+dermatology&hl=en&gl=US&ceid=US:en",
+        ),
+        FeedSpec(
+            "UCB",
+            "https://news.google.com/rss/search?q=UCB+pharma+bimekizumab&hl=en&gl=US&ceid=US:en",
+        ),
+        FeedSpec(
+            "LEO Pharma",
+            "https://news.google.com/rss/search?q=%22LEO+Pharma%22+dermatology&hl=en&gl=US&ceid=US:en",
+        ),
     ],
 }
 
@@ -92,7 +131,7 @@ _CACHE_LOCK = asyncio.Lock()
 
 
 def _today_utc() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    return datetime.now(UTC).strftime("%Y-%m-%d")
 
 
 _TAG_RE = re.compile(r"<[^>]+>")
@@ -145,7 +184,7 @@ async def _fetch_one(client: httpx.AsyncClient, feed: FeedSpec) -> dict:
         r.raise_for_status()
         items = await asyncio.to_thread(_parse_bytes, r.content)
         return {"source": feed.source, "items": items}
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         log.warning("news fetch failed source=%s err=%s", feed.source, exc)
         return {"source": feed.source, "items": [], "error": str(exc)}
 
@@ -221,7 +260,7 @@ async def _fetch_video_candidates(client: httpx.AsyncClient) -> list[dict]:
         r = await client.get(VIDEO_FEED_URL, timeout=PER_FEED_TIMEOUT)
         r.raise_for_status()
         return await asyncio.to_thread(_parse_video_candidates, r.content)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         log.warning("video fetch failed err=%s", exc)
         return []
 
@@ -256,7 +295,7 @@ async def _build_payload() -> dict:
     video = _pick_most_relevant(video_candidates, headlines)
 
     return {
-        "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "fetched_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "pharma": results["pharma"],
         "derm": results["derm"],
         "competitors": results["competitors"],
@@ -283,5 +322,5 @@ async def warm_cache() -> None:
     """Best-effort startup warm — never raises."""
     try:
         await get_briefing()
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         log.warning("news warm_cache failed: %s", exc)

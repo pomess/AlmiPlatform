@@ -1079,7 +1079,7 @@ async def voice_stream_stt(ws: WebSocket) -> None:
                                 mime_type="audio/pcm;rate=16000",
                             )
                         )
-                    elif "text" in msg and msg["text"]:
+                    elif msg.get("text"):
                         try:
                             ctrl = json.loads(msg["text"])
                         except Exception:
@@ -1098,7 +1098,7 @@ async def voice_stream_stt(ws: WebSocket) -> None:
             # bound; in practice Live wraps up within a few hundred ms.
             try:
                 await asyncio.wait_for(reader_task, timeout=5.0)
-            except (asyncio.TimeoutError, asyncio.CancelledError):
+            except (TimeoutError, asyncio.CancelledError):
                 pass
             finally:
                 if not reader_task.done():
@@ -1246,7 +1246,7 @@ async def _voice_turn_stream(
     transcript_override: str | None = None,
 ) -> AsyncIterator[str]:
     # Lazy imports to dodge circular references with api.py.
-    from .api import _agent_for, _persist_interrupts
+    from .api import _agent_for
     from .system_prompt import DEFAULT_BRAIN
     from .tools.memory_tools import reset_turn_budget, set_active_tenant
 
@@ -1331,8 +1331,6 @@ async def _voice_turn_stream(
                     {
                         "type": "done",
                         "thread_id": resolved_thread,
-                        "interrupted": False,
-                        "approvals": [],
                         "empty": True,
                     }
                 )
@@ -1363,8 +1361,6 @@ async def _voice_turn_stream(
             set_active_tenant(tenant_id)
             reset_turn_budget()
 
-            interrupted = False
-            persisted: list[dict] = []
             seen_tool_calls: set[str] = set()
             seen_tool_results: set[str] = set()
             # Last seen usage_metadata across the whole stream. Gemini
@@ -1377,7 +1373,7 @@ async def _voice_turn_stream(
                 async for mode, data in agent.astream(
                     {"messages": [{"role": "user", "content": agent_input}]},
                     config=config,
-                    stream_mode=["messages", "updates"],
+                    stream_mode=["messages"],
                 ):
                     if mode == "messages":
                         chunk, _meta = data
@@ -1449,15 +1445,6 @@ async def _voice_turn_stream(
                             await push({"type": "token", "text": text})
                             tts.feed_text(text)
 
-                    elif mode == "updates":
-                        if isinstance(data, dict) and "__interrupt__" in data:
-                            interrupted = True
-                            try:
-                                persisted.extend(
-                                    _persist_interrupts(resolved_thread, data)
-                                )
-                            except Exception:
-                                log.exception("persisting interrupts failed")
             except Exception as e:
                 log.exception("agent stream crashed")
                 await push({"type": "error", "message": str(e)})
@@ -1468,8 +1455,6 @@ async def _voice_turn_stream(
                 {
                     "type": "done",
                     "thread_id": resolved_thread,
-                    "interrupted": interrupted,
-                    "approvals": persisted,
                 }
             )
         finally:

@@ -138,11 +138,6 @@ export function useStreamChat(brain?: string) {
       setMessages((prev) => [...prev, userMsg, assistantMsg]);
       setIsStreaming(true);
 
-      // Track the cumulative text the server has produced so we can compute
-      // the *new* slice on each event. Some providers may send overlapping
-      // chunks; we treat tokens as deltas but normalise via length check.
-      let serverTotal = "";
-
       const handle = api.chatStream(
         {
           message: text,
@@ -226,7 +221,6 @@ export function useStreamChat(brain?: string) {
             case "token": {
               const delta = evt.text;
               if (!delta) break;
-              serverTotal += delta;
               pendingRef.current += delta;
               startRaf();
               break;
@@ -235,12 +229,6 @@ export function useStreamChat(brain?: string) {
               threadRef.current = evt.thread_id;
               setThreadId(evt.thread_id);
               writeSharedThreadId(evt.thread_id);
-              if (evt.interrupted) {
-                const n = evt.approvals.length;
-                pendingRef.current +=
-                  (serverTotal && !serverTotal.endsWith("\n") ? "\n\n" : "") +
-                  `⏸ paused — ${n} approval${n === 1 ? "" : "s"} pending. Open the Approvals page.`;
-              }
               finishedRef.current = true;
               startRaf();
               break;
@@ -275,17 +263,6 @@ export function useStreamChat(brain?: string) {
     setToolActivity([]);
   }, [stopRaf]);
 
-  // Inject an assistant message into the thread without going through the
-  // streaming path. Used when the harness's approval-resume produces a
-  // post-approval reply (`final_text`) -- without this, the chat message
-  // list stays frozen at "paused — 1 approval pending" even after the
-  // user approves, because the resume runs out-of-band of /chat/stream.
-  const injectAssistantMessage = useCallback((text: string) => {
-    const trimmed = (text || "").trim();
-    if (!trimmed) return;
-    setMessages((prev) => [...prev, { role: "assistant", content: trimmed }]);
-  }, []);
-
   return {
     messages,
     isStreaming,
@@ -293,6 +270,5 @@ export function useStreamChat(brain?: string) {
     threadId,
     sendMessage,
     clearMessages,
-    injectAssistantMessage,
   };
 }

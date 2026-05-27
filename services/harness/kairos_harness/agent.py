@@ -1,9 +1,8 @@
 """Deep Agent factory.
 
-Builds Kairos as a deep agent with:
+Builds Kairos as a read-only deep agent with:
 - Gemini Flash (or local Ollama) as the model
-- Memory tools (HTTP to services/memory)
-- HumanInTheLoopMiddleware on `replace_hot`, `write_note`, `send_email`, `shell_command`
+- Read-only memory tools (HTTP to services/memory)
 - An AsyncSqliteSaver checkpointer (works with both sync .invoke and async .astream)
 """
 
@@ -19,17 +18,6 @@ from kairos_runtime.llm import get_chat_model
 
 from .system_prompt import DEFAULT_BRAIN, assemble
 from .tools import all_memory_tools, research_tools
-from .tools.memory_tools import APPROVAL_TOOLS
-
-# Tool names the agent must always pause on (mirrors policies/actions.yaml).
-DEFAULT_INTERRUPT_TOOLS: set[str] = APPROVAL_TOOLS | {
-    "send_email",
-    "send_message",
-    "create_calendar_event",
-    "update_calendar_event",
-    "delete_calendar_event",
-    "shell_command",
-}
 
 
 def _checkpointer_path() -> Path:
@@ -70,10 +58,8 @@ def build_agent(
     tools = list(base_tools) if base_tools is not None else list(all_memory_tools())
     if extra_tools:
         tools.extend(extra_tools)
-    # Add deep research tool (read-only, no approval needed)
+    # Add deep research tool (read-only)
     tools.extend(research_tools())
-
-    interrupt_on = {name: True for name in DEFAULT_INTERRUPT_TOOLS}
 
     system_prompt = assemble(active_brain, surface=surface)
     if extra_system_prompt:
@@ -117,7 +103,6 @@ def build_agent(
         model=model,
         tools=tools,
         system_prompt=system_prompt,
-        interrupt_on=interrupt_on,
         checkpointer=checkpointer,
     )
     return agent

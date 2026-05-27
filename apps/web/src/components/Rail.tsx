@@ -1,10 +1,9 @@
 // Live port of JARVIS/app/rail.jsx — fetches hot cache, derives pinned pages
-// from wikilinks in hot.md, lists pending approvals + recent tool activity.
+// from wikilinks in hot.md, lists recent tool activity.
 import { useEffect, useState, type CSSProperties } from "react";
 import { api } from "../lib/api";
 import type { ToolActivity } from "../hooks/useStreamChat";
 import type { DisplayBrain } from "../hooks/useBrains";
-import type { DisplayApproval } from "../hooks/useApprovalsLive";
 
 type PinnedPage = { name: string; tok: number; layer: "hot" | "index" | "wiki" | "raw" };
 
@@ -51,17 +50,15 @@ function useHot(brainId?: string): { tokens: number; max: number; pinned: Pinned
 
 interface RailProps {
   brain: DisplayBrain | null;
-  approvals: DisplayApproval[];
   toolActivity: ToolActivity[];
 }
 
-export function Rail({ brain, approvals, toolActivity }: RailProps) {
+export function Rail({ brain, toolActivity }: RailProps) {
   const hot = useHot(brain?.id);
   const tools = toolActivity.slice(-5).map((t) => {
     const elapsedMs = (t.finishedAt ?? Date.now()) - t.startedAt;
     return { name: t.name, elapsed: `${(elapsedMs / 1000).toFixed(2)}s` };
   });
-  const queued = approvals.filter((a) => a.status === "pending" || a.status === "dnd_held");
 
   return (
     <aside className="rail">
@@ -109,36 +106,6 @@ export function Rail({ brain, approvals, toolActivity }: RailProps) {
               {t.name}
             </span>
             <span className="v">{t.elapsed}</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="group">
-        <h4>
-          APPROVALS QUEUE{" "}
-          <span className="actions">
-            {approvals.filter((a) => a.status === "pending").length} PENDING
-          </span>
-        </h4>
-        {queued.slice(0, 4).map((a) => (
-          <div
-            key={a.id}
-            className={"approval-row " + (a.status === "pending" ? "pending" : "")}
-          >
-            <div>
-              <div className="tool">{a.tool}</div>
-              <div className="desc">{a.delta || "—"}</div>
-            </div>
-            {a.status === "pending" ? (
-              <span className="countdown">
-                {Math.floor(a.expires_in / 60)}:
-                {String(a.expires_in % 60).padStart(2, "0")}
-              </span>
-            ) : (
-              <span className="mono" style={{ color: "var(--text-muted)", fontSize: 10.5 }}>
-                DND
-              </span>
-            )}
           </div>
         ))}
       </div>

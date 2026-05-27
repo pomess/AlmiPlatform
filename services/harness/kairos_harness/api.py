@@ -1,12 +1,10 @@
-﻿"""FastAPI REST shim for the harness.
+"""FastAPI REST shim for the harness.
 
 Endpoints:
     GET    /healthz
-    POST   /chat                     {message, brain?, thread_id?, profile?} -> {messages, interrupts, approvals}
-    GET    /approvals                ?status=pending  -> list
-    POST   /approvals/{id}/approve   -> resumes the paused agent thread
-    POST   /approvals/{id}/deny      -> rejects + resumes with feedback
-    POST   /approvals/drain-dnd      -> moves dnd_held -> pending
+    GET    /news
+    POST   /chat                     {message, brain?, thread_id?, profile?} -> {messages}
+    POST   /chat/stream              SSE token stream
 """
 
 from __future__ import annotations
@@ -17,34 +15,13 @@ import logging
 import uuid
 from typing import Any
 
-import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from kairos_runtime.research.tool import reset_research_budget
 from pydantic import BaseModel
 
-
-class _SuppressApprovalsPolling(logging.Filter):
-    """Silence successful GET /approvals access-log lines.
-
-    The web cockpit polls this endpoint every 3s while open, which drowns
-    out interesting traces (research progress, tool calls). Other status
-    codes and other endpoints still log normally.
-    """
-
-    def filter(self, record: logging.LogRecord) -> bool:
-        msg = record.getMessage()
-        if "/approvals" not in msg:
-            return True
-        # Only suppress 2xx GETs; keep errors/4xx/5xx visible.
-        return not ('"GET /approvals' in msg and " 200 " in msg)
-
-
-logging.getLogger("uvicorn.access").addFilter(_SuppressApprovalsPolling())
-
-from kairos_runtime.config import get as config_get
-
-from . import approval_store, audit
+from . import audit
 from .agent import build_agent
 from .news import get_briefing as get_news_briefing
 from .news import warm_cache as warm_news_cache
@@ -55,9 +32,10 @@ from .tools.memory_tools import (
     reset_turn_budget,
     set_active_tenant,
 )
-from kairos_runtime.research.tool import reset_research_budget
 from .voice import router as voice_router
 from .voice import warm_cue_cache, warm_genai_client
+
+log = logging.getLogger(__name__)
 
 app = FastAPI(title="Kairos Harness", version="0.1.0")
 
@@ -98,8 +76,6 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     thread_id: str
     final_text: str
-    interrupted: bool
-    approvals: list[dict]
     raw_messages: list[dict]
 
 
@@ -137,10 +113,7 @@ def _agent_for(
             chunks.append(page_prompt)
         extra_system = "\n\n".join(chunks) if chunks else None
         # Anchor each cached agent to its surface: dashboard for the
-        # /voice + map page, chat for everything else. This drives the
-        # `# SURFACE` block in the assembled system prompt, which stops
-        # the chat agent from mirroring leftover dashboard-style replies
-        # in a thread that spans both surfaces.
+        # /voice + map page, chat for everything else.
         surface = "dashboard" if (page or "").strip().lower() == "dashboard" else "chat"
         _AGENTS[key] = build_agent(
             profile=profile,
@@ -154,12 +127,7 @@ def _agent_for(
 
 
 def _flatten_content(content: Any) -> str:
-    """Coerce a LangChain message content (str | list[block]) into plain text.
-
-    Gemini (and other providers) return content as a list of blocks like
-    `[{"type": "text", "text": "...", "extras": {...}}, ...]`. We join the
-    text blocks and ignore non-text parts (tool calls, signatures, etc).
-    """
+    """Coerce a LangChain message content (str | list[block]) into plain text."""
     if content is None:
         return ""
     if isinstance(content, str):
@@ -194,13 +162,7 @@ def _final_text(messages: list[Any]) -> str:
 def _audit_messages(
     thread_id: str, messages: list[Any], tenant_id: str = DEFAULT_TENANT_ID
 ) -> None:
-    """Audit-log tool calls and tool results visible on a non-streaming reply.
-
-    The SSE path logs from per-chunk events; the sync ``/chat`` path only
-    sees the final message list, so we walk it here. Idempotency across
-    paths is provided by ``tool_call_id`` — replaying the same id just
-    appends another row, which is fine for an append-only log.
-    """
+    """Audit-log tool calls and tool results visible on a non-streaming reply."""
     seen_calls: set[str] = set()
     seen_results: set[str] = set()
     for m in messages:
@@ -235,71 +197,6 @@ def _audit_messages(
                     tool_call_id=tc_id,
                     result_summary=audit.summarize_result(getattr(m, "content", None)),
                 )
-
-
-def _persist_interrupts(
-    thread_id: str, result: dict, tenant_id: str = DEFAULT_TENANT_ID
-) -> list[dict]:
-    """Inspect a langgraph result for `__interrupt__` and persist approval rows."""
-    persisted: list[dict] = []
-    interrupts = result.get("__interrupt__") or []
-    if not isinstance(interrupts, (list, tuple)):
-        interrupts = [interrupts]
-    # LangChain 1.x HumanInTheLoopMiddleware emits:
-    #   interrupt(HITLRequest{"action_requests": [ActionRequest{name, args, description}], ...})
-    # Older HITL shapes used a bare list of action dicts. Normalize both into
-    # a flat list of ActionRequest-like dicts.
-    flat: list[dict] = []
-    for it in interrupts:
-        value = getattr(it, "value", it)
-        if isinstance(value, dict) and "action_requests" in value:
-            reqs = value.get("action_requests") or []
-            flat.extend(r for r in reqs if isinstance(r, dict))
-        elif isinstance(value, list):
-            flat.extend(r for r in value if isinstance(r, dict))
-        elif isinstance(value, dict):
-            flat.append(value)
-    for action in flat:
-        tool = action.get("name") or action.get("tool") or action.get("action") or "unknown"
-        args = action.get("args") or {}
-        rationale = action.get("description") or action.get("rationale")
-        args_payload = args if isinstance(args, dict) else {"_": args}
-        # Enrich apply_* approvals with the full plan from the memory service
-        # so the UI can render the diff without a second fetch.
-        if tool in ("apply_ingest", "apply_solve"):
-            plan = _fetch_plan(
-                tenant_id, args_payload.get("brain"), args_payload.get("plan_id")
-            )
-            if plan is not None:
-                args_payload = {**args_payload, "plan": plan}
-        row = approval_store.create(
-            thread_id=thread_id,
-            tenant_id=tenant_id,
-            tool=tool,
-            args=args_payload,
-            rationale=rationale,
-        )
-        persisted.append(row.to_dict())
-    return persisted
-
-
-def _fetch_plan(tenant_id: Any, brain: Any, plan_id: Any) -> dict | None:
-    """Fetch an ingest/solve plan from the memory service for approval display."""
-    if not brain or not plan_id:
-        return None
-    tenant = tenant_id or DEFAULT_TENANT_ID
-    base = (
-        config_get("KAIROS_MEMORY_URL", "http://127.0.0.1:8001")
-        or "http://127.0.0.1:8001"
-    )
-    try:
-        with httpx.Client(timeout=5.0) as c:
-            r = c.get(f"{base}/tenant/{tenant}/brain/{brain}/plan/{plan_id}")
-            if r.status_code == 200:
-                return r.json()
-    except Exception:
-        return None
-    return None
 
 
 @app.get("/healthz")
@@ -338,16 +235,9 @@ async def chat(req: ChatRequest) -> ChatResponse:
 
     messages = result.get("messages", []) if isinstance(result, dict) else []
     _audit_messages(thread_id, messages, tenant_id=req.tenant_id)
-    approvals = _persist_interrupts(
-        thread_id,
-        result if isinstance(result, dict) else {},
-        tenant_id=req.tenant_id,
-    )
     return ChatResponse(
         thread_id=thread_id,
         final_text=_final_text(messages),
-        interrupted=bool(approvals),
-        approvals=approvals,
         raw_messages=[_msg_dict(m) for m in messages],
     )
 
@@ -361,13 +251,11 @@ async def chat_stream(req: ChatRequest):
     """Server-Sent Events stream of model tokens.
 
     Emits:
-        {"type":"meta","thread_id":...}             â€” once at the start
-        {"type":"tool","name":"...","args":{...}}   â€” when the agent calls a tool
-        {"type":"token","text":"..."}                â€” for each text chunk
-        {"type":"done","interrupted":bool,
-                       "approvals":[...],
-                       "thread_id":...}              â€” at completion
-        {"type":"error","message":"..."}             â€” on failure
+        {"type":"meta","thread_id":...}             — once at the start
+        {"type":"tool","name":"...","args":{...}}   — when the agent calls a tool
+        {"type":"token","text":"..."}                — for each text chunk
+        {"type":"done","thread_id":...}              — at completion
+        {"type":"error","message":"..."}             — on failure
     """
     agent = _agent_for(req.profile, req.brain)
     thread_id = req.thread_id or str(uuid.uuid4())
@@ -384,8 +272,6 @@ async def chat_stream(req: ChatRequest):
     reset_research_budget()
 
     async def gen():
-        interrupted = False
-        persisted: list[dict] = []
         seen_tool_calls: set[str] = set()
         seen_tool_results: set[str] = set()
         user_content = req.message
@@ -401,7 +287,7 @@ async def chat_stream(req: ChatRequest):
             async for mode, data in agent.astream(
                 {"messages": [{"role": "user", "content": user_content}]},
                 config=config,
-                stream_mode=["messages", "updates", "custom"],
+                stream_mode=["messages", "custom"],
             ):
                 if mode == "messages":
                     chunk, _meta = data
@@ -467,10 +353,6 @@ async def chat_stream(req: ChatRequest):
                         )
 
                     # Only stream TEXT tokens from the top-level agent node.
-                    # Nested tool calls (e.g. deep_research internal LLMs)
-                    # produce chunks from other nodes — skip them.
-                    # langchain.agents.factory names the LLM node "model";
-                    # older / custom graphs may use "agent".
                     node = (_meta or {}).get("langgraph_node", "")
                     if node and node not in ("model", "agent"):
                         continue
@@ -478,14 +360,7 @@ async def chat_stream(req: ChatRequest):
                     text = _flatten_content(getattr(chunk, "content", None))
                     if text:
                         yield _sse({"type": "token", "text": text})
-                elif mode == "updates":
-                    if isinstance(data, dict) and "__interrupt__" in data:
-                        interrupted = True
-                        persisted.extend(
-                            _persist_interrupts(thread_id, data, tenant_id=req.tenant_id)
-                        )
                 elif mode == "custom":
-                    print(f"[harness] custom event: type={type(data).__name__} data={data!r:.300}")
                     if isinstance(data, dict) and "name" in data:
                         evt_name = data["name"]
                         payload = data.get("data", data)
@@ -493,12 +368,10 @@ async def chat_stream(req: ChatRequest):
                         evt_name, payload = data
                     else:
                         evt_name, payload = "progress", data
-                    print(f"[harness] custom event parsed name={evt_name!r} payload_type={type(payload).__name__}")
                     if evt_name == "research_progress" and isinstance(payload, dict):
                         stage = payload.get("stage", "")
                         message = payload.get("message", "")
                         detail = payload.get("detail") or {}
-                        print(f"[harness] forwarded research_progress stage={stage!r} message={message!r} detail_keys={list(detail.keys()) if isinstance(detail, dict) else type(detail).__name__}")
                         yield _sse({
                             "type": "tool_progress",
                             "name": "deep_research",
@@ -506,16 +379,9 @@ async def chat_stream(req: ChatRequest):
                             "stage": stage,
                             "detail": detail if isinstance(detail, dict) else {},
                         })
-            print(f"[harness] astream end thread={thread_id} interrupted={interrupted}")
-            yield _sse(
-                {
-                    "type": "done",
-                    "thread_id": thread_id,
-                    "interrupted": interrupted,
-                    "approvals": persisted,
-                }
-            )
-        except Exception as e:  # noqa: BLE001
+            print(f"[harness] astream end thread={thread_id}")
+            yield _sse({"type": "done", "thread_id": thread_id})
+        except Exception as e:
             import traceback as _tb
 
             print(f"[harness] astream raised {type(e).__name__}: {e}")
@@ -527,20 +393,12 @@ async def chat_stream(req: ChatRequest):
                     {
                         "type": "token",
                         "text": (
-                            "\n\n_(Search budget reached â€” answering with what I have. "
-                            "If this isn't enough, ask a more specific question or capture the "
-                            "missing fact into the brain.)_"
+                            "\n\n_(Search budget reached — answering with what I have. "
+                            "If this isn't enough, ask a more specific question.)_"
                         ),
                     }
                 )
-                yield _sse(
-                    {
-                        "type": "done",
-                        "thread_id": thread_id,
-                        "interrupted": False,
-                        "approvals": [],
-                    }
-                )
+                yield _sse({"type": "done", "thread_id": thread_id})
             else:
                 yield _sse({"type": "error", "message": str(e)})
 
@@ -553,100 +411,6 @@ async def chat_stream(req: ChatRequest):
             "Connection": "keep-alive",
         },
     )
-
-
-@app.get("/approvals")
-def list_approvals(status: str | None = None) -> list[dict]:
-    return [a.to_dict() for a in approval_store.list_(status)]
-
-
-async def _resume_thread(thread_id: str, decisions: list[dict]) -> dict:
-    """Resume a paused agent thread with the given decisions."""
-    from langgraph.types import Command
-
-    reset_turn_budget()
-    reset_research_budget()
-    # We don't know which (profile, brain) pair owns this thread; try them all.
-    last_result: dict = {}
-    for agent in _AGENTS.values():
-        try:
-            config = {
-                "configurable": {"thread_id": thread_id},
-                "recursion_limit": 60,
-            }
-            result = await agent.ainvoke(Command(resume={"decisions": decisions}), config=config)
-            if isinstance(result, dict):
-                last_result = result
-                if result.get("messages"):
-                    break
-        except Exception:
-            continue
-    return last_result
-
-
-class ApproveRequest(BaseModel):
-    by: str = "web"
-    edited_args: dict | None = None
-
-
-class DenyRequest(BaseModel):
-    by: str = "web"
-    feedback: str | None = None
-
-
-@app.post("/approvals/{approval_id}/approve")
-async def approve(approval_id: str, req: ApproveRequest) -> dict:
-    item = approval_store.get_by_id(approval_id)
-    if not item:
-        raise HTTPException(404, "approval not found")
-    if item.status not in (approval_store.PENDING, approval_store.DND_HELD):
-        raise HTTPException(409, f"approval already {item.status}")
-    updated = approval_store.resolve(approval_id, decision=approval_store.APPROVED, by=req.by)
-    decision: dict = {"type": "approve"}
-    if req.edited_args:
-        decision = {
-            "type": "edit",
-            "edited_action": {"name": item.tool, "args": req.edited_args},
-        }
-    set_active_tenant(item.tenant_id)
-    result = await _resume_thread(item.thread_id, [decision])
-    if result:
-        _audit_messages(item.thread_id, result.get("messages", []), tenant_id=item.tenant_id)
-    new_approvals = _persist_interrupts(item.thread_id, result, tenant_id=item.tenant_id)
-    return {
-        "approval": updated.to_dict() if updated else None,
-        "new_approvals": new_approvals,
-        "final_text": _final_text(result.get("messages", [])) if result else "",
-    }
-
-
-@app.post("/approvals/{approval_id}/deny")
-async def deny(approval_id: str, req: DenyRequest) -> dict:
-    item = approval_store.get_by_id(approval_id)
-    if not item:
-        raise HTTPException(404, "approval not found")
-    if item.status not in (approval_store.PENDING, approval_store.DND_HELD):
-        raise HTTPException(409, f"approval already {item.status}")
-    updated = approval_store.resolve(approval_id, decision=approval_store.DENIED, by=req.by)
-    decision = {
-        "type": "reject",
-        "feedback": req.feedback or "Denied by user.",
-    }
-    set_active_tenant(item.tenant_id)
-    result = await _resume_thread(item.thread_id, [decision])
-    if result:
-        _audit_messages(item.thread_id, result.get("messages", []), tenant_id=item.tenant_id)
-    new_approvals = _persist_interrupts(item.thread_id, result, tenant_id=item.tenant_id)
-    return {
-        "approval": updated.to_dict() if updated else None,
-        "new_approvals": new_approvals,
-        "final_text": _final_text(result.get("messages", [])) if result else "",
-    }
-
-
-@app.post("/approvals/drain-dnd")
-def drain_dnd() -> dict:
-    return {"drained": approval_store.drain_dnd()}
 
 
 def run() -> None:

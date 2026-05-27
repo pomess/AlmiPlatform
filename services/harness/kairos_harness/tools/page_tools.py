@@ -30,7 +30,6 @@ from langchain_core.tools import tool
 
 from ..client_tools import get_active_bridge
 from .memory_tools import (
-    append_hot,
     get_hot,
     get_index,
     get_page,
@@ -462,50 +461,11 @@ Replies are spoken aloud. Keep them tight: 1-3 sentences, conversational,
 no headings, no bullet lists, no markdown. The map does the visual talking;
 your job is to narrate, not to lecture.
 
-WRITE CAPABILITY (very limited here)
-On the dashboard you have ONE write tool only: `append_hot` -- and only
-for ephemeral one-liner notes scoped to the current conversation. You
-do NOT have `plan_ingest`, `apply_ingest`, `write_note`, `replace_hot`,
-or any other ingest/page tool. They are not in your toolset on this
-surface. Do not pretend they are. Do not say you saved a page, added
-to your brain, captured a fact, or ingested anything -- you cannot.
-
-DEFAULT IS OFF. Do NOT call `append_hot` for ANY of these:
-- Greetings or small talk ("hi", "ay, what's up", "good evening")
-- Questions about the world, geography, or general knowledge
-- Questions about what's already in the brain
-- In-the-moment thinking that isn't framed as "remember"
-- Anything ambiguous -- WHEN IN DOUBT, DO NOT CAPTURE.
-
-`append_hot` is allowed ONLY when Bruno gives an EXPLICIT, in-the-moment
-working-memory instruction, e.g.: "remember for now that I'm focusing
-on X", "note for this session that I'm in a hurry", "stash that I'm
-pairing with Joan today". One-liner, ephemeral, conversational scope.
-NEVER use it for persistent facts (people, projects, decisions,
-identity, dates, plans). Those need full ingest, which lives in Chat.
-
-If Bruno asks you to save / capture / record / store / ingest / write
-down / "put this in my brain" / "add a page about X" -- anything
-beyond a one-liner ephemeral note -- the correct response is to TELL
-HIM the dashboard can't do that and redirect: "I can only stash quick
-working-memory notes here. Switch to Chat and I'll capture that
-properly through the approval flow." Then stop. Do not pretend you
-captured it.
-
-When you DO call `append_hot`, briefly confirm out loud: "Stashed in
-your hot cache." -- one short sentence, no theatre.
-
-Hand-off discipline
-If you have already told Bruno in this thread that something needs to
-be done in Chat, DO NOT keep repeating that line on every follow-up
-turn. He heard you. On follow-ups about the SAME task either:
-- Acknowledge briefly ("Still parked on that one -- it'll come together
-  once you switch to Chat."), or
-- Move on to whatever he is actually asking about now.
-Never re-emit the full "On this dashboard I only have ... switch over
-to Chat ..." paragraph more than once per task. Repeating it bloats
-the shared thread's history and bleeds into the chat agent's replies
-when Bruno does switch over.
+READ-ONLY POSTURE
+This cockpit reads the vault — it does not write to it. You have NO
+ingest, page-write, or hot-cache tools on any surface. If Bruno asks
+to save, capture, record, store, ingest, or write something down,
+tell him plainly the cockpit is read-only right now and continue.
 
 Tool routing (memory)
 The KNOWLEDGE LANDSCAPE block at the top of your prompt names every key
@@ -544,16 +504,6 @@ PAGE_TOOLS: dict[str, Sequence] = {
 # list instead of the default `all_memory_tools()` — page tools from
 # `PAGE_TOOLS` are still appended on top. Pages absent from this dict fall
 # back to the full memory toolkit.
-#
-# Dashboard set: read tools + `append_hot` ONLY. Voice + Gemini Flash is
-# a noisy match for the heavy ingest pipeline -- `plan_ingest`'s
-# docstring ("use whenever the user shares a meaningful fact") makes the
-# model fish for it on every casual turn, and on voice the user can't
-# review a diff aloud anyway. So full page authoring lives in typed Chat
-# (where the model has the full toolset and the user reads the approval
-# card). The dashboard keeps `append_hot` for one-line working-memory
-# notes -- its docstring is tightly constrained ("Use ONLY for
-# observations scoped to the current conversation") and doesn't fish.
 PAGE_BASE_TOOLS: dict[str, Sequence] = {
     "dashboard": (
         search_wiki,
@@ -561,7 +511,6 @@ PAGE_BASE_TOOLS: dict[str, Sequence] = {
         get_index,
         get_hot,
         list_brains,
-        append_hot,
     ),
 }
 

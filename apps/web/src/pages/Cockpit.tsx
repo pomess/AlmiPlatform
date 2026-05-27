@@ -1,38 +1,18 @@
-// Cockpit shell — port of JARVIS/app/main.jsx App, wired live.
-import { useCallback, useEffect, useRef, useState } from "react";
+// Cockpit shell — read-only port of JARVIS/app/main.jsx App, wired live.
+import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
-import {
-  Composer,
-  ChatStream,
-  buildItems,
-  IngestPlanCard,
-} from "../components/Chat";
+import { Composer, ChatStream, buildItems } from "../components/Chat";
 import { Rail } from "../components/Rail";
 import { GraphPage } from "../components/GraphPage";
 import { DashboardPage } from "../components/DashboardPage";
 import { BullseyePage } from "../components/BullseyePage";
-import { ApprovalsPage, BrainsPage } from "../components/Pages";
+import { BrainsPage } from "../components/Pages";
 import { useBrains, type DisplayBrain } from "../hooks/useBrains";
-import { useApprovalsLive } from "../hooks/useApprovalsLive";
 import { useStreamChat } from "../hooks/useStreamChat";
-import type { IngestPlan } from "../lib/api";
 
-type Route =
-  | "chat"
-  | "dashboard"
-  | "bullseye"
-  | "graph"
-  | "approvals"
-  | "brains";
-const ROUTES: Route[] = [
-  "chat",
-  "dashboard",
-  "bullseye",
-  "graph",
-  "approvals",
-  "brains",
-];
+type Route = "chat" | "dashboard" | "bullseye" | "graph" | "brains";
+const ROUTES: Route[] = ["chat", "dashboard", "bullseye", "graph", "brains"];
 
 function routeFromPath(pathname: string): Route {
   const tail = pathname.replace(/^\/app\/?/, "").split("/")[0];
@@ -72,25 +52,9 @@ export function Cockpit() {
   const brain: DisplayBrain | null =
     brains.find((b) => b.id === brainId) ?? brains[0] ?? null;
 
-  // Live approvals
-  const { approvals, pendingCount, resolve } = useApprovalsLive();
-
   // Live streaming chat
-  const {
-    messages,
-    isStreaming,
-    toolActivity,
-    threadId,
-    sendMessage,
-    injectAssistantMessage,
-  } = useStreamChat(brain?.id);
-
-  // Keep latest threadId in a ref so the resolve handler doesn't need to
-  // be rebuilt on every chat token (which would force re-renders downstream).
-  const threadIdRef = useRef<string | null>(threadId);
-  useEffect(() => {
-    threadIdRef.current = threadId;
-  }, [threadId]);
+  const { messages, isStreaming, toolActivity, threadId, sendMessage } =
+    useStreamChat(brain?.id);
 
   const handleWikilinkClick = useCallback(
     (target: string) => {
@@ -99,40 +63,10 @@ export function Cockpit() {
     [navigate, brain],
   );
 
-  // Wrap resolve so an approval/denial automatically drops the harness's
-  // post-resume reply into the active chat thread. Without this the user
-  // approves on the Approvals page (or via the inline plan card) and the
-  // chat just sits at "paused — 1 approval pending" until they nudge it.
-  const handleResolve = useCallback(
-    async (id: string, decision: "approved" | "denied") => {
-      const outcome = await resolve(id, decision);
-      if (!outcome) return;
-      if (
-        threadIdRef.current &&
-        outcome.thread_id === threadIdRef.current &&
-        outcome.final_text
-      ) {
-        injectAssistantMessage(outcome.final_text);
-      }
-    },
-    [resolve, injectAssistantMessage],
-  );
-
   // URL routing — driven by react-router
   function setRoute(r: string) {
     navigate(`/app/${r}`);
   }
-
-  // Inline ingest plan (latest pending plan-bearing approval for this thread)
-  const inlinePlan: { id: string; plan: IngestPlan; expires_in: number } | null = (() => {
-    const a = approvals.find(
-      (x) =>
-        x.status === "pending" &&
-        x.plan != null &&
-        (!threadId || x.thread_id === threadId),
-    );
-    return a && a.plan ? { id: a.id, plan: a.plan, expires_in: a.expires_in } : null;
-  })();
 
   const items = buildItems(messages, toolActivity, isStreaming);
   const shortThread = threadId ? threadId.slice(0, 4) + "·" + threadId.slice(4, 8) : "—";
@@ -145,7 +79,6 @@ export function Cockpit() {
         brain={brain}
         brains={brains}
         setBrain={(b) => setBrainId(b.id)}
-        pendingCount={pendingCount}
       />
 
       <main className="app-main">
@@ -191,22 +124,12 @@ export function Cockpit() {
                 items={items}
                 streaming={isStreaming}
                 onWikilinkClick={handleWikilinkClick}
-                footer={
-                  inlinePlan ? (
-                    <IngestPlanCard
-                      plan={inlinePlan.plan}
-                      pending={{ expires_in: inlinePlan.expires_in }}
-                      onApprove={() => handleResolve(inlinePlan.id, "approved")}
-                      onDeny={() => handleResolve(inlinePlan.id, "denied")}
-                    />
-                  ) : null
-                }
               />
 
               <Composer onSend={(t, opts) => sendMessage(t, opts)} streaming={isStreaming} />
             </div>
 
-            <Rail brain={brain} approvals={approvals} toolActivity={toolActivity} />
+            <Rail brain={brain} toolActivity={toolActivity} />
           </div>
         )}
 
@@ -224,9 +147,6 @@ export function Cockpit() {
           <div className="page">
             <GraphPage brain={brain} />
           </div>
-        )}
-        {route === "approvals" && (
-          <ApprovalsPage approvals={approvals} onResolve={handleResolve} />
         )}
         {route === "brains" && <BrainsPage brains={brains} />}
       </main>

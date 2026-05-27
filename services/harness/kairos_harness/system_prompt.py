@@ -6,59 +6,25 @@ from datetime import datetime
 from pathlib import Path
 
 import httpx
-
 from kairos_runtime.config import get, repo_root
 
 DEFAULT_BRAIN = "Bruno's Brain"
 
 
 # ---------------------------------------------------------------------------
-# Surface notes
+# Surface notes — read-only cockpit
 #
-# The langgraph thread is shared across surfaces (chat + voice on the
-# dashboard). On a fresh turn, the LLM sees the FULL message history --
-# including assistant turns produced by a *different* surface's agent
-# with a different toolset and persona. Without a surface anchor on the
-# system prompt, the LLM tends to mirror the most recent assistant
-# persona it sees (persona-persistence > system-instruction in practice),
-# which leaks dashboard-style "I can only stash in hot cache, switch to
-# Chat" replies into chat turns.
-#
-# These blocks are appended to the assembled system prompt. They quote
-# back the exact leaked phrases and forbid them, which is the strongest
-# pure-prompt counter we have without restructuring threads.
+# The cockpit reads the vault. There are no write tools on any surface.
+# Both Chat and the Dashboard share the same read-only toolset; the
+# surface label is kept so page-specific addendums (e.g. dashboard map
+# narration) can still anchor the reply.
 # ---------------------------------------------------------------------------
 
-CHAT_SURFACE_NOTE = (
-    "On chat you have FULL write tools: `plan_ingest`, `apply_ingest`, "
-    "`write_note`, `replace_hot`, `append_hot`. The wiki-edit policy "
-    "below applies here.\n"
-    "\n"
-    "This thread is shared with the dashboard's voice assistant. Earlier "
-    "turns in the visible history may have come from voice on the "
-    "dashboard, where the toolset is intentionally read-only + "
-    "`append_hot`. Those turns say things like:\n"
-    "- \"On this dashboard surface I only have access to ...\"\n"
-    "- \"switch over to Chat to ingest / write / update\"\n"
-    "- \"I've stashed it in your hot cache for now\"\n"
-    "\n"
-    "That was the dashboard speaking. THIS turn is on Chat. Therefore:\n"
-    "- Do NOT echo phrases like \"on this dashboard\", \"switch over to "
-    "Chat\", \"I can only stash in hot cache\" -- you ARE chat, with "
-    "full tools.\n"
-    "- If a prior turn deferred a write to chat (\"we'll do this in "
-    "chat\"), this is that chat. Execute the deferred write now, "
-    "subject to the WIKI EDIT POLICY -- it still requires an explicit "
-    "user verb in the CURRENT turn.\n"
-    "- Default capture path is `plan_ingest` -> `apply_ingest`. Do not "
-    "pick `append_hot` just because a prior dashboard turn used it; "
-    "that was the dashboard being constrained, not a style choice."
-)
-
-DASHBOARD_SURFACE_NOTE = (
-    "On the dashboard you have read tools + `append_hot` only. For any "
-    "persistent write the user wants, point them at Chat once and stop "
-    "-- do not keep repeating the hand-off across follow-up turns."
+READ_ONLY_SURFACE_NOTE = (
+    "This cockpit is read-only. You can search and read the vault but "
+    "cannot write to it. If the user asks to save, capture, record, "
+    "ingest, or write something, tell them plainly the cockpit is "
+    "read-only right now and continue helping with what you can do."
 )
 
 
@@ -189,61 +155,14 @@ def assemble(
 
     surface_norm = (surface or "chat").strip().lower()
     surface_label = surface_norm.upper()
-    surface_note = (
-        CHAT_SURFACE_NOTE if surface_norm == "chat" else DASHBOARD_SURFACE_NOTE
-    )
 
     return (
         f"# NOW\n{_now_block()}\n\n"
         f"# SURFACE\n"
         f"You are currently replying on the **{surface_label}** surface.\n"
-        f"{surface_note}\n\n"
+        f"{READ_ONLY_SURFACE_NOTE}\n\n"
         f"# IDENTITY (SOUL.md)\n{soul}\n\n"
         f"# USER (USER.md)\n{user}\n\n"
-        f"# WIKI EDIT POLICY\n"
-        "Writes to the brain (`plan_ingest`, `apply_ingest`, `write_note`, "
-        "`replace_hot`, `append_hot`) require an EXPLICIT, in-this-turn "
-        "instruction from the user. Default is OFF -- when in doubt, do "
-        "not write.\n"
-        "\n"
-        "DO NOT write for any of these:\n"
-        "- Recall / status / resume questions: 'what were we doing', 'where "
-        "were we', 'what's the status', 'continue', 'go on', 'and?'. ANSWER "
-        "NARRATIVELY in past tense ('We were drafting your mentorship plan; "
-        "I sent it to your approvals 4 minutes ago. Want me to keep going?'). "
-        "DO NOT re-fire `apply_ingest` / `write_note` / `plan_ingest` to "
-        "'make progress'. The conversation having a paused approval is "
-        "NOT a directive to apply again.\n"
-        "- Greetings, small talk, casual chat.\n"
-        "- General-knowledge questions, opinions, brainstorming, reasoning "
-        "out loud. Thinking aloud is not a save request.\n"
-        "- Read-only requests: 'what did I write about X', 'pull up my Y', "
-        "'summarise my Z'. Use the read tools, never the write ones.\n"
-        "- Anything ambiguous. ASK before writing: 'Want me to capture that?'\n"
-        "\n"
-        "ONLY write when the user gives an unambiguous capture verb in THIS "
-        "turn: save, record, capture, note, remember, ingest, write down, "
-        "store, log, jot down, put this in my brain, add a page about, "
-        "correct my Y page, fix the date on Z, update X. Same content "
-        "covered by an existing pending approval should NOT be re-ingested "
-        "-- if you see a pending approval for what the user is asking "
-        "about, point them at the Approvals page instead.\n"
-        "\n"
-        "When the user IS asking you to write:\n"
-        "- Default to `plan_ingest` -> `apply_ingest`. `plan_ingest` proposes "
-        "the full multi-file change (page edits + hot/index/overview/log "
-        "updates) in ONE LLM call and ONE approval card showing the diff.\n"
-        "- Use `write_note` ONLY when the change is a single isolated page "
-        "and the user explicitly asked for that page. NEVER call "
-        "`write_note` more than once per turn -- if you find yourself "
-        "wanting a second one, stop and call `plan_ingest` instead.\n"
-        "- For tiny corrections (a date, a name): still prefer `plan_ingest` "
-        "-- it handles the index/hot updates too. `append_hot` is the only "
-        "exception, for one-liner ephemeral memos under `## notes`.\n"
-        "- After firing an apply/write tool, do NOT claim the change "
-        "succeeded until the approval is resolved. While paused, the "
-        "right phrasing is 'queued for approval', not 'saved' / 'added' / "
-        "'stored'.\n\n"
         "# TOOL ARGUMENT GROUNDING\n"
         "When calling any tool that takes a free-text query argument (e.g. "
         "`deep_research`, `search_wiki`), you MUST pass ONLY the terms the "

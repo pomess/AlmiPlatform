@@ -1,9 +1,7 @@
 """Append-only JSONL audit log.
 
-Every event the harness emits — tool calls, tool results, approval
-lifecycle changes — lands as one line in ``logs/audit.jsonl``. The file is
-the compliance artifact: a fractional CFO's malpractice carrier or an
-M&A boutique's broker-dealer of record can be handed the file directly.
+Every event the harness emits — tool calls and tool results — lands as
+one line in ``logs/audit.jsonl``. The file is the compliance artifact.
 
 Events share a flat schema:
 
@@ -13,9 +11,6 @@ Event kinds emitted today:
 
     tool_call            agent invokes a tool
     tool_result          tool returns
-    approval_created     approval row inserted (pending or dnd_held)
-    approval_resolved    approval moved to approved/denied/expired
-    approval_drained     dnd_held rows promoted to pending at heartbeat
 
 Writes are guarded by a process-local lock. The file is opened, appended,
 flushed, and closed per event — fine at expected event rates and avoids
@@ -71,8 +66,8 @@ def redact_args(args: Any) -> Any:
     """Replace values for secret-shaped keys with ``"[REDACTED]"``.
 
     Recurses dicts and lists. Leaves primitives alone. Used for the
-    ``args_redacted`` field on tool-call and approval-created events so a
-    raw API key sitting in a tool argument never lands in the audit log.
+    ``args_redacted`` field on tool-call events so a raw API key
+    sitting in a tool argument never lands in the audit log.
     """
     if isinstance(args, dict):
         return {
@@ -101,9 +96,9 @@ def summarize_result(content: Any) -> str:
 def log_event(kind: str, **fields: Any) -> None:
     """Append one JSONL event. Never raises — audit is best-effort.
 
-    A failure to write the audit log must not break a tool call or an
-    approval flow. Failures are swallowed; in dev they show up in stderr
-    via the ``print`` fallback so they're not silently invisible.
+    A failure to write the audit log must not break a tool call.
+    Failures are swallowed; in dev they show up in stderr via the
+    ``print`` fallback so they're not silently invisible.
     """
     record = {"ts": _now_iso(), "kind": kind, **fields}
     try:
