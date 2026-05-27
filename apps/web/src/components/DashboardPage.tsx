@@ -13,9 +13,9 @@ import {
 
 const STYLE_URL = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 
-const ROUTE_SOURCE_ID = "kairos-route";
-const ROUTE_GLOW_LAYER_ID = "kairos-route-glow";
-const ROUTE_LINE_LAYER_ID = "kairos-route-line";
+const ROUTE_SOURCE_ID = "disease360-route";
+const ROUTE_GLOW_LAYER_ID = "disease360-route-glow";
+const ROUTE_LINE_LAYER_ID = "disease360-route-line";
 
 // The dashboard map's resting pitch — used both at construction time and as
 // the target the route flyover restores to when finalising, so the camera
@@ -179,7 +179,7 @@ function DashboardComposer({
   );
 }
 
-const COMPOSER_SILENT_STORAGE_KEY = "kairos.dashboard.composer.silent";
+const COMPOSER_SILENT_STORAGE_KEY = "disease360.dashboard.composer.silent";
 
 function readComposerSilent(): boolean {
   try {

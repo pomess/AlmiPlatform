@@ -1,4 +1,4 @@
-# Kairos — The AI workspace for fractional CFOs
+# Disease360 — The AI workspace for fractional CFOs
 
 _One-pager. For the fractional-CFO buyer running 4–8 client engagements._
 
@@ -12,7 +12,7 @@ Generic AI tools weren't built for this. They blur clients together, send things
 
 ---
 
-## What Kairos is
+## What Disease360 is
 
 A per-client AI workspace that:
 
@@ -24,7 +24,7 @@ A per-client AI workspace that:
 
 ## How it's different
 
-| Other AI tools | Kairos |
+| Other AI tools | Disease360 |
 |---|---|
 | One workspace, one memory | One workspace **per client engagement** |
 | Sends when asked | Sends only when **you tap approve** |
@@ -69,4 +69,4 @@ The thing the marketing language hides: under the hood, every "send this" is a p
 - **Book a 30-minute walkthrough:** [calendly.com/signkairos/30min](https://calendly.com/signkairos/30min)
 - **Email a question:** hello@signkairos.com
 
-Bring one engagement you'd want to scope. We'll walk through how Kairos would remember it, draft the next board update, and queue the send for your approval.
+Bring one engagement you'd want to scope. We'll walk through how Disease360 would remember it, draft the next board update, and queue the send for your approval.

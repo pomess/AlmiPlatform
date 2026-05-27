@@ -1,6 +1,6 @@
 # Supabase setup runbook
 
-One-time setup for Kairos sign-in (Google OAuth) and the allowlist gate. Read this once, do it, never read it again unless you recreate the project.
+One-time setup for Disease360 sign-in (Google OAuth) and the allowlist gate. Read this once, do it, never read it again unless you recreate the project.
 
 The frontend lives in `apps/web/`. The Supabase artifacts live in `supabase/`.
 
@@ -55,7 +55,7 @@ supabase secrets set \
   RESEND_API_KEY=re_... \
   BRUNO_EMAIL=bruno@signkairos.com \
   CALENDLY_URL=https://calendly.com/signkairos/30min \
-  EMAIL_FROM="Kairos <noreply@signkairos.com>"
+  EMAIL_FROM="Disease360 <noreply@signkairos.com>"
 supabase functions deploy notify-signup --no-verify-jwt
 ```
 
@@ -87,8 +87,8 @@ Save. The first signup with a fresh Google account will trigger it.
 1. `cd apps/web && npm run dev`.
 2. Open `http://localhost:5173`, click **Sign in →**, complete Google OAuth.
 3. Expected: redirect to `/app` → waitlist screen (because `granted_access = false`).
-4. Bruno's inbox: a `Kairos signup: …` notification.
-5. Test account inbox: a `Kairos — you're on the list` welcome with the Calendly link.
+4. Bruno's inbox: a `Disease360 signup: …` notification.
+5. Test account inbox: a `Disease360 — you're on the list` welcome with the Calendly link.
 6. Flip `granted_access = true` for the test row in the Supabase dashboard, refresh `/app` → cockpit loads.
 
 ## 8. Granting access to a new pilot

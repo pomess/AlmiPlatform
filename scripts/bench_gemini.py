@@ -25,12 +25,12 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-# Make `kairos_runtime` importable when running this file directly without
+# Make `disease360_runtime` importable when running this file directly without
 # `pip install -e .` having been re-run since the package layout changed.
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "services" / "runtime"))
 
-from kairos_runtime import config  # noqa: E402
+from disease360_runtime import config  # noqa: E402
 
 PROMPTS = [
     (
@@ -75,7 +75,7 @@ def _model_name(backend: str, override: str | None) -> str:
     if backend == "ollama":
         return config.get("OLLAMA_DEFAULT_MODEL", "gemma4:e4b") or "gemma4:e4b"
     return (
-        config.get("KAIROS_MODEL_OVERRIDE")
+        config.get("DISEASE360_MODEL_OVERRIDE")
         or config.get("GEMINI_DEFAULT_MODEL", "gemini-flash-latest")
         or "gemini-flash-latest"
     )

@@ -34,7 +34,7 @@ ROOT = Path(__file__).resolve().parent.parent
 for _sub in ("services/runtime", "services/memory"):
     sys.path.insert(0, str(ROOT / _sub))
 
-from kairos_memory.registry import DEFAULT_TENANT_ID, Brain, tenant_root  # noqa: E402
+from disease360_memory.registry import DEFAULT_TENANT_ID, Brain, tenant_root  # noqa: E402
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 

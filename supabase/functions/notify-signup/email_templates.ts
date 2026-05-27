@@ -12,9 +12,9 @@ export type SignupInfo = {
 export type EmailPayload = { subject: string; html: string; text: string };
 
 export function brunoNotificationEmail(info: SignupInfo): EmailPayload {
-  const subject = `Kairos signup: ${info.email}`;
+  const subject = `Disease360 signup: ${info.email}`;
   const text = [
-    `New Kairos signup`,
+    `New Disease360 signup`,
     ``,
     `Email:    ${info.email}`,
     `Name:     ${info.fullName ?? "—"}`,
@@ -26,7 +26,7 @@ export function brunoNotificationEmail(info: SignupInfo): EmailPayload {
   ].join("\n");
   const html = `
     <div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;color:#111;">
-      <h2 style="margin:0 0 12px;font-size:15px;">New Kairos signup</h2>
+      <h2 style="margin:0 0 12px;font-size:15px;">New Disease360 signup</h2>
       <table style="border-collapse:collapse;">
         <tr><td style="padding:2px 12px 2px 0;color:#666;">Email</td><td>${escapeHtml(info.email)}</td></tr>
         <tr><td style="padding:2px 12px 2px 0;color:#666;">Name</td><td>${escapeHtml(info.fullName ?? "—")}</td></tr>
@@ -40,11 +40,11 @@ export function brunoNotificationEmail(info: SignupInfo): EmailPayload {
 
 export function userWelcomeEmail(info: SignupInfo): EmailPayload {
   const greeting = info.fullName ? `Hi ${info.fullName.split(" ")[0]},` : "Hi,";
-  const subject = "Kairos — you're on the list";
+  const subject = "Disease360 — you're on the list";
   const text = [
     greeting,
     ``,
-    `Thanks for signing up for Kairos. We're invite-only right now while we onboard the first cohort of fractional CFOs.`,
+    `Thanks for signing up for Disease360. We're invite-only right now while we onboard the first cohort of fractional CFOs.`,
     ``,
     `The fastest way to get access is a 30-minute walkthrough — pick a slot here:`,
     info.calendlyUrl,
@@ -52,24 +52,24 @@ export function userWelcomeEmail(info: SignupInfo): EmailPayload {
     `On the call we'll set up your workspace, walk through the approval gate, and get your first client engagement loaded.`,
     ``,
     `— Bruno`,
-    `Kairos · signkairos.com`,
+    `Disease360 · signkairos.com`,
   ].join("\n");
   const html = `
     <div style="font-family:Inter,system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.55;color:#111;max-width:560px;">
       <a href="https://signkairos.com" style="display:inline-block;margin:0 0 28px;text-decoration:none;">
         <img src="https://signkairos.com/logos/kairos_logo_navy.png"
-             alt="Kairos"
+             alt="Disease360"
              width="120"
              style="display:block;border:0;max-width:120px;height:auto;" />
       </a>
       <p style="margin:0 0 14px;">${escapeHtml(greeting)}</p>
-      <p style="margin:0 0 14px;">Thanks for signing up for Kairos. We're invite-only right now while we onboard the first cohort of fractional CFOs.</p>
+      <p style="margin:0 0 14px;">Thanks for signing up for Disease360. We're invite-only right now while we onboard the first cohort of fractional CFOs.</p>
       <p style="margin:0 0 18px;">The fastest way to get access is a 30-minute walkthrough — pick a slot below:</p>
       <p style="margin:0 0 22px;">
         <a href="${escapeHtml(info.calendlyUrl)}" style="display:inline-block;background:#3a52d1;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:500;">Book a 30-min walkthrough →</a>
       </p>
       <p style="margin:0 0 14px;">On the call we'll set up your workspace, walk through the approval gate, and get your first client engagement loaded.</p>
-      <p style="margin:18px 0 0;color:#666;">— Bruno<br/>Kairos · <a href="https://signkairos.com" style="color:#666;">signkairos.com</a></p>
+      <p style="margin:18px 0 0;color:#666;">— Bruno<br/>Disease360 · <a href="https://signkairos.com" style="color:#666;">signkairos.com</a></p>
     </div>`.trim();
   return { subject, html, text };
 }

@@ -1,4 +1,4 @@
-# Kairos — Pitch outline
+# Disease360 — Pitch outline
 
 _For the rare strategic conversation. **Bruno is not raising.** This exists for acquirer/partner discussions and as a discipline for keeping the narrative tight._
 
@@ -8,7 +8,7 @@ _For the rare strategic conversation. **Bruno is not raising.** This exists for 
 
 ## 1 — Title
 
-**Kairos**
+**Disease360**
 The AI workspace for fractional CFOs.
 *Per-client memory. Approve every send. Exportable audit log.*
 
@@ -52,7 +52,7 @@ The cockpit is the only surface. CLI/voice/gesture exist but are not the product
 
 The three commodity layers — LLM, vector DB, agent framework — converge fast. The defensible layers are:
 
-- **Approval gate on persisted LangGraph interrupts.** Most agent stacks pause in memory or freeze the whole thread. Kairos persists the interrupt to SQLite, lets *any* channel resolve it, and resumes the same thread with state. Hard to retrofit.
+- **Approval gate on persisted LangGraph interrupts.** Most agent stacks pause in memory or freeze the whole thread. Disease360 persists the interrupt to SQLite, lets *any* channel resolve it, and resumes the same thread with state. Hard to retrofit.
 - **Markdown-as-source-of-truth.** No vector DB lock-in. Diffable, hand-editable. FTS5 is just an accelerator over disk files.
 - **Wikilink graph + lint.** Orphans, broken links, schema violations — drives navigation and integrity checks.
 - **Multi-channel queue.** Same DB visible from web + CLI + (future) gesture/Telegram. No channel amnesia.
@@ -92,7 +92,7 @@ End-of-90 target: **6–8 paying logos, $3–4k MRR, ~$20k earned**.
 
 ## 8 — Why Bruno
 
-- Operator background; built and shipped Kairos solo over 6 months from a deep research dossier.
+- Operator background; built and shipped Disease360 solo over 6 months from a deep research dossier.
 - Design and engineering one head. The cockpit's visual quality is uncommon for a B2B SaaS at this stage and converts trial-to-paid intent.
 - Lifestyle-business shape is intentional, not a fallback. No fundraising required for the CFO wedge.
 

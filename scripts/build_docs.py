@@ -40,7 +40,7 @@ def md_to_docx(md_path: Path, docx_path: Path, title: str) -> None:
 
     Handles: H1/H2/H3, paragraphs, unordered lists, ordered lists, simple tables,
     code/horizontal rules, italics-only blockquotes. Not a general-purpose converter
-    — calibrated for the Kairos doc style.
+    — calibrated for the Disease360 doc style.
     """
     doc = Document()
 
@@ -201,14 +201,14 @@ def _add_inline_runs(paragraph, text: str) -> None:
 
 
 DOC_TARGETS = [
-    ("docs/MASTER.md", "Kairos — Master documentation index", "00_master_index.docx"),
-    ("docs/ONBOARDING.md", "Kairos — Contractor onboarding", "01_contractor_onboarding.docx"),
-    ("docs/business/strategy.md", "Kairos — Commercialization strategy", "02_strategy.docx"),
-    ("docs/business/state.md", "Kairos — Technical state", "03_technical_state.docx"),
-    ("docs/external/one-pager.md", "Kairos — Sales one-pager", "04_sales_one_pager.docx"),
-    ("docs/external/security.md", "Kairos — Security & data handling", "05_security_overview.docx"),
-    ("docs/investor/pitch-outline.md", "Kairos — Pitch outline", "06_pitch_outline.docx"),
-    ("docs/ROADMAP.md", "Kairos — Commercialization roadmap", "08_roadmap.docx"),
+    ("docs/MASTER.md", "Disease360 — Master documentation index", "00_master_index.docx"),
+    ("docs/ONBOARDING.md", "Disease360 — Contractor onboarding", "01_contractor_onboarding.docx"),
+    ("docs/business/strategy.md", "Disease360 — Commercialization strategy", "02_strategy.docx"),
+    ("docs/business/state.md", "Disease360 — Technical state", "03_technical_state.docx"),
+    ("docs/external/one-pager.md", "Disease360 — Sales one-pager", "04_sales_one_pager.docx"),
+    ("docs/external/security.md", "Disease360 — Security & data handling", "05_security_overview.docx"),
+    ("docs/investor/pitch-outline.md", "Disease360 — Pitch outline", "06_pitch_outline.docx"),
+    ("docs/ROADMAP.md", "Disease360 — Commercialization roadmap", "08_roadmap.docx"),
 ]
 
 DECK_TARGETS = [
@@ -222,7 +222,7 @@ DECK_TARGETS = [
 
 def _find_chromium() -> str | None:
     """Return a path to a Chromium-based browser that supports --print-to-pdf."""
-    env = os.environ.get("KAIROS_CHROME")
+    env = os.environ.get("DISEASE360_CHROME")
     if env and Path(env).exists():
         return env
 
@@ -272,7 +272,7 @@ def main() -> None:
 
     browser = _find_chromium()
     if browser is None:
-        print("  skip decks: no Chrome/Edge found (set KAIROS_CHROME to override)")
+        print("  skip decks: no Chrome/Edge found (set DISEASE360_CHROME to override)")
         return
     for src_rel, out_name in DECK_TARGETS:
         src = ROOT / src_rel

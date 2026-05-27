@@ -1,16 +1,16 @@
-# Kairos — Security & data handling overview
+# Disease360 — Security & data handling overview
 
 _Customer-facing. Last updated: 2026-05-18._
 
-This page summarizes how Kairos handles your engagement data. It is written for **fractional CFOs** evaluating whether to put their clients' financials, board materials, and investor correspondence into the platform.
+This page summarizes how Disease360 handles your engagement data. It is written for **fractional CFOs** evaluating whether to put their clients' financials, board materials, and investor correspondence into the platform.
 
 If you need a Data Processing Agreement (DPA), email **hello@signkairos.com** — we provide a GDPR Art. 28-compliant DPA on request, including SCCs for international transfers.
 
 ---
 
-## What Kairos stores
+## What Disease360 stores
 
-For each engagement (each of your client relationships), Kairos stores:
+For each engagement (each of your client relationships), Disease360 stores:
 
 - **Markdown pages** you (or the assistant, with your approval) write. These hold meeting notes, variance commentary, draft board updates, runway models, and other engagement context.
 - **An approval queue.** Every outbound action the assistant proposes is recorded with its inputs, your decision, and a timestamp.
@@ -20,7 +20,7 @@ We do **not** store: connected mailbox contents beyond what you explicitly inges
 
 ---
 
-## What Kairos does *not* do with your data
+## What Disease360 does *not* do with your data
 
 - **No model training on your client data.** Your client data is never used to train, fine-tune, or evaluate any model — ours, our LLM provider's, or any third party's.
 - **No secondary use.** We don't aggregate, anonymize-and-resell, or analyze across customers.
@@ -89,7 +89,7 @@ Changes to this list are notified 30 days in advance. The current canonical list
 ## Access controls
 
 - One account per practice. Sub-users are not yet available — when added, role-based access (admin / member) will land at the same time.
-- No employee of Kairos accesses customer data except for explicit support requests, and only with your written authorization.
+- No employee of Disease360 accesses customer data except for explicit support requests, and only with your written authorization.
 - Production access is logged.
 
 ---

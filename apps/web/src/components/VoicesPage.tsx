@@ -210,7 +210,7 @@ export function VoicesPage() {
           <b>{selected ?? "—"}</b>
         </div>
         <div className="muted small">
-          To use this voice: set <code>KAIROS_VOICE_NAME={selected ?? "Charon"}</code>{" "}
+          To use this voice: set <code>DISEASE360_VOICE_NAME={selected ?? "Charon"}</code>{" "}
           in <code>policies/secrets.env</code> and restart the harness.
         </div>
       </div>

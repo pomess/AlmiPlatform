@@ -21,9 +21,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "services" / "runtime"))
 
-from kairos_runtime.research.config import DepthTier  # noqa: E402
-from kairos_runtime.research.runner import deep_research  # noqa: E402
-from kairos_runtime.research.state import ProgressEvent  # noqa: E402
+from disease360_runtime.research.config import DepthTier  # noqa: E402
+from disease360_runtime.research.runner import deep_research  # noqa: E402
+from disease360_runtime.research.state import ProgressEvent  # noqa: E402
 
 QUERIES: list[tuple[str, DepthTier]] = [
     (

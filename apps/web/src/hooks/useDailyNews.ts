@@ -7,8 +7,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchDailyNews, type NewsBriefing } from "../lib/api";
 
-const LS_DATE = "kairos.news.lastFetchDate";
-const LS_PAYLOAD = "kairos.news.payload";
+const LS_DATE = "disease360.news.lastFetchDate";
+const LS_PAYLOAD = "disease360.news.payload";
 
 function todayLocalISO(): string {
   // en-CA gives YYYY-MM-DD which sorts and compares correctly.

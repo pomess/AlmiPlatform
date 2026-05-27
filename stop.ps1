@@ -1,4 +1,4 @@
-# Force-stop any leftover Kairos service processes by port.
+# Force-stop any leftover Disease360 service processes by port.
 # Usage:  .\stop.ps1
 $ErrorActionPreference = "SilentlyContinue"
 $ports = 8001, 8002, 5173, 5174

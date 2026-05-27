@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from kairos_memory.graph import build
+from disease360_memory.graph import build
 
 
 def _write(brain, rel: str, body: str) -> None:

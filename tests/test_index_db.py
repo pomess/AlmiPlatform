@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from kairos_memory.index_db import reindex, search, search_all
+from disease360_memory.index_db import reindex, search, search_all
 
 
 def _write(brain, rel: str, body: str) -> None:

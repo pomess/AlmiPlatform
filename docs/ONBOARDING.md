@@ -1,12 +1,12 @@
-# Kairos — Contractor onboarding
+# Disease360 — Contractor onboarding
 
-_For a part-time contractor joining Bruno on Kairos. Half-day to read, run locally, and pick a first ticket._
+_For a part-time contractor joining Bruno on Disease360. Half-day to read, run locally, and pick a first ticket._
 
 ---
 
 ## What you're being hired to help with
 
-Kairos is **a single-user AI cockpit** being repurposed as **a multi-tenant SaaS for fractional CFOs**. The single-user version works end-to-end on Bruno's Windows machine. The SaaS version doesn't exist yet — you're being hired to help cross that gap.
+Disease360 is **a single-user AI cockpit** being repurposed as **a multi-tenant SaaS for fractional CFOs**. The single-user version works end-to-end on Bruno's Windows machine. The SaaS version doesn't exist yet — you're being hired to help cross that gap.
 
 The gap is real. Read [`business/state.md`](business/state.md) before writing any code. It lists ~5–7 weeks of plumbing blockers honestly: hardcoded paths, no auth, single-tenant vault, Windows-only run, no CI, no billing.
 
@@ -65,8 +65,8 @@ apps/web/                       Vite + React 19 + TS cockpit
 services/
   memory/                       FastAPI, port 8001 (vault, FTS, graph, lint)
   harness/                      FastAPI, port 8002 (agent, approvals, audit log)
-    kairos_harness/audit.py     append-only JSONL log (logs/audit.jsonl)
-  channels/cli/                 `kairos` Typer CLI
+    disease360_harness/audit.py     append-only JSONL log (logs/audit.jsonl)
+  channels/cli/                 `disease360` Typer CLI
   perception/                   voice/gesture (Phase 3+, partial)
   runtime/                      shared LLM client config
 policies/
@@ -145,5 +145,5 @@ Branch naming: `feat/...`, `fix/...`, `refactor/...`, `chore/...`. PRs squash-me
 ## When you're stuck
 
 1. Check [`MASTER.md`](MASTER.md) for the right doc.
-2. Search the vault — Kairos eats its own dogfood; design notes often live in `vault/Bruno's Brain/wiki/`.
+2. Search the vault — Disease360 eats its own dogfood; design notes often live in `vault/Bruno's Brain/wiki/`.
 3. Ping Bruno. Solo founder, async, expects clear questions with file paths and line numbers.

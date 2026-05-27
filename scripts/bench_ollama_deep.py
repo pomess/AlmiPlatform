@@ -38,7 +38,7 @@ import httpx
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "services" / "runtime"))
 
-from kairos_runtime import config  # noqa: E402
+from disease360_runtime import config  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Scenarios
@@ -55,7 +55,7 @@ LONG_OUTPUT = 1500
 # context. We pre-render it once so every long-context trial gets the same
 # input and per-trial variance reflects model state rather than input drift.
 _LONG_CONTEXT_BLOCK = (
-    "Bruno is building Kairos, a personal AI cockpit that fuses a markdown "
+    "Bruno is building Disease360, a personal AI cockpit that fuses a markdown "
     "second brain, a voice-first dashboard, and an approval-gated harness. "
     "The cloud profile uses Gemini 3 Flash; the private/offline profile uses "
     "Gemma 3 E4B via Ollama on the same machine. Each brain is a folder of "
@@ -107,7 +107,7 @@ SCENARIOS: list[tuple[str, str, str, str, int]] = [
         "long_ctx_short_out",
         "long context (~4k tokens) -> short reply (~150 tokens)",
         f"You are an assistant with the following context:\n\n{LONG_CONTEXT}",
-        "Given the context above, summarise in about 100 words what Kairos's "
+        "Given the context above, summarise in about 100 words what Disease360's "
         "private/offline profile is for and how it differs from the cloud "
         "profile.",
         SHORT_OUTPUT,
@@ -117,7 +117,7 @@ SCENARIOS: list[tuple[str, str, str, str, int]] = [
         "long context (~4k tokens) -> long reply (~1500 tokens)",
         f"You are an assistant with the following context:\n\n{LONG_CONTEXT}",
         "Using the context above, write a detailed ~1200 word architectural "
-        "overview of Kairos. Cover the harness, memory service, voice path, "
+        "overview of Disease360. Cover the harness, memory service, voice path, "
         "dashboard, and approvals model, and call out where the private "
         "Ollama profile would be preferred over the cloud one.",
         LONG_OUTPUT,

@@ -1,4 +1,4 @@
-# Kairos — Technical state, sales-readiness audit
+# Disease360 — Technical state, sales-readiness audit
 
 _As of 2026-05-17. Source: deep-audit subagent on the full repo._
 
@@ -9,7 +9,7 @@ _As of 2026-05-17. Source: deep-audit subagent on the full repo._
 - **Markdown vault I/O** with FTS5 + wikilink graph + lint (`services/memory/`).
 - **Ingest / solve cycle** — plan → approve → apply, with multi-file atomic updates.
 - **Multi-brain support** — registry bootstraps Bruno's Brain + Deloitte's Brain on startup; cross-brain wikilinks work.
-- **Typer CLI** — `kairos ask`, `kairos approvals`, `kairos brains`, `kairos switch`.
+- **Typer CLI** — `disease360 ask`, `disease360 approvals`, `disease360 brains`, `disease360 switch`.
 - **Force-directed graph view** with click-to-peek 3D flashcard.
 - **Hot.md cache** — ~500-token working set loaded into every prompt.
 - **Partial voice endpoints** — STT + TTS plumbing in `voice.py`, dashboard client tools.
@@ -41,7 +41,7 @@ Caught during the audit. Don't demo or promise these until they ship.
 
 ## Genuine moat (defensible)
 
-- **Approval gate on persisted LangGraph interrupts** — most agent stacks pause in memory or freeze the whole thread. Kairos persists the interrupt to SQLite, allows any channel (web/CLI/gesture) to resolve it, and resumes the same thread with full state. Hard to bolt on retroactively.
+- **Approval gate on persisted LangGraph interrupts** — most agent stacks pause in memory or freeze the whole thread. Disease360 persists the interrupt to SQLite, allows any channel (web/CLI/gesture) to resolve it, and resumes the same thread with full state. Hard to bolt on retroactively.
 - **Tenant-scoped Postgres vault under RLS** *(target architecture, Phase 2 — was "markdown-as-source-of-truth" through Phase 1)*. Cross-tenant isolation enforced at the database, not in URL routing. Markdown export remains for archive/Obsidian workflows. See ADR `docs/adr/0001-postgres-vault.md`.
 - **Wikilink graph + lint** — orphans, broken links, schema violations. Drives both navigation and integrity checks. Harder than flat-document search, harder than generic knowledge graphs.
 - **Multi-channel approval queue** — same DB visible from web + CLI + (future) gesture/Telegram. No channel amnesia.

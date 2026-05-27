@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from kairos_memory.vault import (
+from disease360_memory.vault import (
     append_to_section,
     parse_wikilinks,
     read_page,

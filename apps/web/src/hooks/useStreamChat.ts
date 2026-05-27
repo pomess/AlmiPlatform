@@ -32,7 +32,7 @@ export interface ToolActivity {
 // Shared with the voice hook so a thread started by speaking on the
 // dashboard continues when the user types on the chat page (and vice
 // versa).
-const THREAD_KEY = "kairos.thread";
+const THREAD_KEY = "disease360.thread";
 
 function readSharedThreadId(): string | null {
   try {

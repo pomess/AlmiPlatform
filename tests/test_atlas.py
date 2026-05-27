@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from kairos_memory import atlas as atlas_mod
+from disease360_memory import atlas as atlas_mod
 
 
 def _write(brain, rel: str, body: str) -> None:

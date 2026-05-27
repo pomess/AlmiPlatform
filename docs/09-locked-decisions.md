@@ -27,4 +27,4 @@
 - **Voice + gesture**: `services/perception/` (Phase 3+). Web push-to-talk first; gestures slim (👍 approve / 👎 deny) in Phase 1, full 7-gesture set Phase 4.
 - **CLI**: spawn-and-exit Python (`jarvis ask|status|approvals|brains|switch`). Reads approvals SQLite directly; POSTs approve/deny to harness REST so the paused agent can resume.
 - **Web**: fresh Vite + React + TypeScript app under `apps/web/`.
-- **Vault**: rows in Supabase Postgres, RLS scoped by `tenant_id` from the verified JWT. Markdown export remains available via a `kairos vault export` command for Obsidian-style local browsing, but the running system reads/writes Postgres. Approval queue and audit log move to Postgres alongside the vault.
+- **Vault**: rows in Supabase Postgres, RLS scoped by `tenant_id` from the verified JWT. Markdown export remains available via a `disease360 vault export` command for Obsidian-style local browsing, but the running system reads/writes Postgres. Approval queue and audit log move to Postgres alongside the vault.

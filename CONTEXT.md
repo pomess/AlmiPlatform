@@ -1,4 +1,4 @@
-# Kairos
+# Disease360
 
 A long-running personal AI cockpit for a single user. Markdown-backed memory, approval-gated tools, three services (memory, harness, web) that can be restarted independently.
 
@@ -7,15 +7,15 @@ A long-running personal AI cockpit for a single user. Markdown-backed memory, ap
 ### Surfaces
 
 **Cockpit**:
-The React web UI at port 5173. The single screen the user drives Kairos from.
+The React web UI at port 5173. The single screen the user drives Disease360 from.
 _Avoid_: Frontend, dashboard, app, client
 
 **Channel**:
-A surface through which the user reads or acts on Kairos — `web`, `cli`, `gesture`, future `telegram`. All channels see the same approval queue.
+A surface through which the user reads or acts on Disease360 — `web`, `cli`, `gesture`, future `telegram`. All channels see the same approval queue.
 _Avoid_: Interface, client, frontend
 
 **CLI**:
-The `kairos` Typer command. One-shot — spawns, hits the harness over HTTP, exits.
+The `disease360` Typer command. One-shot — spawns, hits the harness over HTTP, exits.
 _Avoid_: Terminal, console, shell tool
 
 ### Services
@@ -133,5 +133,5 @@ _Avoid_: History, journal, trace
 ## Flagged ambiguities
 
 - "agent" was being used for both the runtime and the wiki-editing role — resolved: **Agent** is the runtime, **Wiki agent** is the same runtime in its vault-editing capacity.
-- "memory" was being used for both the service and the concept of long-term recall — resolved: **Memory** (capitalised) refers to the service; the broader idea of persistent recall is just "the vault" or "what Kairos remembers".
+- "memory" was being used for both the service and the concept of long-term recall — resolved: **Memory** (capitalised) refers to the service; the broader idea of persistent recall is just "the vault" or "what Disease360 remembers".
 - "session" was being used for both a chat thread and a container/process lifetime — resolved: a chat conversation is a **Thread**; "session" is reserved for process lifetime and should not appear as a domain term.

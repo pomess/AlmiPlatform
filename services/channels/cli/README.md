@@ -5,21 +5,21 @@ Thin Python CLI built with `typer`. **Spawn-and-exit** per command (Phase 1; dae
 ## Commands (Phase 1)
 
 ```
-kairos ask "<question>"             # one-shot; runs the Deep Agent in-process
-kairos status                       # harness reachable? memory reachable? counts of pending approvals
-kairos approvals list               # reads SQLite directly (services/harness/data/approvals.db)
-kairos approvals approve <id>       # POST harness REST so the paused agent resumes
-kairos approvals deny <id>          # POST harness REST
-kairos brains                       # GET memory /brains
-kairos switch <brain>               # write to ~/.kairos/state.json (active brain for the next ask)
+disease360 ask "<question>"             # one-shot; runs the Deep Agent in-process
+disease360 status                       # harness reachable? memory reachable? counts of pending approvals
+disease360 approvals list               # reads SQLite directly (services/harness/data/approvals.db)
+disease360 approvals approve <id>       # POST harness REST so the paused agent resumes
+disease360 approvals deny <id>          # POST harness REST
+disease360 brains                       # GET memory /brains
+disease360 switch <brain>               # write to ~/.disease360/state.json (active brain for the next ask)
 ```
 
 ## Phase 2+
 
 ```
-kairos digest                       # run morning digest now
-kairos ingest <file>                # ingest into active brain (require_approval)
-kairos daemon                       # long-running mode (Phase 4)
+disease360 digest                       # run morning digest now
+disease360 ingest <file>                # ingest into active brain (require_approval)
+disease360 daemon                       # long-running mode (Phase 4)
 ```
 
 Status: **scaffolded — implement in Phase 1**.

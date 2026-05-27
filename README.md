@@ -1,11 +1,11 @@
 <div align="center">
 
-# Kairos
+# Disease360
 
 **Your personal AI cockpit.**
 Remembers everything. Drafts the work. Never touches production without asking.
 
-![Kairos cockpit landing](docs/images/landing.png)
+![Disease360 cockpit landing](docs/images/landing.png)
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.7-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -24,7 +24,7 @@ Remembers everything. Drafts the work. Never touches production without asking.
 
 ---
 
-## What Kairos is
+## What Disease360 is
 
 A long-running personal AI for a single user. Cloud LLM by default (Gemini Flash), local fallback (Ollama / Gemma). All long-term memory lives as plain markdown in a set of knowledge graphs — **brains** — that you own on disk. Every mutating tool the agent wants to call is paused at an **approval gate** you control from the web UI, the CLI, or a camera gesture.
 
@@ -97,7 +97,7 @@ Personal AI/
 ├── scripts/                      run.py (used by run.ps1) + onboarding
 ├── services/
 │   ├── channels/
-│   │   ├── cli/                  `kairos` typer CLI
+│   │   ├── cli/                  `disease360` typer CLI
 │   │   └── web/                  (reserved for future web-channel glue)
 │   ├── harness/                  Deep Agent, approval queue, REST shim (port 8002)
 │   ├── memory/                   Markdown vault, graph, FTS, lint (port 8001)
@@ -108,7 +108,7 @@ Personal AI/
 └── stop.ps1                      Kill anything lingering on the service ports
 ```
 
-> Python packages are `kairos_memory`, `kairos_harness`, `kairos_cli`, `kairos_runtime`. The CLI command is `kairos`.
+> Python packages are `disease360_memory`, `disease360_harness`, `disease360_cli`, `disease360_runtime`. The CLI command is `disease360`.
 
 ---
 
@@ -165,13 +165,13 @@ Data contracts live in [`apps/web/src/lib/api.ts`](apps/web/src/lib/api.ts).
 One-shot commands. The CLI spawns, talks to the harness over HTTP, and exits.
 
 ```powershell
-kairos status                     # health of both services + pending approvals
-kairos brains                     # list brains, mark the active one
-kairos switch "Bruno's Brain"     # change active brain (starts a new thread)
-kairos ask "Summarize hot.md"     # send a message, print the answer
-kairos approvals list             # see queued approvals (--status pending|all|…)
-kairos approvals approve <id>     # 8-char prefix is fine
-kairos approvals deny <id> -f "reason"
+disease360 status                     # health of both services + pending approvals
+disease360 brains                     # list brains, mark the active one
+disease360 switch "Bruno's Brain"     # change active brain (starts a new thread)
+disease360 ask "Summarize hot.md"     # send a message, print the answer
+disease360 approvals list             # see queued approvals (--status pending|all|…)
+disease360 approvals approve <id>     # 8-char prefix is fine
+disease360 approvals deny <id> -f "reason"
 ```
 
 ---

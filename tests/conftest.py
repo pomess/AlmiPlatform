@@ -1,6 +1,6 @@
 """Shared pytest fixtures.
 
-Tests run against a tmp_path-scoped fake "Kairos home" so they never touch the
+Tests run against a tmp_path-scoped fake "Disease360 home" so they never touch the
 real `vault/`, `services/harness/data/`, or the project's `policies/secrets.env`.
 """
 
@@ -11,11 +11,11 @@ from pathlib import Path
 
 import pytest
 
-from kairos_runtime import config as runtime_config
+from disease360_runtime import config as runtime_config
 
 
 @pytest.fixture
-def kairos_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+def disease360_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Point repo_root() at a tmp directory laid out like the real repo.
 
     Creates the `policies/` and `identity/` markers that `repo_root()` walks
@@ -28,23 +28,23 @@ def kairos_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     (tmp_path / "services" / "harness" / "data").mkdir(parents=True)
     (tmp_path / "services" / "memory" / "data").mkdir(parents=True)
 
-    monkeypatch.setenv("KAIROS_HOME", str(tmp_path))
+    monkeypatch.setenv("DISEASE360_HOME", str(tmp_path))
 
     # Reset caches that pin paths from a previous repo_root().
     runtime_config.load_env.cache_clear()
-    from kairos_runtime.research import store as research_store
+    from disease360_runtime.research import store as research_store
 
     research_store._DB_PATH = None
     research_store._ACTIVE_TASKS.clear()
 
     # Reset atlas cache, which is keyed by brain id and outlives test runs.
-    from kairos_memory import atlas as atlas_mod
+    from disease360_memory import atlas as atlas_mod
 
     atlas_mod.invalidate(None)
 
     # Reset audit module's cached path so it re-resolves under the new
-    # KAIROS_HOME instead of writing to a previous test's tmp dir.
-    from kairos_harness import audit as audit_mod
+    # DISEASE360_HOME instead of writing to a previous test's tmp dir.
+    from disease360_harness import audit as audit_mod
 
     audit_mod._PATH = None
 
@@ -52,15 +52,15 @@ def kairos_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 
 @pytest.fixture
-def vault_root(kairos_home: Path) -> Path:
+def vault_root(disease360_home: Path) -> Path:
     """Top-level vault directory (parent of per-tenant subdirs)."""
-    return kairos_home / "vault"
+    return disease360_home / "vault"
 
 
 @pytest.fixture
 def tenant_root(vault_root: Path) -> Path:
     """Default-tenant directory under the test vault."""
-    from kairos_memory.registry import DEFAULT_TENANT_ID
+    from disease360_memory.registry import DEFAULT_TENANT_ID
 
     p = vault_root / DEFAULT_TENANT_ID
     p.mkdir(parents=True, exist_ok=True)
@@ -70,7 +70,7 @@ def tenant_root(vault_root: Path) -> Path:
 @pytest.fixture
 def make_brain(tenant_root: Path):
     """Factory that builds a brain folder with the standard layout under the default tenant."""
-    from kairos_memory.registry import DEFAULT_TENANT_ID, Brain
+    from disease360_memory.registry import DEFAULT_TENANT_ID, Brain
 
     def _make(brain_id: str = "Test Brain") -> Brain:
         b = Brain(id=brain_id, root=tenant_root / brain_id, tenant_id=DEFAULT_TENANT_ID)

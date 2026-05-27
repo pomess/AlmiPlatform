@@ -1,5 +1,5 @@
 ---
-description: Run the full Kairos check loop — ruff, mypy, pytest, frontend tsc
+description: Run the full Disease360 check loop — ruff, mypy, pytest, frontend tsc
 ---
 
 Run these in parallel where possible and report a punch list of failures.

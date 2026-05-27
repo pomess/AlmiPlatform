@@ -2,7 +2,7 @@
 
 // Default tenant for local dev. Auth will swap this for the signed-in tenant id.
 const DEFAULT_TENANT = "local";
-const LS_TENANT = "kairos.activeTenant";
+const LS_TENANT = "disease360.activeTenant";
 
 export function getActiveTenant(): string {
   return localStorage.getItem(LS_TENANT) || DEFAULT_TENANT;
@@ -497,7 +497,7 @@ export async function fetchGraph(brain: string): Promise<{
   };
 }
 
-const LS_BRAIN = "kairos.activeBrain";
+const LS_BRAIN = "disease360.activeBrain";
 export function getActiveBrain(): string {
   const legacy = localStorage.getItem("jarvis.activeBrain");
   if (legacy && !localStorage.getItem(LS_BRAIN)) {

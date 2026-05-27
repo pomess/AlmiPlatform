@@ -1,4 +1,4 @@
-# Kairos — Commercialization roadmap
+# Disease360 — Commercialization roadmap
 
 _As of 2026-05-18. Owner: Bruno. Solo / lifestyle business._
 
@@ -46,7 +46,7 @@ Each item below is a ship-blocker for the first paid customer.
 - [ ] Render deploy with health checks. Memory + harness containerized. **Blocked on phase 4** — deploying without JWT verification leaks vault data to anyone who knows the URL.
 - [ ] Frontend `apps/web/src/lib/api.ts` reads base URLs from env.
 - [ ] Audit log hash-chain (each row carries prev-row hash). Removes the "tamper-evident" overpromise.
-- [ ] Markdown export command (`kairos vault export`) so Bruno can keep an Obsidian-readable snapshot. (ADR 0001 phase 6.)
+- [ ] Markdown export command (`disease360 vault export`) so Bruno can keep an Obsidian-readable snapshot. (ADR 0001 phase 6.)
 
 ### Definition of done for the wedge feature
 

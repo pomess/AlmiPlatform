@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
-from kairos_harness import audit
+from disease360_harness import audit
 
 
 def _read_audit(home: Path) -> list[dict]:
@@ -17,7 +17,7 @@ def _read_audit(home: Path) -> list[dict]:
 
 
 def _reset_audit_path() -> None:
-    """Force the audit module to re-resolve the path under the new KAIROS_HOME."""
+    """Force the audit module to re-resolve the path under the new DISEASE360_HOME."""
     audit._PATH = None
 
 
@@ -50,31 +50,31 @@ def test_summarize_result_handles_dicts():
     assert '"k"' in s and '"v"' in s
 
 
-def test_log_event_writes_jsonl(kairos_home: Path):
+def test_log_event_writes_jsonl(disease360_home: Path):
     _reset_audit_path()
-    audit.log_event("smoke", who="kairos", n=1)
-    rows = _read_audit(kairos_home)
+    audit.log_event("smoke", who="disease360", n=1)
+    rows = _read_audit(disease360_home)
     assert len(rows) == 1
     assert rows[0]["kind"] == "smoke"
-    assert rows[0]["who"] == "kairos"
+    assert rows[0]["who"] == "disease360"
     assert rows[0]["n"] == 1
     assert "ts" in rows[0]
 
 
-def test_log_event_appends(kairos_home: Path):
+def test_log_event_appends(disease360_home: Path):
     _reset_audit_path()
     audit.log_event("a", i=1)
     audit.log_event("b", i=2)
-    rows = _read_audit(kairos_home)
+    rows = _read_audit(disease360_home)
     assert [r["kind"] for r in rows] == ["a", "b"]
 
 
 def test_audit_path_env_override(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    """KAIROS_AUDIT_PATH bypasses repo_root()."""
+    """DISEASE360_AUDIT_PATH bypasses repo_root()."""
     target = tmp_path / "custom" / "audit.jsonl"
-    monkeypatch.setenv("KAIROS_HOME", str(tmp_path))
-    monkeypatch.setenv("KAIROS_AUDIT_PATH", str(target))
-    from kairos_runtime import config as runtime_config
+    monkeypatch.setenv("DISEASE360_HOME", str(tmp_path))
+    monkeypatch.setenv("DISEASE360_AUDIT_PATH", str(target))
+    from disease360_runtime import config as runtime_config
 
     runtime_config.load_env.cache_clear()
     _reset_audit_path()

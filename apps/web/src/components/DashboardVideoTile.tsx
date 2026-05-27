@@ -7,8 +7,8 @@ import type { NewsVideo } from "../lib/api";
 // avoid stomping on the spoken line.
 declare global {
   interface Window {
-    __kairosNewsIntroSpeaking?: boolean;
-    __kairosOnNewsIntroEnd?: (() => void) | null;
+    __disease360NewsIntroSpeaking?: boolean;
+    __disease360OnNewsIntroEnd?: (() => void) | null;
   }
 }
 
@@ -39,7 +39,7 @@ const VOLUME_TARGET = 30;
 const FADE_STEPS = 6;
 const FADE_INTERVAL_MS = 120;
 
-const LS_HIDDEN = "kairos.video.hidden";
+const LS_HIDDEN = "disease360.video.hidden";
 
 export function DashboardVideoTile({ video }: Props) {
   const [started, setStarted] = useState(false);
@@ -145,17 +145,17 @@ export function DashboardVideoTile({ video }: Props) {
 
   useEffect(() => {
     if (started) return;
-    if (!window.__kairosNewsIntroSpeaking) {
+    if (!window.__disease360NewsIntroSpeaking) {
       setStarted(true);
       return;
     }
-    window.__kairosOnNewsIntroEnd = () => {
+    window.__disease360OnNewsIntroEnd = () => {
       setStarted(true);
-      window.__kairosOnNewsIntroEnd = null;
+      window.__disease360OnNewsIntroEnd = null;
     };
     return () => {
-      if (window.__kairosOnNewsIntroEnd) {
-        window.__kairosOnNewsIntroEnd = null;
+      if (window.__disease360OnNewsIntroEnd) {
+        window.__disease360OnNewsIntroEnd = null;
       }
     };
   }, [started]);
