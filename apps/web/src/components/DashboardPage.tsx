@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { CompetitorPhotoCard } from "./CompetitorPhotoCard";
 import { DashboardActivity } from "./DashboardActivity";
 import { DashboardNewsPanel } from "./DashboardNewsPanel";
 import { useVoiceTurn } from "../hooks/useVoiceTurn";
@@ -507,7 +508,7 @@ export function DashboardPage() {
 
   return (
     <div
-      className={`dashboard-page${pttHeld ? " ptt-active" : ""}`}
+      className={`dashboard-page${pttHeld ? " ptt-active" : ""}${selectedCompetitor ? " has-photo-card" : ""}`}
       ref={hostRef}
     >
       <div className="dashboard-eyebrow">
@@ -518,6 +519,7 @@ export function DashboardPage() {
         selectedCompetitor={selectedCompetitor}
         onDismissCompetitor={() => setSelectedCompetitor(null)}
       />
+      <CompetitorPhotoCard selectedCompetitor={selectedCompetitor} />
       <div
         className={`dashboard-ptt-bar${pttHeld ? " is-active" : ""}`}
         role="status"
