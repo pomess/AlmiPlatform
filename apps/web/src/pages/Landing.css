@@ -11,6 +11,7 @@ body.on-landing #root { position: static !important; inset: auto !important; dis
 html:has(body.on-landing) {
   background: oklch(0.985 0.003 240) !important;
   color-scheme: light;
+  overflow-x: hidden;
 }
 html:has(body.on-landing),
 body.on-landing {
@@ -54,8 +55,8 @@ body.on-landing::-webkit-scrollbar-track {
 
     overflow-x: hidden;
     background:
-      radial-gradient(1200px 600px at 70% -10%, oklch(0.62 0.15 260 / 0.05), transparent 60%),
-      radial-gradient(900px 500px at 10% 110%, oklch(0.62 0.15 260 / 0.06), transparent 60%),
+      radial-gradient(1200px 600px at 70% -10%, oklch(0.82 0.16 175 / 0.07), transparent 60%),
+      radial-gradient(900px 500px at 10% 110%, oklch(0.82 0.16 175 / 0.08), transparent 60%),
       var(--bg-base);
     color: var(--text-primary);
   }
@@ -89,7 +90,8 @@ body.on-landing::-webkit-scrollbar-track {
 
   body.on-landing .brand { display: flex; align-items: center; gap: 10px; }
   body.on-landing .brand .mark {
-    width: 26px; height: 26px;
+    height: 26px;
+    width: auto;
     object-fit: contain;
     display: block;
   }
@@ -141,7 +143,7 @@ body.on-landing::-webkit-scrollbar-track {
     font-family: inherit;
     font-weight: 600; font-size: 12.5px;
     letter-spacing: 0.02em;
-    box-shadow: 0 0 0 1px oklch(0.88 0.19 260 / 0.3);
+    box-shadow: 0 0 0 1px oklch(0.88 0.18 175 / 0.4);
     transition: transform var(--t-fast) var(--ease-cinema), background var(--t-fast);
   }
   .enter-btn:hover { background: var(--accent-bright); transform: translateY(-1px); }
@@ -158,7 +160,7 @@ body.on-landing::-webkit-scrollbar-track {
     position: absolute; left: 50%; top: 36%; transform: translate(-50%,-50%);
     width: 1100px; height: 1100px; border-radius: 50%;
     background:
-      radial-gradient(closest-side, oklch(0.82 0.17 260 / 0.18), transparent 70%);
+      radial-gradient(closest-side, oklch(0.82 0.17 175 / 0.20), transparent 70%);
     filter: blur(20px);
     pointer-events: none;
     z-index: 0;
@@ -166,7 +168,7 @@ body.on-landing::-webkit-scrollbar-track {
   .hero-aurora.b {
     left: 80%; top: 70%;
     width: 700px; height: 700px;
-    background: radial-gradient(closest-side, oklch(0.55 0.14 260 / 0.18), transparent 70%);
+    background: radial-gradient(closest-side, oklch(0.62 0.13 175 / 0.20), transparent 70%);
   }
 
   .hero-grid {
@@ -186,6 +188,22 @@ body.on-landing::-webkit-scrollbar-track {
     display: grid; gap: 28px;
     justify-items: center;
   }
+  .hero-pictogram {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: clamp(160px, 24vw, 300px);
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: -1;
+    color: var(--accent);
+  }
+  .hero-pictogram img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
   .hero .eyebrow {
     display: inline-flex; align-items: center; gap: 12px;
     padding: 6px 14px; border-radius: var(--r-full);
@@ -202,19 +220,32 @@ body.on-landing::-webkit-scrollbar-track {
 
   h1.hero-title {
     margin: 0;
-    font-size: clamp(48px, 8vw, 104px);
-    line-height: 0.95;
+    font-size: clamp(72px, 12vw, 160px);
+    line-height: 1;
     letter-spacing: -0.04em;
-    font-weight: 600;
+    font-weight: 700;
   }
   h1.hero-title .stack {
     display: block;
     background: linear-gradient(180deg, oklch(0.18 0.04 260), oklch(0.32 0.06 260) 80%);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
+
+  .hero-subtitle {
+    margin: 0;
+    font-size: clamp(22px, 3.2vw, 36px);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: var(--text-secondary);
+    line-height: 1.3;
+  }
+  .hero-subtitle em {
+    font-style: italic;
+    color: var(--accent);
+  }
   h1.hero-title .accent {
     display: block;
-    background: linear-gradient(120deg, oklch(0.45 0.16 260) 0%, oklch(0.55 0.16 260) 50%, oklch(0.62 0.14 260) 100%);
+    background: linear-gradient(120deg, oklch(0.42 0.12 175) 0%, oklch(0.55 0.15 175) 50%, oklch(0.68 0.16 175) 100%);
     -webkit-background-clip: text; background-clip: text; color: transparent;
     font-style: italic;
     font-weight: 500;
@@ -273,7 +304,7 @@ body.on-landing::-webkit-scrollbar-track {
   }
   .preview::before {
     content: ""; position: absolute; inset: 0;
-    background: radial-gradient(800px 300px at 70% -10%, oklch(0.82 0.17 260 / 0.10), transparent 60%);
+    background: radial-gradient(800px 300px at 70% -10%, oklch(0.82 0.17 175 / 0.12), transparent 60%);
     pointer-events: none;
   }
   .preview-bar {
@@ -410,6 +441,23 @@ body.on-landing::-webkit-scrollbar-track {
     grid-template-columns: 220px 1fr 280px;
     min-height: 520px;
   }
+  /* Snapshot variant — full-bleed product screenshot inside the preview
+     frame. Kills the 220/1fr/280 grid that would otherwise jam an <img>
+     into the leftmost 220px column. */
+  body.on-landing .preview-body--snapshot {
+    grid-template-columns: 1fr;
+    place-items: stretch;
+    min-height: 0;
+    padding: 0;
+    background: oklch(0.13 0.012 240);
+  }
+  body.on-landing .preview-bullseye-snapshot {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: 0;
+  }
 
   /* Right-rail meta pill (counter to the right of section header) */
   body.on-landing .pv-rail .pv-rail-meta {
@@ -514,15 +562,15 @@ body.on-landing::-webkit-scrollbar-track {
   body.on-landing .pv-main .pv-link {
     color: var(--accent-bright);
     text-decoration: underline;
-    text-decoration-color: oklch(0.62 0.15 260 / 0.45);
+    text-decoration-color: oklch(0.62 0.13 175 / 0.55);
     text-decoration-thickness: 1px;
     text-underline-offset: 3px;
     transition: color var(--t-fast) var(--ease-cinema),
                 text-decoration-color var(--t-fast) var(--ease-cinema);
   }
   body.on-landing .pv-main .pv-link:hover {
-    color: oklch(0.82 0.13 260);
-    text-decoration-color: oklch(0.82 0.13 260 / 0.85);
+    color: oklch(0.62 0.13 175);
+    text-decoration-color: oklch(0.62 0.13 175 / 0.85);
   }
   .pv-think {
     align-self: flex-start;
@@ -966,3 +1014,259 @@ body.on-landing::-webkit-scrollbar-track {
   /* fade-up helper */
   .fade-up { opacity: 0; transform: translateY(28px); transition: opacity 700ms var(--ease-cinema), transform 700ms var(--ease-cinema); }
   .fade-up.in { opacity: 1; transform: none; }
+/* ============================================================
+   Section 2 — Dashboard globe showcase
+   Spans the full strip; left text + right SVG globe with pulsing
+   competitor pins anchored on Spain.
+   ============================================================ */
+body.on-landing .globe-showcase-wrap {
+  /* Single-row layout for the standalone showcase — overrides the
+     4-col `.strip-inner` grid since this strip only contains the
+     showcase article. */
+  grid-template-columns: 1fr;
+}
+/* Section 2 wrapper: full-bleed dark surface that matches the cockpit
+   dashboard's background, so the globe + deep-dive rows feel like a
+   continuous "product zone" inside the marketing page. The text colour
+   palette inside flips to the dark-theme tokens via the cascade below. */
+body.on-landing .section-2-dark {
+  position: relative;
+  margin: 60px calc(50% - 50vw) 0;
+  padding: 0 0 80px;
+  width: 100vw;
+  background:
+    radial-gradient(900px 420px at 80% 8%, oklch(0.55 0.15 175 / 0.10), transparent 65%),
+    radial-gradient(700px 320px at 14% 92%, oklch(0.55 0.15 175 / 0.08), transparent 60%),
+    linear-gradient(180deg, oklch(0.13 0.012 240) 0%, oklch(0.105 0.012 240) 100%);
+  color: oklch(0.92 0.012 240);
+  /* Dark-theme palette overrides for everything nested inside. */
+  --bg-base: oklch(0.13 0.012 240);
+  --bg-surface: oklch(0.185 0.014 240);
+  --text-primary: oklch(0.97 0.005 240);
+  --text-secondary: oklch(0.78 0.012 240);
+  --text-muted: oklch(0.58 0.014 240);
+  --text-faint: oklch(0.42 0.012 240);
+  --border-hairline: oklch(1 0 0 / 0.06);
+  --border-subtle: oklch(1 0 0 / 0.10);
+  --border-medium: oklch(1 0 0 / 0.16);
+}
+body.on-landing .section-2-dark .section-head h2 {
+  color: oklch(0.97 0.005 240);
+}
+body.on-landing .section-2-dark .section-head em {
+  color: oklch(0.85 0.16 175);
+}
+body.on-landing .section-2-dark .section-head .meta {
+  color: oklch(0.58 0.014 240);
+}
+/* The .visual hud-frame panels in the deep-row block already use the
+   dark cockpit palette via their own scope — no extra rule needed. */
+body.on-landing .section-2-dark .deep .text h3,
+body.on-landing .section-2-dark .deep .text p,
+body.on-landing .section-2-dark .deep .text .eyebrow,
+body.on-landing .section-2-dark .deep .bullets li {
+  color: var(--text-primary);
+}
+body.on-landing .section-2-dark .deep .text p,
+body.on-landing .section-2-dark .deep .bullets li {
+  color: var(--text-secondary);
+}
+body.on-landing .section-2-dark .deep .text .eyebrow {
+  color: var(--text-faint);
+}
+
+/* Frameless treatment: the globe sits centered on the section background,
+   the heading + copy float above it in the top-left corner. No card,
+   no border, no shadow — just the rotating planet. */
+body.on-landing .globe-showcase,
+body.on-landing .globe-showcase.hud-frame {
+  grid-column: 1 / -1;
+  position: relative;
+  display: block;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 32px 0 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1100px;
+  overflow: visible;
+}
+body.on-landing .globe-showcase-text {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 460px;
+  margin: 0 0 -200px 5%;
+  pointer-events: none;
+}
+body.on-landing .globe-showcase-text .ix {
+  color: oklch(0.85 0.16 175);
+}
+body.on-landing .globe-showcase-text h3 {
+  color: oklch(0.97 0.005 240);
+  font-size: 24px;
+  margin: 0;
+  letter-spacing: -0.012em;
+  font-weight: 500;
+}
+body.on-landing .globe-showcase-text p {
+  color: oklch(0.78 0.012 240);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+body.on-landing .globe-showcase-visual {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+/* Frameless live MapLibre globe. No circular mask — the bottom of the
+   canvas is faded out with a soft vertical mask so the globe seems to
+   dissolve into the section background along an invisible horizontal
+   line, while the top stays crisp. */
+body.on-landing .landing-globe-mock {
+  position: relative;
+  /* Full-bleed: span the viewport width, centered, regardless of the
+     parent container's width — so the planet has room to render at its
+     full silhouette without getting clipped on the left/right. */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  max-width: none;
+  height: 720px;
+  background: transparent;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black 65%,
+    transparent 95%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black 65%,
+    transparent 95%
+  );
+}
+body.on-landing .landing-globe-mock canvas {
+  outline: none;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Globe pins — Almirall mint home + red rivals. */
+body.on-landing .globe-pin {
+  pointer-events: none;
+}
+body.on-landing .globe-pin--home .globe-pin-dot { fill: oklch(0.92 0.18 175); }
+body.on-landing .globe-pin--home .globe-pin-ring {
+  fill: none;
+  stroke: oklch(0.92 0.18 175 / 0.85);
+  stroke-width: 1;
+}
+body.on-landing .globe-pin--home .globe-pin-pulse {
+  fill: oklch(0.55 0.15 175 / 0.5);
+  animation: globe-pulse-home 2.6s ease-out infinite;
+}
+@keyframes globe-pulse-home {
+  0%   { transform: scale(0.4); opacity: 0.9; }
+  100% { transform: scale(2.0); opacity: 0; }
+}
+
+body.on-landing .globe-pin--rival .globe-pin-dot { fill: oklch(0.65 0.22 25); }
+body.on-landing .globe-pin--rival .globe-pin-pulse {
+  fill: oklch(0.62 0.22 25 / 0.45);
+  /* Anchor each pulse on its own bounding box so all rivals breathe
+     outward from their own dots, regardless of where they sit in
+     the SVG coordinate system. */
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: globe-pulse-rival 3s ease-out infinite;
+  animation-delay: var(--pulse-delay, 0s);
+}
+body.on-landing .globe-pin--home .globe-pin-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes globe-pulse-rival {
+  0%   { transform: scale(0.3); opacity: 0.9; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.on-landing .globe-pin-pulse {
+    animation: none;
+    opacity: 0.4;
+  }
+}
+
+@media (max-width: 980px) {
+  body.on-landing .globe-showcase {
+    grid-template-columns: 1fr;
+    padding: 28px 24px;
+  }
+}
+
+/* ============================================================
+   Knowledge-graph dive — sticky-scrub 3D fly-through
+   ============================================================ */
+body.on-landing .kg-section {
+  position: relative;
+  margin: 60px 0 0;
+  padding: 100px 24px 140px;
+  background:
+    radial-gradient(1200px 600px at 50% 35%, oklch(0.62 0.13 175 / 0.10), transparent 70%);
+}
+body.on-landing .kg-text {
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto 56px;
+}
+body.on-landing .kg-text .ix {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  color: oklch(0.55 0.15 175);
+  margin-bottom: 16px;
+}
+body.on-landing .kg-text h3 {
+  margin: 0 0 14px;
+  font-size: clamp(32px, 3.6vw, 44px);
+  font-weight: 500;
+  letter-spacing: -0.018em;
+  color: var(--text-primary);
+}
+body.on-landing .kg-text p {
+  margin: 0 auto;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+body.on-landing .kg-stage {
+  display: flex;
+  justify-content: center;
+}
+body.on-landing .kg-snapshot {
+  display: block;
+  width: 100%;
+  max-width: 1280px;
+  height: auto;
+  border-radius: var(--r-md);
+  box-shadow: 0 30px 80px -20px oklch(0.20 0.04 260 / 0.30);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.on-landing .graph-dive {
+    height: auto;
+    min-height: 100vh;
+  }
+  body.on-landing .graph-dive-sticky {
+    position: relative;
+    height: 100vh;
+  }
+}

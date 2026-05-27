@@ -27,7 +27,7 @@ export interface UseVoiceTurnOptions {
   profile?: string;
   /** True while the user holds the PTT key. */
   pttActive: boolean;
-  /** Optional thread_id; if omitted, persisted under `kairos.thread`. */
+  /** Optional thread_id; if omitted, persisted under `disease360.thread`. */
   threadId?: string | null;
   /**
    * Returns the user's current GPS fix at submit time, or null if no fix
@@ -70,7 +70,7 @@ export interface UseVoiceTurnReturn {
 const PLAYBACK_RATE = 24_000;
 const CAPTURE_RATE = 16_000;
 const WORKLET_URL = "/worklets/pcm-downsampler.js";
-const THREAD_KEY = "kairos.thread";
+const THREAD_KEY = "disease360.thread";
 // Mechanical playback speedup. We do this in the client (instead of
 // asking Gemini for `[fast]` prosody) because the audio-tag approach
 // makes the model act faster -- it raises pitch and adds urgency, which

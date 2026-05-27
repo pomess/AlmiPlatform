@@ -23,11 +23,11 @@ The connective tissue between channels, the runtime, and the policy/audit layer.
 
 ## Modules
 
-- `kairos_harness/agent.py`          — Deep Agent factory
-- `kairos_harness/system_prompt.py`  — SOUL+USER+hot+index assembler
-- `kairos_harness/approval_store.py` — SQLite queue (sync via `sqlite3`, simple)
-- `kairos_harness/middleware.py`     — HITL config + audit middleware
-- `kairos_harness/tools/`            — memory_tools, web_search, email_read (stubs P1), calendar_read (stubs P1)
-- `kairos_harness/api.py`            — FastAPI REST shim (port 8002)
+- `disease360_harness/agent.py`          — Deep Agent factory
+- `disease360_harness/system_prompt.py`  — SOUL+USER+hot+index assembler
+- `disease360_harness/approval_store.py` — SQLite queue (sync via `sqlite3`, simple)
+- `disease360_harness/middleware.py`     — HITL config + audit middleware
+- `disease360_harness/tools/`            — memory_tools, web_search, email_read (stubs P1), calendar_read (stubs P1)
+- `disease360_harness/api.py`            — FastAPI REST shim (port 8002)
 
 Status: **scaffolded — implement in Phase 1**.

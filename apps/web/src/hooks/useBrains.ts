@@ -16,7 +16,7 @@ const PALETTE = [
   "var(--layer-hot)",
 ];
 
-const GLOBAL_KEY = "kairos.globalBrain";
+const GLOBAL_KEY = "disease360.globalBrain";
 
 export function useBrains(): {
   brains: DisplayBrain[];

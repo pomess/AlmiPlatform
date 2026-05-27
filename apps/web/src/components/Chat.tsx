@@ -1,12 +1,11 @@
-// Verbatim port of JARVIS/app/chat.jsx (Thinking, ToolCallout, IngestPlan,
-// ChatStream, SkeletonAnswer, Composer). Live-wired via useStreamChat:
-// the streaming hook drives messages + toolActivity, and tool callouts
-// render between the current user message and the in-progress assistant.
+// Read-only port of JARVIS/app/chat.jsx (Thinking, ToolCallout, ChatStream,
+// SkeletonAnswer, Composer). Live-wired via useStreamChat: the streaming
+// hook drives messages + toolActivity, and tool callouts render between
+// the current user message and the in-progress assistant.
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { I } from "../lib/icons";
 import { renderMarkdown } from "../lib/markdown";
 import type { ResearchStep, ToolActivity } from "../hooks/useStreamChat";
-import type { IngestPlan, WikiEditOp } from "../lib/api";
 
 // ============================================================
 // THINKING STRIP (kept for inline live tool console while streaming)
@@ -255,158 +254,6 @@ export function ToolGroup({ entries }: { entries: ToolEntry[] }) {
 }
 
 // ============================================================
-// INGEST PLAN — diff renderer (computed from before/after on server ops)
-// ============================================================
-type DiffLineT = { type: "ctx" | "add" | "del"; n1?: number; n2?: number; t: string };
-
-function lcsDiff(beforeText: string, afterText: string): DiffLineT[] {
-  const a = beforeText.split("\n");
-  const b = afterText.split("\n");
-  const m = a.length;
-  const n = b.length;
-  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
-  for (let i = m - 1; i >= 0; i--) {
-    for (let j = n - 1; j >= 0; j--) {
-      dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
-    }
-  }
-  const out: DiffLineT[] = [];
-  let i = 0;
-  let j = 0;
-  let ln1 = 1;
-  let ln2 = 1;
-  while (i < m && j < n) {
-    if (a[i] === b[j]) {
-      out.push({ type: "ctx", n1: ln1++, n2: ln2++, t: a[i] });
-      i++;
-      j++;
-    } else if (dp[i + 1][j] >= dp[i][j + 1]) {
-      out.push({ type: "del", n1: ln1++, t: a[i] });
-      i++;
-    } else {
-      out.push({ type: "add", n2: ln2++, t: b[j] });
-      j++;
-    }
-  }
-  while (i < m) out.push({ type: "del", n1: ln1++, t: a[i++] });
-  while (j < n) out.push({ type: "add", n2: ln2++, t: b[j++] });
-  return out;
-}
-
-function DiffLine({ d }: { d: DiffLineT }) {
-  const cls = d.type;
-  return (
-    <div className="line">
-      <div className={"ln " + cls}>
-        {d.type === "add" ? "+" : d.type === "del" ? "−" : ""}
-        {d.n2 || d.n1}
-      </div>
-      <div className={"tx " + cls}>{d.t || " "}</div>
-    </div>
-  );
-}
-
-function IngestOp({ op }: { op: WikiEditOp }) {
-  const [open, setOpen] = useState(op.kind === "create");
-  const diff = (() => {
-    if (op.kind === "create") {
-      return op.after.split("\n").map((t, i) => ({ type: "add" as const, n2: i + 1, t }));
-    }
-    return lcsDiff(op.before || "", op.after);
-  })();
-  const adds = diff.filter((d) => d.type === "add").length;
-  const dels = diff.filter((d) => d.type === "del").length;
-  return (
-    <div className={"op" + (open ? " open" : "")}>
-      <div className="ohead" onClick={() => setOpen((o) => !o)}>
-        <span className="chevron">›</span>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-          <span className={"kind " + op.kind}>{op.kind.toUpperCase()}</span>
-          <span className="path">{op.path}</span>
-        </div>
-        <span className="delta">
-          <span className="add">+{adds}</span>
-          <span className="del">−{dels}</span>
-        </span>
-        <span
-          style={{
-            color: "var(--text-faint)",
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-          }}
-        >
-          {diff.length} lines
-        </span>
-      </div>
-      {open && (
-        <div className="diff">
-          {diff.map((d, i) => (
-            <DiffLine key={i} d={d} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-export function IngestPlanCard({
-  plan,
-  pending,
-  onApprove,
-  onDeny,
-}: {
-  plan: IngestPlan;
-  pending?: { expires_in: number };
-  onApprove?: () => void;
-  onDeny?: () => void;
-}) {
-  return (
-    <div className="ingest">
-      <div className="ihead">
-        <span className="icon">⤓</span>
-        <div>
-          <h4>
-            Ingest plan ·{" "}
-            <span className="mono accent" style={{ fontSize: "12.5px" }}>
-              {plan.brain}
-            </span>
-          </h4>
-          <div className="summary">{plan.summary}</div>
-        </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <span className="chip chip-accent">{plan.ops.length} ops</span>
-          {pending && (
-            <span className="pending-pill">
-              PENDING · {Math.floor(pending.expires_in / 60)}:
-              {String(pending.expires_in % 60).padStart(2, "0")}
-            </span>
-          )}
-        </div>
-      </div>
-      <div>
-        {plan.ops.map((op, i) => (
-          <IngestOp key={i} op={op} />
-        ))}
-      </div>
-      {pending && (onApprove || onDeny) && (
-        <div className="actions" style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 12 }}>
-          {onDeny && (
-            <button className="btn" onClick={onDeny}>
-              Deny
-            </button>
-          )}
-          {onApprove && (
-            <button className="btn btn-primary" onClick={onApprove}>
-              Approve →
-            </button>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ============================================================
 // MESSAGES + SKELETON
 // ============================================================
 export type ChatMsg =
@@ -427,7 +274,7 @@ function SkeletonAnswer() {
   return (
     <div className="msg">
       <div className="meta">
-        <span className="who jarvis">KAIROS</span>
+        <span className="who jarvis">DISEASE360</span>
         <span>·</span>
       </div>
       <div style={{ display: "grid", gap: 8, maxWidth: 520 }}>
@@ -443,15 +290,31 @@ export function ChatStream({
   items,
   streaming,
   footer,
+  onWikilinkClick,
 }: {
   items: ChatMsg[];
   streaming: boolean;
   footer?: ReactNode;
+  onWikilinkClick?: (target: string) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (ref.current) ref.current.scrollTop = ref.current.scrollHeight;
   }, [items.length, streaming]);
+
+  useEffect(() => {
+    const root = ref.current;
+    if (!root || !onWikilinkClick) return;
+    function onClick(e: MouseEvent) {
+      const el = (e.target as HTMLElement).closest("a[data-wikilink]") as HTMLAnchorElement | null;
+      if (!el) return;
+      e.preventDefault();
+      const target = el.dataset.wikilink || "";
+      if (target) onWikilinkClick!(target);
+    }
+    root.addEventListener("click", onClick);
+    return () => root.removeEventListener("click", onClick);
+  }, [onWikilinkClick]);
 
   // Collapse consecutive tool messages into a single group block.
   // Key the group by the index of its FIRST tool — stable as more tools
@@ -499,7 +362,7 @@ export function ChatStream({
     rendered.push(
       <div className="msg" key={i}>
         <div className="meta">
-          <span className="who jarvis">KAIROS</span>
+          <span className="who jarvis">DISEASE360</span>
           <span>{m.ts}</span>
         </div>
         <div className="body">{renderMarkdown(m.content)}</div>

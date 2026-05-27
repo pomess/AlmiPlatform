@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from kairos_memory.registry import (
+from disease360_memory.registry import (
     DEFAULT_TENANT_ID,
     Brain,
     bootstrap_default_brains,
@@ -19,12 +19,12 @@ from kairos_memory.registry import (
 )
 
 
-def test_vault_root_resolves_under_kairos_home(kairos_home: Path):
-    assert vault_root() == kairos_home / "vault"
+def test_vault_root_resolves_under_disease360_home(disease360_home: Path):
+    assert vault_root() == disease360_home / "vault"
 
 
-def test_tenant_root_nests_under_vault(kairos_home: Path):
-    assert tenant_root("acme") == kairos_home / "vault" / "acme"
+def test_tenant_root_nests_under_vault(disease360_home: Path):
+    assert tenant_root("acme") == disease360_home / "vault" / "acme"
 
 
 def test_ensure_layout_creates_skeleton(tenant_root: Path):

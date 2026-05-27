@@ -1,10 +1,10 @@
-# Kairos — Commercialization strategy
+# Disease360 — Commercialization strategy
 
 _As of 2026-05-17. Owner: Bruno. Scope: solo/lifestyle business._
 
 ## Shape of the business
 
-Kairos is being commercialized as a **solo / lifestyle business**.
+Disease360 is being commercialized as a **solo / lifestyle business**.
 
 - Target: **$30–80k MRR within 12 months** (~$600k–$1M ARR ceiling at this configuration).
 - Bruno stays solo, with at most one part-time contractor after $30k MRR.
@@ -41,7 +41,7 @@ Kairos is being commercialized as a **solo / lifestyle business**.
 
 ## Why this shape
 
-Apple Intelligence / Gemini-in-Workspace / ChatGPT Tasks ate the consumer tier. Kairos's real moat — **approval gate on persisted LangGraph interrupts + markdown-as-source-of-truth + multi-channel queue** — is wasted on consumers who want magic, and exactly what regulated solo professionals will pay $2k+/mo for without blinking.
+Apple Intelligence / Gemini-in-Workspace / ChatGPT Tasks ate the consumer tier. Disease360's real moat — **approval gate on persisted LangGraph interrupts + markdown-as-source-of-truth + multi-channel queue** — is wasted on consumers who want magic, and exactly what regulated solo professionals will pay $2k+/mo for without blinking.
 
 The wedge fits the moat: fractional CFOs juggle 4–8 clients, live in fear of cross-contamination, are reachable on public channels, and have budget. M&A advisors have higher ACV but a 60–90 day compliance gate per logo that doesn't fit a solo cashflow target.
 
@@ -57,7 +57,7 @@ Frame **all product, copy, and feature decisions** toward fractional CFOs first.
 ## Brand and domain
 
 - Domain: **signkairos.com** (purchased 2026-05-17). Defensive: also grab `kairossign.com` as a 301 redirect.
-- External product line: **Kairos** for end-customer; "Kairos Engine" for any developer-facing later tier.
+- External product line: **Disease360** for end-customer; "Disease360 Engine" for any developer-facing later tier.
 - Marketing site: `signkairos.com`. Product: `app.signkairos.com`.
 
 ## 90-day plan (high level)

@@ -1,8 +1,8 @@
-# Kairos — Master documentation index
+# Disease360 — Master documentation index
 
 _Last updated: 2026-05-18. Read this first. Everything else is reachable from here._
 
-Kairos is a single-tenant AI cockpit being commercialized as **a per-client AI workspace for fractional CFOs**. This index points to the right doc for whoever you are.
+Disease360 is a single-tenant AI cockpit being commercialized as **a per-client AI workspace for fractional CFOs**. This index points to the right doc for whoever you are.
 
 ---
 

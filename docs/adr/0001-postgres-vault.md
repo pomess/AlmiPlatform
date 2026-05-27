@@ -23,7 +23,7 @@ Supabase is already in the repo for Google OAuth + the `allowed_users` waitlist 
 
 The vault is **Postgres-canonical**. Tenants are Supabase auth users; `tenant_id := auth.uid()`. Every vault row has a `tenant_id` column with an RLS policy `tenant_id = auth.uid()`. The harness uses the user's JWT to talk to Postgres; the memory service is rewritten to wrap Postgres queries instead of filesystem operations.
 
-Markdown becomes an **export format**, not a source. A `kairos vault export` command (CLI) writes the user's vault to disk in the legacy directory shape for Obsidian-style local browsing. The running system never reads from those files.
+Markdown becomes an **export format**, not a source. A `disease360 vault export` command (CLI) writes the user's vault to disk in the legacy directory shape for Obsidian-style local browsing. The running system never reads from those files.
 
 The approval queue and audit log move to Postgres alongside the vault — they're per-tenant data and need the same RLS treatment.
 
@@ -142,10 +142,10 @@ Phase the work so the system stays runnable:
 3. **Approval store + audit move** — port `approval_store.py` and `audit.py` to Postgres. The CLI's "read approvals SQLite directly" path becomes an HTTP read.
 4. **Auth wiring** — harness extracts `tenant_id` from the Supabase JWT (already available in the cockpit). CLI gets a service-role token for Bruno's tenant during local dev.
 5. **Migration script** — `scripts/migrate_vault_to_postgres.py` walks `vault/<brain>/`, inserts rows under Bruno's tenant. Run once per environment.
-6. **Markdown export** — `kairos vault export` CLI command writes a tenant's vault back to disk for archive / Obsidian browsing.
+6. **Markdown export** — `disease360 vault export` CLI command writes a tenant's vault back to disk for archive / Obsidian browsing.
 7. **Delete the filesystem code paths** — only after the export command works and a manual round-trip is verified.
 
-Each phase ships behind a feature flag (`KAIROS_VAULT_BACKEND=disk|postgres`) so we can roll back if a phase breaks production. The flag is removed at the end of phase 7.
+Each phase ships behind a feature flag (`DISEASE360_VAULT_BACKEND=disk|postgres`) so we can roll back if a phase breaks production. The flag is removed at the end of phase 7.
 
 ## Consequences
 
@@ -157,7 +157,7 @@ Each phase ships behind a feature flag (`KAIROS_VAULT_BACKEND=disk|postgres`) so
 - The "cross-contamination is impossible by design" line in copy stops being vapor.
 
 **Costs:**
-- Bruno loses direct Obsidian editing of the live vault. Mitigated by `kairos vault export` for archive workflows; the cockpit becomes the canonical edit surface.
+- Bruno loses direct Obsidian editing of the live vault. Mitigated by `disease360 vault export` for archive workflows; the cockpit becomes the canonical edit surface.
 - ~2–3 weeks of focused work per the migration phases above.
 - The 13-file directory-shaped tenancy diff (`cf0da22`) is largely superseded — kept as a stepping stone reference, not a foundation.
 - New runtime dependency on Supabase availability. Acceptable trade for a SaaS deploy; the local-only mode for Bruno is preserved via a self-hosted Postgres + Supabase Studio if needed.

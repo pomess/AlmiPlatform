@@ -6,7 +6,7 @@
 // Webhook:   Database → Webhooks → "On insert in auth.users" → POST to this function
 // Secrets:   supabase secrets set RESEND_API_KEY=... BRUNO_EMAIL=... CALENDLY_URL=... \
 //                                 SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
-//                                 EMAIL_FROM="Kairos <noreply@signkairos.com>"
+//                                 EMAIL_FROM="Disease360 <noreply@signkairos.com>"
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
@@ -20,7 +20,7 @@ const BRUNO_EMAIL = Deno.env.get("BRUNO_EMAIL") ?? "";
 const CALENDLY_URL = Deno.env.get("CALENDLY_URL") ?? "https://calendly.com/signkairos/30min";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-const EMAIL_FROM = Deno.env.get("EMAIL_FROM") ?? "Kairos <noreply@signkairos.com>";
+const EMAIL_FROM = Deno.env.get("EMAIL_FROM") ?? "Disease360 <noreply@signkairos.com>";
 
 type WebhookPayload = {
   type: string;

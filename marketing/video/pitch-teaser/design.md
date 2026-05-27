@@ -1,4 +1,4 @@
-# Kairos — Pitch teaser design
+# Disease360 — Pitch teaser design
 
 Mood: cinematic obsidian glass, navy accent, HUD frames. Match the cockpit (apps/web/src/styles/tokens.css). Quiet but alive — restraint is the credibility signal. No gradient slop, no glassmorphism cliché.
 

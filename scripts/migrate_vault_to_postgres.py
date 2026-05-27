@@ -11,7 +11,7 @@ commit cf0da22 is in play, that path) and inserts rows into:
 Idempotent: uses INSERT ... ON CONFLICT, so re-runs update existing rows
 instead of duplicating. Drops old wikilinks for each rewritten page.
 
-Targets the tenant in `KAIROS_DEV_TENANT_ID`. Run once per environment.
+Targets the tenant in `DISEASE360_DEV_TENANT_ID`. Run once per environment.
 
 Usage:
     uv run python scripts/migrate_vault_to_postgres.py
@@ -33,8 +33,8 @@ ROOT = Path(__file__).resolve().parent.parent
 for sub in ("services/runtime", "services/memory"):
     sys.path.insert(0, str(ROOT / sub))
 
-from kairos_memory import db, registry_pg, vault_pg  # noqa: E402
-from kairos_memory.db import acquire  # noqa: E402
+from disease360_memory import db, registry_pg, vault_pg  # noqa: E402
+from disease360_memory.db import acquire  # noqa: E402
 
 
 def _vault_root() -> Path:
@@ -216,7 +216,7 @@ async def main() -> int:
 
     if not db.is_postgres():
         print(
-            "KAIROS_VAULT_BACKEND must be 'postgres' to run this migration. "
+            "DISEASE360_VAULT_BACKEND must be 'postgres' to run this migration. "
             "Set it in policies/secrets.env first.",
             file=sys.stderr,
         )

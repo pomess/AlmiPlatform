@@ -7,8 +7,8 @@ import type { NewsVideo } from "../lib/api";
 // avoid stomping on the spoken line.
 declare global {
   interface Window {
-    __kairosNewsIntroSpeaking?: boolean;
-    __kairosOnNewsIntroEnd?: (() => void) | null;
+    __disease360NewsIntroSpeaking?: boolean;
+    __disease360OnNewsIntroEnd?: (() => void) | null;
   }
 }
 
@@ -39,11 +39,28 @@ const VOLUME_TARGET = 30;
 const FADE_STEPS = 6;
 const FADE_INTERVAL_MS = 120;
 
+const LS_HIDDEN = "disease360.video.hidden";
+
 export function DashboardVideoTile({ video }: Props) {
   const [started, setStarted] = useState(false);
   const [muted, setMuted] = useState(true);
   const [playing, setPlaying] = useState(true);
   const [hovered, setHovered] = useState(false);
+  const [hidden, setHidden] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(LS_HIDDEN) === "1";
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LS_HIDDEN, hidden ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+  }, [hidden]);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const fadeRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -128,17 +145,17 @@ export function DashboardVideoTile({ video }: Props) {
 
   useEffect(() => {
     if (started) return;
-    if (!window.__kairosNewsIntroSpeaking) {
+    if (!window.__disease360NewsIntroSpeaking) {
       setStarted(true);
       return;
     }
-    window.__kairosOnNewsIntroEnd = () => {
+    window.__disease360OnNewsIntroEnd = () => {
       setStarted(true);
-      window.__kairosOnNewsIntroEnd = null;
+      window.__disease360OnNewsIntroEnd = null;
     };
     return () => {
-      if (window.__kairosOnNewsIntroEnd) {
-        window.__kairosOnNewsIntroEnd = null;
+      if (window.__disease360OnNewsIntroEnd) {
+        window.__disease360OnNewsIntroEnd = null;
       }
     };
   }, [started]);
@@ -156,7 +173,26 @@ export function DashboardVideoTile({ video }: Props) {
     return () => clearTimeout(timer);
   }, [started]);
 
+  // Full-window-height rail on the right edge — always rendered so the
+   // user can hide and re-summon the video without it disappearing.
+  const rail = (
+    <button
+      type="button"
+      className={`dashboard-video-rail${hidden ? "" : " dashboard-video-rail--open"}`}
+      onClick={() => setHidden((h) => !h)}
+      aria-label={hidden ? "Show video panel" : "Hide video panel"}
+      title={hidden ? "Show video" : "Hide video"}
+    >
+      <span>{hidden ? "▶  Show video" : "◀  Hide video"}</span>
+    </button>
+  );
+
+  if (hidden) {
+    return rail;
+  }
+
   return (
+    <>
     <aside
       className={`dashboard-video-tile${hovered ? " dashboard-video-tile--focus" : ""}`}
       aria-label="Daily video briefing"
@@ -215,6 +251,8 @@ export function DashboardVideoTile({ video }: Props) {
         {video.title}
       </a>
     </aside>
+    {rail}
+    </>
   );
 }
 

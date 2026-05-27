@@ -5,7 +5,6 @@ import type { DisplayBrain } from "../hooks/useBrains";
 type Tab = {
   id: string;
   label: string;
-  badge?: number | null;
 };
 
 interface HeaderProps {
@@ -15,7 +14,6 @@ interface HeaderProps {
   brains: DisplayBrain[];
   setBrain: (b: DisplayBrain) => void;
   dnd?: boolean;
-  pendingCount: number;
 }
 
 export function Header({
@@ -25,7 +23,6 @@ export function Header({
   brains,
   setBrain,
   dnd,
-  pendingCount,
 }: HeaderProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -48,10 +45,9 @@ export function Header({
   const tabs: Tab[] = [
     { id: "chat", label: "Chat" },
     { id: "dashboard", label: "Dashboard" },
+    { id: "bullseye", label: "Bullseye" },
     { id: "graph", label: "Graph" },
-    { id: "approvals", label: "Approvals", badge: pendingCount > 0 ? pendingCount : null },
     { id: "brains", label: "Brains" },
-    { id: "settings", label: "Settings" },
   ];
   const showBrain = ["chat", "graph", "brains"].includes(route);
 
@@ -59,12 +55,11 @@ export function Header({
     <header className="app-top">
       <div className="left">
         <a className="brand-link" href="/" title="Landing">
-          <img className="mark" src="/logos/kairos_logo_white.png" alt="Kairos" />
-          <span className="wordmark">KAIROS</span>
+          <img className="mark" src="/logos/almirall_logo_white.svg" alt="Almirall" />
         </a>
         <span className="corner">
           <span className="live"></span>
-          ONLINE · GEMINI FLASH
+          ONLINE · COMPETITIVE INTEL
         </span>
         {dnd && (
           <span className="dnd-badge">
@@ -82,7 +77,6 @@ export function Header({
             onClick={() => setRoute(t.id)}
           >
             {t.label}
-            {t.badge ? <span className="badge">{t.badge}</span> : null}
           </button>
         ))}
       </nav>

@@ -4,11 +4,11 @@ LLM client layer. **Locked**: LangChain 1.0 + Deep Agents (the Deep Agents harne
 
 ## What lives here
 
-- `kairos_runtime/llm.py` — `get_chat_model(profile: str) -> BaseChatModel`. Profiles:
-  - `"chat"` (default) → Gemini via `langchain-google-genai`. Model = `KAIROS_MODEL_OVERRIDE` or `GEMINI_DEFAULT_MODEL` (default `gemini-flash-latest`).
+- `disease360_runtime/llm.py` — `get_chat_model(profile: str) -> BaseChatModel`. Profiles:
+  - `"chat"` (default) → Gemini via `langchain-google-genai`. Model = `DISEASE360_MODEL_OVERRIDE` or `GEMINI_DEFAULT_MODEL` (default `gemini-flash-latest`).
   - `"local"` → Ollama via `langchain-ollama`. Model = `OLLAMA_DEFAULT_MODEL` (default `gemma4:4b`).
   - `"private"` → alias for `"local"`. Used when SOUL principle #4 fires (health/finance/intimate).
-- `kairos_runtime/config.py` — env loader (reads `policies/secrets.env` + process env).
+- `disease360_runtime/config.py` — env loader (reads `policies/secrets.env` + process env).
 
 ## Why LangChain + Deep Agents
 

@@ -1,5 +1,5 @@
 {
-  "name": "kairos-web",
+  "name": "disease360-web",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -19,13 +19,15 @@
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.0.0",
     "remark-breaks": "^4.0.0",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "three": "^0.184.0"
   },
   "devDependencies": {
     "@types/d3-force": "^3.0.10",
     "@types/d3-scale": "^4.0.9",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.184.1",
     "@vitejs/plugin-react": "^4.3.4",
     "typescript": "^5.7.2",
     "vite": "^6.0.7"

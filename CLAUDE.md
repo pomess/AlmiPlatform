@@ -1,12 +1,12 @@
-# Kairos — orientation for Claude
+# Disease360 — orientation for Claude
 
 This file is loaded into context every session. Read it before touching code or copy.
 
-## What Kairos is
+## What Disease360 is
 
 A long-running personal AI cockpit for **one user (Bruno)**, being commercialized as a **per-client AI workspace for fractional CFOs**. Three independent services, markdown-backed memory, an approval gate on every mutating tool. Not a chatbot — closer to a chief of staff.
 
-- **Internal name (legacy):** JARVIS. **External / product name:** Kairos.
+- **Internal name (legacy):** JARVIS. **External / product name:** Disease360.
 - **Domain:** signkairos.com (marketing), app.signkairos.com (product).
 - **Status:** Phase 1 works end-to-end on Windows; ~5–7 weeks of plumbing block multi-tenant SaaS.
 
@@ -18,11 +18,11 @@ Three processes, each restartable independently. **The cockpit never talks to me
 
 | Service | Port | Package | Role |
 |---|---|---|---|
-| memory  | 8001 | `kairos_memory`  | Vault I/O over Supabase Postgres (tenant-scoped via RLS), FTS, wikilink graph, lint, ingest/solve planner. **No LLM, no secrets.** *(Migration in progress — Phase 1 still uses on-disk markdown; see locked decision #12.)* |
-| harness | 8002 | `kairos_harness` | Deep Agent runtime, SSE chat, approval queue, audit log. **Only process with API keys.** |
+| memory  | 8001 | `disease360_memory`  | Vault I/O over Supabase Postgres (tenant-scoped via RLS), FTS, wikilink graph, lint, ingest/solve planner. **No LLM, no secrets.** *(Migration in progress — Phase 1 still uses on-disk markdown; see locked decision #12.)* |
+| harness | 8002 | `disease360_harness` | Deep Agent runtime, SSE chat, approval queue, audit log. **Only process with API keys.** |
 | web     | 5173 | `apps/web`       | Vite + React 19 + TS cockpit. |
 
-CLI: `kairos_cli` (Typer, spawn-and-exit). Shared runtime: `kairos_runtime` (LLM client, deep-research pipeline, env loader).
+CLI: `disease360_cli` (Typer, spawn-and-exit). Shared runtime: `disease360_runtime` (LLM client, deep-research pipeline, env loader).
 
 Vite proxies: `/api/memory/*` → 8001, `/api/harness/*` → 8002 (both with `ws: true`).
 
@@ -37,7 +37,7 @@ Read `CONTEXT.md` before writing copy or new code that introduces terms.
 From `docs/09-locked-decisions.md`:
 
 1. **Greenfield.** No code reuse from Obsidian-Knowledge-Graphs / de-warp. Inspiration only.
-2. **Cloud-first LLM** with `gemini-flash-latest` alias; **Ollama + `gemma4:4b`** as local fallback. Single `LLMClient` abstraction. Override via `KAIROS_MODEL_OVERRIDE`.
+2. **Cloud-first LLM** with `gemini-flash-latest` alias; **Ollama + `gemma4:4b`** as local fallback. Single `LLMClient` abstraction. Override via `DISEASE360_MODEL_OVERRIDE`.
 3. **LangChain 1.x + Deep Agents** on LangGraph. Approval persistence via SQLite, 5-minute default in-session timeout, persists across restarts.
 4. **Pragmatic sandbox**: read silently, ask before send/write/exec, refuse destructive. Editable in `policies/actions.yaml`.
 5. **Locale Europe/Madrid.** DND **01:00–07:00** (queue silently, drain at 07:00). Morning digest 08:00.
@@ -70,10 +70,10 @@ identity/                  SOUL.md (agent), USER.md (Bruno), HEARTBEAT.md (cron 
 policies/                  actions.yaml, network.yaml, secrets.env(.example)
 scripts/                   run.py (used by run.ps1), build_docs.py, bench_*.py, grounding_chat.py
 services/
-  channels/cli/            kairos_cli (Typer)
-  harness/kairos_harness/  agent.py, system_prompt.py, approval_store.py, audit.py, news.py, voice.py, tools/
-  memory/kairos_memory/    main.py, vault.py, index_db.py (FTS5), registry.py, schemas.py, wiki_agent.py, atlas.py, graph.py
-  runtime/kairos_runtime/  llm.py, config.py, prompt_cache.py, research/{runner,classifier,lead,verifier,synthesizer,fetch,cache,...}
+  channels/cli/            disease360_cli (Typer)
+  harness/disease360_harness/  agent.py, system_prompt.py, approval_store.py, audit.py, news.py, voice.py, tools/
+  memory/disease360_memory/    main.py, vault.py, index_db.py (FTS5), registry.py, schemas.py, wiki_agent.py, atlas.py, graph.py
+  runtime/disease360_runtime/  llm.py, config.py, prompt_cache.py, research/{runner,classifier,lead,verifier,synthesizer,fetch,cache,...}
 tests/                     conftest.py + test_{audit,approval_store,vault,registry,index_db,graph,atlas}.py
 vault/                     Brains: "Bruno's Brain" (primary), "Deloitte's Brain", "Acme SaaS Inc", "Beacon Logistics"
 logs/audit.jsonl           Append-only audit trail (one event per line; args redacted)
@@ -81,7 +81,7 @@ run.ps1, stop.ps1          Launch all three / kill anything on 8001/8002/5173/51
 CONTEXT.md                 Glossary — read before introducing new terms
 ```
 
-Python packages on the path: `kairos_memory`, `kairos_harness`, `kairos_cli`, `kairos_runtime`. Console script: `kairos`.
+Python packages on the path: `disease360_memory`, `disease360_harness`, `disease360_cli`, `disease360_runtime`. Console script: `disease360`.
 
 ## Dev workflow
 
@@ -96,15 +96,15 @@ pytest                                     # asyncio_mode=auto; tests under test
 cd apps\web && npx tsc --noEmit            # frontend type check
 ```
 
-Tests use a `kairos_home` fixture that points `KAIROS_HOME` at a tmp dir with `policies/`, `identity/`, `vault/` scaffolding — keep new tests on this pattern, never touch the real vault.
+Tests use a `disease360_home` fixture that points `DISEASE360_HOME` at a tmp dir with `policies/`, `identity/`, `vault/` scaffolding — keep new tests on this pattern, never touch the real vault.
 
-Docs: `python scripts/build_docs.py` regenerates `docs/exports/*.docx` from canonical markdown and `*.pdf` from HTML decks via headless Chrome/Edge (set `KAIROS_CHROME` if not auto-detected).
+Docs: `python scripts/build_docs.py` regenerates `docs/exports/*.docx` from canonical markdown and `*.pdf` from HTML decks via headless Chrome/Edge (set `DISEASE360_CHROME` if not auto-detected).
 
 ## How to work in this repo
 
 - **Edit existing files.** Don't add new abstractions or files unless the task requires them. The architecture is small and deliberate.
 - **No code reuse from prior projects.** Locked decision #1 — even if it would save time.
-- **Match the audit-log invariant.** Any new mutating tool must be intercept-able by `HumanInTheLoopMiddleware` and emit `tool_call` / `tool_result` events through `kairos_harness.audit`. Add it to `policies/actions.yaml` under `require_approval` unless it's read-only.
+- **Match the audit-log invariant.** Any new mutating tool must be intercept-able by `HumanInTheLoopMiddleware` and emit `tool_call` / `tool_result` events through `disease360_harness.audit`. Add it to `policies/actions.yaml` under `require_approval` unless it's read-only.
 - **Memory writes are two-phase.** `plan_*` proposes a diff (silent), `apply_*` writes to disk (gated). Don't add a one-shot write tool that bypasses the planner.
 - **Cockpit talks to harness, never to memory.** If the UI needs vault data, route through a harness endpoint or extend `apps/web/src/lib/api.ts` against `/api/memory/*` (which the dev proxy handles, but keep this constraint visible).
 - **Read `vault/<brain>/AGENTS.md`** before any change that writes wiki pages — that's the contract the wiki agent follows, brain-local.

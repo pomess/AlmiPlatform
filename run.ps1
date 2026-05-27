@@ -1,4 +1,4 @@
-# Launch all Kairos services in one terminal.
+# Launch all Disease360 services in one terminal.
 # Usage:  .\run.ps1
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path

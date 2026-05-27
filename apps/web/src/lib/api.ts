@@ -2,7 +2,7 @@
 
 // Default tenant for local dev. Auth will swap this for the signed-in tenant id.
 const DEFAULT_TENANT = "local";
-const LS_TENANT = "kairos.activeTenant";
+const LS_TENANT = "disease360.activeTenant";
 
 export function getActiveTenant(): string {
   return localStorage.getItem(LS_TENANT) || DEFAULT_TENANT;
@@ -18,24 +18,9 @@ function memTenant(suffix = ""): string {
   return `/api/memory/tenant/${encodeURIComponent(getActiveTenant())}${suffix}`;
 }
 
-export type Approval = {
-  id: string;
-  thread_id: string;
-  tool: string;
-  args: Record<string, unknown>;
-  rationale: string | null;
-  status: "pending" | "approved" | "denied" | "expired" | "dnd_held";
-  created_at: string;
-  expires_at: string;
-  resolved_at: string | null;
-  resolved_by: string | null;
-};
-
 export type ChatResponse = {
   thread_id: string;
   final_text: string;
-  interrupted: boolean;
-  approvals: Approval[];
   raw_messages: { role: string; content: string }[];
 };
 
@@ -56,64 +41,15 @@ export type NewsVideo = {
 };
 export type NewsBriefing = {
   fetched_at: string;
-  world: NewsSource[];
-  tech: NewsSource[];
-  ai: NewsSource[];
+  pharma: NewsSource[];
+  derm: NewsSource[];
+  competitors: NewsSource[];
   video: NewsVideo | null;
 };
 
 export async function fetchDailyNews(force = false): Promise<NewsBriefing> {
   return jget<NewsBriefing>(`/api/harness/news${force ? "?force=1" : ""}`);
 }
-
-// --- Wiki maintenance: ingest / lint / solve ------------------------------
-
-export type WikiEditOp = {
-  kind: "create" | "update";
-  path: string;
-  title?: string | null;
-  before?: string | null;
-  after: string;
-};
-
-export type IngestPlan = {
-  plan_id: string;
-  brain: string;
-  kind: "ingest" | "solve";
-  summary: string;
-  ops: WikiEditOp[];
-  hot_before: string;
-  hot_after: string;
-  index_before: string;
-  index_after: string;
-  overview_before: string;
-  overview_after: string;
-  log_entry: string;
-  raw_path: string | null;
-  created_at: string;
-  expires_at: string;
-};
-
-export type LintIssue = {
-  type: string;
-  severity: "high" | "medium" | "low";
-  description: string;
-  page: string;
-  suggestion: string;
-};
-
-export type LintReport = {
-  issues: LintIssue[];
-  summary: string;
-  stats: { total_pages?: number; orphans?: number; missing_pages?: number };
-};
-
-export type ApplyResult = {
-  ok: boolean;
-  plan_id: string;
-  pages_touched: string[];
-  summary: string;
-};
 
 async function jget<T>(url: string): Promise<T> {
   const r = await fetch(url);
@@ -136,15 +72,6 @@ export const api = {
   chat: (req: { message: string; brain: string; thread_id?: string | null; profile?: string }) =>
     jpost<ChatResponse>("/api/harness/chat", { tenant_id: getActiveTenant(), ...req }),
   chatStream,
-  listApprovals: (status: string = "pending") =>
-    jget<Approval[]>(`/api/harness/approvals?status=${encodeURIComponent(status)}`),
-  approve: (id: string, edited_args?: Record<string, unknown>) =>
-    jpost<{ final_text: string }>(`/api/harness/approvals/${id}/approve`, {
-      by: "web",
-      edited_args,
-    }),
-  deny: (id: string, feedback?: string) =>
-    jpost<{ final_text: string }>(`/api/harness/approvals/${id}/deny`, { by: "web", feedback }),
   // memory
   brains: () => jget<Brain[]>(memTenant("/brains")),
   index: (brain: string) =>
@@ -160,25 +87,6 @@ export const api = {
       nodes: { id: string; title: string; layer: string }[];
       edges: { source: string; target: string }[];
     }>(memBrain(brain, "/graph")),
-
-  // wiki maintenance
-  lintBrain: (brain: string) =>
-    jpost<LintReport>(memBrain(brain, "/lint"), {}),
-  planIngest: (brain: string, title: string, content: string) =>
-    jpost<IngestPlan>(memBrain(brain, "/ingest/plan"), {
-      title,
-      content,
-    }),
-  applyIngest: (brain: string, plan_id: string) =>
-    jpost<ApplyResult>(memBrain(brain, "/ingest/apply"), {
-      plan_id,
-    }),
-  planSolve: (brain: string, issue: LintIssue) =>
-    jpost<IngestPlan>(memBrain(brain, "/solve/plan"), issue),
-  applySolve: (brain: string, plan_id: string) =>
-    jpost<ApplyResult>(memBrain(brain, "/solve/apply"), {
-      plan_id,
-    }),
 };
 
 // --- streaming chat -------------------------------------------------------
@@ -206,7 +114,7 @@ export type ChatStreamEvent =
       };
     }
   | { type: "token"; text: string }
-  | { type: "done"; thread_id: string; interrupted: boolean; approvals: Approval[] }
+  | { type: "done"; thread_id: string }
   | { type: "error"; message: string };
 
 export interface ChatStreamHandle {
@@ -290,7 +198,7 @@ export type VoiceTurnEvent =
   | { type: "tool_call"; id: string; name: string; args: Record<string, unknown> }
   | { type: "token"; text: string }
   | { type: "audio"; b64: string; seq: number; rate: number }
-  | { type: "done"; thread_id: string; interrupted: boolean; approvals: Approval[]; empty?: boolean }
+  | { type: "done"; thread_id: string; empty?: boolean }
   | { type: "error"; message: string };
 
 export interface VoiceTurnHandle {
@@ -589,7 +497,7 @@ export async function fetchGraph(brain: string): Promise<{
   };
 }
 
-const LS_BRAIN = "kairos.activeBrain";
+const LS_BRAIN = "disease360.activeBrain";
 export function getActiveBrain(): string {
   const legacy = localStorage.getItem("jarvis.activeBrain");
   if (legacy && !localStorage.getItem(LS_BRAIN)) {

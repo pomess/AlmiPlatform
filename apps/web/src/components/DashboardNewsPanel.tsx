@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useDailyNews } from "../hooks/useDailyNews";
 import type { NewsSource } from "../lib/api";
-import DashboardVideoTile from "./DashboardVideoTile";
+// import DashboardVideoTile from "./DashboardVideoTile"; // disabled — video tile to be redesigned
 
-const LS_COLLAPSED = "kairos.news.collapsed";
-const LS_INTRO_DATE = "kairos.news.introPlayedDate";
+const LS_COLLAPSED = "disease360.news.collapsed";
+const LS_INTRO_DATE = "disease360.news.introPlayedDate";
 
 // Spoken once on the first dashboard open of the day. Kept short so it
 // doesn't fight the dashboard's existing voice/PTT loop. The greeting
@@ -24,10 +24,10 @@ function buildIntroLine(): string {
   return `${greetingForHour(new Date().getHours())}. Today's headlines, below.`;
 }
 
-const CATEGORY_LABELS: { key: "world" | "tech" | "ai"; label: string }[] = [
-  { key: "world", label: "World" },
-  { key: "tech", label: "Tech" },
-  { key: "ai", label: "AI" },
+const CATEGORY_LABELS: { key: "pharma" | "derm" | "competitors"; label: string }[] = [
+  { key: "pharma", label: "Pharma" },
+  { key: "derm", label: "Dermatology" },
+  { key: "competitors", label: "Competitors" },
 ];
 
 function flattenSources(sources: NewsSource[] | undefined): {
@@ -62,10 +62,10 @@ function todayLocalISO(): string {
 // before a user gesture, so if the initial play() throws NotAllowedError we
 // arm a one-shot listener that retries on the first pointer/key event.
 function notifyIntroEnded(): void {
-  window.__kairosNewsIntroSpeaking = false;
-  const cb = window.__kairosOnNewsIntroEnd;
+  window.__disease360NewsIntroSpeaking = false;
+  const cb = window.__disease360OnNewsIntroEnd;
   if (cb) {
-    window.__kairosOnNewsIntroEnd = null;
+    window.__disease360OnNewsIntroEnd = null;
     try {
       cb();
     } catch {
@@ -78,19 +78,19 @@ function playIntroOnce(): () => void {
   if (localStorage.getItem(LS_INTRO_DATE) === todayLocalISO()) {
     // Already spoken today — make sure the flag is false so the video
     // tile starts right away on this load.
-    window.__kairosNewsIntroSpeaking = false;
+    window.__disease360NewsIntroSpeaking = false;
     return () => {};
   }
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     // Mark as played so we don't keep retrying for users who opt out of motion+audio.
     localStorage.setItem(LS_INTRO_DATE, todayLocalISO());
-    window.__kairosNewsIntroSpeaking = false;
+    window.__disease360NewsIntroSpeaking = false;
     return () => {};
   }
 
   // Latch the global flag so the video tile knows to defer its iframe
   // creation until the spoken line is done.
-  window.__kairosNewsIntroSpeaking = true;
+  window.__disease360NewsIntroSpeaking = true;
 
   const ctrl = new AbortController();
   let cleanupGesture: (() => void) | null = null;
@@ -166,7 +166,13 @@ function playIntroOnce(): () => void {
   };
 }
 
-export function DashboardNewsPanel() {
+export function DashboardNewsPanel({
+  selectedCompetitor,
+  onDismissCompetitor,
+}: {
+  selectedCompetitor?: string | null;
+  onDismissCompetitor?: () => void;
+}) {
   const { data, loading, error } = useDailyNews();
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     try {
@@ -196,6 +202,24 @@ export function DashboardNewsPanel() {
     return stop;
   }, [collapsed, data]);
 
+  // Build competitor-filtered items when a pin is selected
+  const competitorItems = (() => {
+    if (!selectedCompetitor || !data) return [];
+    const needle = selectedCompetitor.toLowerCase();
+    // First try exact source match from competitor feeds
+    const directItems = flattenSources(
+      data.competitors?.filter((s) => s.source.toLowerCase() === needle),
+    );
+    if (directItems.length > 0) return directItems;
+    // Fallback: scan all news for title mentions
+    const allItems = [
+      ...flattenSources(data.pharma),
+      ...flattenSources(data.competitors),
+      ...flattenSources(data.derm),
+    ];
+    return allItems.filter((it) => it.title.toLowerCase().includes(needle));
+  })();
+
   if (collapsed) {
     return (
       <button
@@ -211,7 +235,48 @@ export function DashboardNewsPanel() {
 
   return (
     <>
-    <aside className="dashboard-news-panel" aria-label="Daily news">
+    <aside
+      className={`dashboard-news-panel${selectedCompetitor ? " dashboard-news-panel--competitor" : ""}`}
+      aria-label={selectedCompetitor ? `${selectedCompetitor} news` : "Daily news"}
+    >
+      {selectedCompetitor ? (
+        <>
+          <header className="dashboard-news-header">
+            <span className="dashboard-news-competitor-name">{selectedCompetitor}</span>
+            <button
+              type="button"
+              className="dashboard-news-close"
+              onClick={onDismissCompetitor}
+              aria-label="Dismiss competitor news"
+            >
+              ×
+            </button>
+          </header>
+          <div className="dashboard-news-body">
+            {competitorItems.length === 0 ? (
+              <div className="dashboard-news-empty">
+                No headlines found for {selectedCompetitor}.
+              </div>
+            ) : (
+              <ul className="dashboard-news-list">
+                {competitorItems.slice(0, 12).map((it, i) => (
+                  <li key={`comp-${i}`} className="dashboard-news-item">
+                    <a
+                      href={it.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`${it.source} — ${it.title}`}
+                    >
+                      {it.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
       <header className="dashboard-news-header">
         <span className="dashboard-news-title">NEWS · {todayHeader()}</span>
         <button
@@ -254,14 +319,9 @@ export function DashboardNewsPanel() {
                           href={it.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          title={it.title}
+                          title={`${it.source} — ${it.title}`}
                         >
-                          <span className="dashboard-news-source">
-                            {it.source}
-                          </span>
-                          <span className="dashboard-news-headline">
-                            {it.title}
-                          </span>
+                          {it.title}
                         </a>
                       </li>
                     ))}
@@ -272,8 +332,12 @@ export function DashboardNewsPanel() {
           })}
         </div>
       )}
+        </>
+      )}
     </aside>
-    {data?.video && <DashboardVideoTile video={data.video} />}
+    {/* Video tile + hide/show button temporarily disabled — to be redesigned.
+    {data?.video && !selectedCompetitor && <DashboardVideoTile video={data.video} />}
+    */}
     </>
   );
 }
