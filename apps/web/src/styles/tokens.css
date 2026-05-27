@@ -1,4 +1,4 @@
-/* Kairos — design tokens
+/* Disease360 — design tokens
    Cinematic glass · obsidian · navy accent (Greek palette)
 */
 
@@ -300,3 +300,19 @@ textarea:focus-visible,
 [data-density="compact"] { --density: 0.85; }
 [data-density="normal"] { --density: 1; }
 [data-density="comfy"] { --density: 1.18; }
+
+/* View Transitions — smooth crossfade between landing ↔ cockpit */
+::view-transition-old(root) {
+  animation: vt-fade-out 400ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+::view-transition-new(root) {
+  animation: vt-fade-in 400ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes vt-fade-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.98); }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; transform: scale(1.02); }
+  to { opacity: 1; transform: scale(1); }
+}

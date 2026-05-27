@@ -1,4 +1,4 @@
-// Verbatim port of JARVIS/app/pages.jsx — Approvals / Brains / BrainDetail / Settings.
+// Verbatim port of JARVIS/app/pages.jsx — Approvals / Brains / BrainDetail.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { api, type LintReport, type LintIssue } from "../lib/api";
@@ -169,28 +169,6 @@ export function ApprovalsPage({
               </button>
             ))}
           </div>
-          <button className="btn btn-ghost" disabled style={{ opacity: 0.6 }}>
-            <span style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-              >
-                <rect x="2" y="4" width="9" height="8" rx="1.5" />
-                <path d="M11 7l3-1.5v5L11 9" />
-              </svg>
-              Enable gestures
-            </span>
-            <span
-              className="mono"
-              style={{ color: "var(--text-faint)", fontSize: 10.5, marginLeft: 8 }}
-            >
-              OFF
-            </span>
-          </button>
         </div>
 
         <div className="approvals-list">
@@ -729,121 +707,3 @@ function BrainDetail({
   );
 }
 
-// ============================================================
-// SETTINGS — gesture knobs, persisted to localStorage.
-// ============================================================
-const GESTURE_KEY = "kairos.gestureSettings";
-
-type GestureSettings = { fps: number; conf: number; frames: number; cool: number };
-const GESTURE_DEFAULTS: GestureSettings = { fps: 3, conf: 0.65, frames: 3, cool: 2000 };
-
-export function SettingsPage() {
-  const [s, setS] = useState<GestureSettings>(() => {
-    try {
-      const raw = localStorage.getItem(GESTURE_KEY);
-      if (raw) return { ...GESTURE_DEFAULTS, ...JSON.parse(raw) };
-    } catch {
-      /* ignore */
-    }
-    return GESTURE_DEFAULTS;
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(GESTURE_KEY, JSON.stringify(s));
-    } catch {
-      /* ignore */
-    }
-  }, [s]);
-
-  const sliders = [
-    {
-      lbl: "Frame rate",
-      hint: "How often the camera samples a frame.",
-      v: s.fps,
-      key: "fps" as const,
-      min: 1,
-      max: 10,
-      step: 1,
-      fmt: (v: number) => `${v} fps`,
-    },
-    {
-      lbl: "Confidence",
-      hint: "Minimum model score to count a gesture.",
-      v: s.conf,
-      key: "conf" as const,
-      min: 0.3,
-      max: 0.95,
-      step: 0.05,
-      fmt: (v: number) => v.toFixed(2),
-    },
-    {
-      lbl: "Confirm frames",
-      hint: "Consecutive matching frames before firing.",
-      v: s.frames,
-      key: "frames" as const,
-      min: 1,
-      max: 10,
-      step: 1,
-      fmt: (v: number) => `${v}`,
-    },
-    {
-      lbl: "Cooldown",
-      hint: "Quiet period after a gesture fires.",
-      v: s.cool,
-      key: "cool" as const,
-      min: 500,
-      max: 5000,
-      step: 250,
-      fmt: (v: number) => `${(v / 1000).toFixed(2)} s`,
-    },
-  ];
-
-  return (
-    <div className="settings-page page">
-      <div className="settings-inner">
-        <div className="page-head">
-          <span className="eyebrow">PREFERENCES</span>
-          <h1>Settings</h1>
-          <p>Tune gesture recognition. More controls land here as the surface grows.</p>
-        </div>
-
-        <div className="settings-card">
-          <h3>
-            Gestures <span className="desc">Camera-based approval shortcut</span>
-          </h3>
-          {sliders.map((sl) => {
-            const p = ((sl.v - sl.min) / (sl.max - sl.min)) * 100;
-            return (
-              <div className="slider-row" key={sl.key}>
-                <div className="slider-top">
-                  <div>
-                    <div className="lbl">{sl.lbl}</div>
-                    <div className="hint">{sl.hint}</div>
-                  </div>
-                  <div className="val">{sl.fmt(sl.v)}</div>
-                </div>
-                <input
-                  type="range"
-                  min={sl.min}
-                  max={sl.max}
-                  step={sl.step}
-                  value={sl.v}
-                  style={{ ["--p" as never]: p + "%" } as React.CSSProperties}
-                  onChange={(e) =>
-                    setS((prev) => ({ ...prev, [sl.key]: parseFloat(e.target.value) }))
-                  }
-                />
-              </div>
-            );
-          })}
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-            <button className="btn btn-ghost btn-sm" onClick={() => setS(GESTURE_DEFAULTS)}>
-              Reset to defaults
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}

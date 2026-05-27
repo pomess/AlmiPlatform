@@ -48,6 +48,7 @@ export function makePharmaMarker(
   const el = document.createElement("div");
   el.className = `dashboard-pharma-pin dashboard-pharma-pin--${variant}`;
   el.title = `${name} — ${city}`;
+  el.dataset.company = name;
   el.innerHTML = `
     <svg viewBox="0 0 ${width} 80" width="${width}" height="80" xmlns="http://www.w3.org/2000/svg">
       <circle cx="16" cy="64" r="3" class="pharma-pin-anchor" />

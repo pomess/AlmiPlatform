@@ -166,7 +166,13 @@ function playIntroOnce(): () => void {
   };
 }
 
-export function DashboardNewsPanel() {
+export function DashboardNewsPanel({
+  selectedCompetitor,
+  onDismissCompetitor,
+}: {
+  selectedCompetitor?: string | null;
+  onDismissCompetitor?: () => void;
+}) {
   const { data, loading, error } = useDailyNews();
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     try {
@@ -196,6 +202,24 @@ export function DashboardNewsPanel() {
     return stop;
   }, [collapsed, data]);
 
+  // Build competitor-filtered items when a pin is selected
+  const competitorItems = (() => {
+    if (!selectedCompetitor || !data) return [];
+    const needle = selectedCompetitor.toLowerCase();
+    // First try exact source match from competitor feeds
+    const directItems = flattenSources(
+      data.competitors?.filter((s) => s.source.toLowerCase() === needle),
+    );
+    if (directItems.length > 0) return directItems;
+    // Fallback: scan all news for title mentions
+    const allItems = [
+      ...flattenSources(data.pharma),
+      ...flattenSources(data.competitors),
+      ...flattenSources(data.derm),
+    ];
+    return allItems.filter((it) => it.title.toLowerCase().includes(needle));
+  })();
+
   if (collapsed) {
     return (
       <button
@@ -211,7 +235,48 @@ export function DashboardNewsPanel() {
 
   return (
     <>
-    <aside className="dashboard-news-panel" aria-label="Daily news">
+    <aside
+      className={`dashboard-news-panel${selectedCompetitor ? " dashboard-news-panel--competitor" : ""}`}
+      aria-label={selectedCompetitor ? `${selectedCompetitor} news` : "Daily news"}
+    >
+      {selectedCompetitor ? (
+        <>
+          <header className="dashboard-news-header">
+            <span className="dashboard-news-competitor-name">{selectedCompetitor}</span>
+            <button
+              type="button"
+              className="dashboard-news-close"
+              onClick={onDismissCompetitor}
+              aria-label="Dismiss competitor news"
+            >
+              ×
+            </button>
+          </header>
+          <div className="dashboard-news-body">
+            {competitorItems.length === 0 ? (
+              <div className="dashboard-news-empty">
+                No headlines found for {selectedCompetitor}.
+              </div>
+            ) : (
+              <ul className="dashboard-news-list">
+                {competitorItems.slice(0, 12).map((it, i) => (
+                  <li key={`comp-${i}`} className="dashboard-news-item">
+                    <a
+                      href={it.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`${it.source} — ${it.title}`}
+                    >
+                      {it.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
       <header className="dashboard-news-header">
         <span className="dashboard-news-title">NEWS · {todayHeader()}</span>
         <button
@@ -267,8 +332,10 @@ export function DashboardNewsPanel() {
           })}
         </div>
       )}
+        </>
+      )}
     </aside>
-    {data?.video && <DashboardVideoTile video={data.video} />}
+    {data?.video && !selectedCompetitor && <DashboardVideoTile video={data.video} />}
     </>
   );
 }

@@ -427,7 +427,7 @@ function SkeletonAnswer() {
   return (
     <div className="msg">
       <div className="meta">
-        <span className="who jarvis">KAIROS</span>
+        <span className="who jarvis">DISEASE360</span>
         <span>·</span>
       </div>
       <div style={{ display: "grid", gap: 8, maxWidth: 520 }}>
@@ -515,7 +515,7 @@ export function ChatStream({
     rendered.push(
       <div className="msg" key={i}>
         <div className="meta">
-          <span className="who jarvis">KAIROS</span>
+          <span className="who jarvis">DISEASE360</span>
           <span>{m.ts}</span>
         </div>
         <div className="body">{renderMarkdown(m.content)}</div>

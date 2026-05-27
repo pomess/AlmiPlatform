@@ -1558,58 +1558,6 @@ body { overflow: hidden; }
 }
 
 /* ============================================================
-   SETTINGS page
-   ============================================================ */
-.settings-page { overflow-y: auto; height: 100%; }
-.settings-inner {
-  max-width: 720px; margin: 0 auto;
-  padding: 32px 32px 80px;
-}
-.settings-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--r-lg);
-  padding: 24px;
-  display: grid; gap: 20px;
-}
-.settings-card h3 {
-  margin: 0;
-  font-size: 15px; font-weight: 500; letter-spacing: -0.005em;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.settings-card h3 .desc { font-weight: 400; font-size: 12.5px; color: var(--text-muted); }
-.slider-row { display: grid; gap: 10px; }
-.slider-row .slider-top {
-  display: grid; grid-template-columns: 1fr auto;
-  gap: 12px; align-items: baseline;
-}
-.slider-row .lbl { font-size: 13.5px; color: var(--text-primary); }
-.slider-row .hint { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-.slider-row .val {
-  font-family: var(--font-mono); font-size: 12px;
-  padding: 3px 10px; border-radius: var(--r-full);
-  background: var(--accent-faint);
-  color: var(--accent-bright);
-  border: 1px solid var(--border-accent);
-}
-.slider-row input[type=range] {
-  width: 100%; appearance: none; background: transparent; height: 22px;
-  cursor: pointer;
-}
-.slider-row input[type=range]::-webkit-slider-runnable-track {
-  height: 4px; border-radius: 2px;
-  background: linear-gradient(to right, var(--accent) var(--p,50%), oklch(1 0 0 / 0.06) var(--p,50%));
-}
-.slider-row input[type=range]::-webkit-slider-thumb {
-  appearance: none;
-  margin-top: -6px;
-  width: 16px; height: 16px; border-radius: 50%;
-  background: oklch(0.97 0.01 260);
-  border: 2px solid var(--accent);
-  box-shadow: 0 2px 8px -2px var(--accent-glow);
-}
-
-/* ============================================================
    DASHBOARD
    ============================================================ */
 
@@ -1620,6 +1568,24 @@ body { overflow: hidden; }
   background: var(--bg-void);
 }
 .dashboard-page canvas { outline: none; }
+
+/* Soft scrim so map labels don't fight the eyebrow + news panel */
+.dashboard-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 420px;
+  height: 50%;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 420px 400px at 0% 0%,
+    oklch(0.08 0.01 240 / 0.82),
+    transparent 70%
+  );
+}
+
 .dashboard-eyebrow {
   position: absolute; top: 16px; left: 20px; z-index: 2;
   pointer-events: none;
@@ -2897,6 +2863,29 @@ body { overflow: hidden; }
   color: oklch(0.95 0.10 175);
 }
 
+/* Competitor mode — red accent replaces green when a rival pin is selected */
+.dashboard-news-panel--competitor .dashboard-news-title,
+.dashboard-news-panel--competitor .dashboard-news-section-summary {
+  color: oklch(0.85 0.20 25 / 0.9);
+}
+.dashboard-news-panel--competitor .dashboard-news-close:hover {
+  background: oklch(0.85 0.20 25 / 0.12);
+}
+.dashboard-news-panel--competitor .dashboard-news-item a:hover {
+  background: oklch(0.85 0.20 25 / 0.08);
+}
+.dashboard-news-panel--competitor .dashboard-news-source {
+  color: oklch(0.85 0.20 25 / 0.7);
+}
+.dashboard-news-competitor-name {
+  font-family: var(--font-sans, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: oklch(0.85 0.20 25);
+  line-height: 1.2;
+}
+
 /* Toggle rail attached to the video tile.
    - When the video is open: sits at the tile's right edge (left 312 + 400 = 712).
    - When the video is hidden: sits where the tile's left edge would be (312),
@@ -3590,6 +3579,10 @@ body { overflow: hidden; }
    ============================================================ */
 .dashboard-pharma-pin {
   pointer-events: none;
+}
+.dashboard-pharma-pin--rival {
+  pointer-events: auto;
+  cursor: pointer;
 }
 .dashboard-pharma-pin .pharma-pin-line,
 .dashboard-pharma-pin .pharma-pin-tick {

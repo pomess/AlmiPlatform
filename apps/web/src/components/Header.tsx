@@ -52,7 +52,6 @@ export function Header({
     { id: "graph", label: "Graph" },
     { id: "approvals", label: "Approvals", badge: pendingCount > 0 ? pendingCount : null },
     { id: "brains", label: "Brains" },
-    { id: "settings", label: "Settings" },
   ];
   const showBrain = ["chat", "graph", "brains"].includes(route);
 

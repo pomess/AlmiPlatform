@@ -17,7 +17,13 @@ export function Landing() {
   const navigate = useNavigate();
 
   const handleOpenApp = () => {
-    navigate("/app");
+    if (document.startViewTransition) {
+      document.startViewTransition(() => {
+        navigate("/app");
+      });
+    } else {
+      navigate("/app");
+    }
   };
 
   useEffect(() => {
@@ -271,7 +277,7 @@ export function Landing() {
       <section
         id="section-1"
         className="hero"
-        style={{ minHeight: "auto", padding: "40px 24px 0", scrollMarginTop: 96 }}
+        style={{ minHeight: "auto", padding: "40px 24px 40px", scrollMarginTop: 96 }}
       >
         <div className="preview-wrap" id="previewWrap">
           <div className="preview hud-frame" id="previewPanel">
@@ -287,7 +293,7 @@ export function Landing() {
         </div>
       </section>
 
-      <div className="section-head" style={{ marginTop: 40 }}>
+      <div className="section-head" style={{ marginTop: 80 }}>
         <h2>
           Every drug <em>in your sights.</em>
         </h2>
@@ -322,12 +328,11 @@ export function Landing() {
             </p>
           </article>
           <article className="feat hud-frame fade-up">
-            <div className="ix">04 · TWO INDICATIONS, ONE SHELL</div>
-            <h3>AD today. HS today. More tomorrow.</h3>
+            <div className="ix">04 · THREE INDICATIONS, ONE SHELL</div>
+            <h3>AD. HS. Psoriasis. Same cockpit.</h3>
             <p>
-              Atopic dermatitis and hidradenitis suppurativa are wired in. Psoriasis, prurigo,
-              alopecia areata — same shell, same map, same drill-down. Add an indication, not a
-              tool.
+              Three indications wired in today. Prurigo nodularis, alopecia areata, vitiligo —
+              same shell, same map, same drill-down. Add an indication, not a tool.
             </p>
           </article>
         </div>
@@ -407,8 +412,8 @@ export function Landing() {
               lineHeight: 1.55,
             }}
           >
-            Atopic dermatitis and hidradenitis suppurativa, end-to-end. Open Disease360 and
-            click any dot to drill into the asset behind it.
+            Atopic dermatitis, hidradenitis suppurativa, and psoriasis — end-to-end. Open
+            Disease360 and click any dot to drill into the asset behind it.
           </p>
           <button
             className="enter-btn"

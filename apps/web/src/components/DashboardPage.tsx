@@ -129,13 +129,13 @@ function DashboardComposer({
             (e.currentTarget as HTMLTextAreaElement).blur();
           }
         }}
-        placeholder="ASK KAIROS"
+        placeholder="ASK DISEASE360"
         rows={1}
         spellCheck={false}
         autoCorrect="off"
         autoCapitalize="off"
         disabled={disabled}
-        aria-label="Type a prompt for Kairos"
+        aria-label="Type a prompt for Disease360"
       />
       <button
         type="button"
@@ -207,6 +207,7 @@ export function DashboardPage() {
   const homeMarkerRef = useRef<maplibregl.Marker | null>(null);
   const competitorMarkersRef = useRef<maplibregl.Marker[]>([]);
   const [status, setStatus] = useState<string | null>(null);
+  const [selectedCompetitor, setSelectedCompetitor] = useState<string | null>(null);
   const [silentTextTurns, setSilentTextTurns] = useState<boolean>(() =>
     readComposerSilent(),
   );
@@ -291,6 +292,24 @@ export function DashboardPage() {
       map.remove();
       mapRef.current = null;
     };
+  }, []);
+
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    function onClick(e: MouseEvent) {
+      const pin = (e.target as HTMLElement).closest(
+        ".dashboard-pharma-pin--rival[data-company]",
+      ) as HTMLElement | null;
+      if (pin) {
+        const company = pin.dataset.company || "";
+        setSelectedCompetitor((prev) => (prev === company ? null : company));
+      } else if (!(e.target as HTMLElement).closest(".dashboard-news-panel")) {
+        setSelectedCompetitor(null);
+      }
+    }
+    host.addEventListener("click", onClick);
+    return () => host.removeEventListener("click", onClick);
   }, []);
 
   function recenter() {
@@ -437,7 +456,10 @@ export function DashboardPage() {
         <span className="eyebrow">DASHBOARD · GLOBAL VIEW</span>
         {status && <span className="status">{status}</span>}
       </div>
-      <DashboardNewsPanel />
+      <DashboardNewsPanel
+        selectedCompetitor={selectedCompetitor}
+        onDismissCompetitor={() => setSelectedCompetitor(null)}
+      />
       <div
         className={`dashboard-ptt-bar${pttHeld ? " is-active" : ""}`}
         role="status"

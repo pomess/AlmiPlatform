@@ -12,11 +12,7 @@ import { Rail } from "../components/Rail";
 import { GraphPage } from "../components/GraphPage";
 import { DashboardPage } from "../components/DashboardPage";
 import { BullseyePage } from "../components/BullseyePage";
-import {
-  ApprovalsPage,
-  BrainsPage,
-  SettingsPage,
-} from "../components/Pages";
+import { ApprovalsPage, BrainsPage } from "../components/Pages";
 import { useBrains, type DisplayBrain } from "../hooks/useBrains";
 import { useApprovalsLive } from "../hooks/useApprovalsLive";
 import { useStreamChat } from "../hooks/useStreamChat";
@@ -28,8 +24,7 @@ type Route =
   | "bullseye"
   | "graph"
   | "approvals"
-  | "brains"
-  | "settings";
+  | "brains";
 const ROUTES: Route[] = [
   "chat",
   "dashboard",
@@ -37,7 +32,6 @@ const ROUTES: Route[] = [
   "graph",
   "approvals",
   "brains",
-  "settings",
 ];
 
 function routeFromPath(pathname: string): Route {
@@ -235,7 +229,6 @@ export function Cockpit() {
           <ApprovalsPage approvals={approvals} onResolve={handleResolve} />
         )}
         {route === "brains" && <BrainsPage brains={brains} />}
-        {route === "settings" && <SettingsPage />}
       </main>
     </div>
   );
