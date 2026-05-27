@@ -1,4 +1,4 @@
-// Almirall Platform — landing for the Bullseye competitive-intelligence cockpit.
+// Almirall Platform — landing for the Disease360 competitive-intelligence cockpit.
 // Reuses the existing Landing.css classes; swaps copy + preview for pharma.
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -7,10 +7,10 @@ import { LandingGraphDive } from "../components/LandingGraphDive";
 import "./Landing.css";
 
 const BOOT_MESSAGES = [
-  "almirall :: bullseye · 12 assets tracked · 2 indications",
-  "almirall :: ebglyss · IL-13 · EU rights · approved 2024",
-  "almirall :: HS landscape · 3 approved · 3 in late-stage trials",
-  "almirall :: next readout · sonelokimab VELA Ph III · watching",
+  "disease360 :: 12 assets tracked · 2 indications · live",
+  "disease360 :: ebglyss · IL-13 · EU rights · approved 2024",
+  "disease360 :: HS landscape · 3 approved · 3 in late-stage trials",
+  "disease360 :: next readout · sonelokimab VELA Ph III · watching",
 ];
 
 export function Landing() {
@@ -169,13 +169,13 @@ export function Landing() {
                 boxShadow: "0 0 8px oklch(0.78 0.13 155 / 0.6)",
               }}
             ></span>{" "}
-            COMPETITIVE INTELLIGENCE PLATFORM
+            DISEASE360
           </span>
           <button className="top-link mono" type="button" onClick={handleOpenApp}>
             Open platform →
           </button>
           <a className="enter-btn" href="#preview">
-            See the Bullseye →
+            See Disease360 →
           </a>
         </div>
       </header>
@@ -226,14 +226,17 @@ export function Landing() {
         <div className="float-line" style={{ left: "55%", right: 0, top: "58%" }}></div>
 
         <div className="hero-inner">
+          <div className="hero-pictogram" aria-hidden="true">
+            <img src="/logos/almirall_pictogram.svg" alt="" />
+          </div>
           <div className="eyebrow">
             <span className="live-dot"></span>
-            <span className="mono">ALMIRALL · DERMATOLOGY COMPETITIVE INTELLIGENCE</span>
+            <span className="mono">ALMIRALL · DISEASE360</span>
           </div>
           <h1 className="hero-title">
-            <span className="stack">Everything you need.</span>
-            <span className="accent">In one place.</span>
+            <span className="stack">Disease360</span>
           </h1>
+          <p className="hero-subtitle">Everything you need. <em>In one place.</em></p>
           <p className="hero-sub">
             A unified competitive-intelligence platform for Almirall's dermatology franchise.
             Landscape maps, knowledge graphs, global dashboards — all connected, all live,
@@ -241,7 +244,7 @@ export function Landing() {
           </p>
           <div className="hero-cta">
             <button className="enter-btn" type="button" onClick={handleOpenApp}>
-              Open the Bullseye <span className="mono">→</span>
+              Open Disease360 <span className="mono">→</span>
             </button>
             <a
               className="ghost"
@@ -276,7 +279,7 @@ export function Landing() {
               <img
                 className="preview-bullseye-snapshot"
                 src="/snapshots/bullseye-ad.png"
-                alt="Bullseye — atopic dermatitis competitive landscape"
+                alt="Disease360 — atopic dermatitis competitive landscape"
                 loading="lazy"
               />
             </div>
@@ -383,7 +386,7 @@ export function Landing() {
           <div className="aurora" style={{ left: -200, top: -200 }}></div>
           <div className="aurora" style={{ right: -200, bottom: -200 }}></div>
           <div className="eyebrow" style={{ marginBottom: 18 }}>
-            COMPETITIVE INTEL · ASSET DRILL-DOWN · TWO INDICATIONS WIRED
+            DISEASE360 · COMPETITIVE INTEL · ASSET DRILL-DOWN
           </div>
           <h2
             style={{
@@ -404,7 +407,7 @@ export function Landing() {
               lineHeight: 1.55,
             }}
           >
-            Atopic dermatitis and hidradenitis suppurativa, end-to-end. Open the Bullseye and
+            Atopic dermatitis and hidradenitis suppurativa, end-to-end. Open Disease360 and
             click any dot to drill into the asset behind it.
           </p>
           <button
@@ -427,9 +430,9 @@ export function Landing() {
             <span className="mono">© 2026 ALMIRALL</span>
           </div>
           <div className="links">
-            <a href="#preview">See the Bullseye</a>
+            <a href="#preview">See Disease360</a>
           </div>
-          <div className="mono">ALMIRALL · COMPETITIVE INTELLIGENCE PLATFORM</div>
+          <div className="mono">ALMIRALL · DISEASE360</div>
         </div>
       </footer>
     </div>
