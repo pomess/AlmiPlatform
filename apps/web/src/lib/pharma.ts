@@ -17,9 +17,15 @@ export type Competitor = {
   country: string;
   lat: number;
   lng: number;
-  // Wikipedia article title used to fetch the corporate cover image
-  // (Wikipedia REST summary endpoint). Disambiguated where needed
-  // because plain "Merck" / "UCB" resolve to disambig pages.
+  // Curated cover image served from /public/competitors/. Drop a JPG/PNG
+  // there with the matching filename and the photo card will pick it up.
+  // Falls back to Wikipedia when null. Vite serves /public at the site
+  // root, so "/competitors/sanofi.jpg" maps to
+  // apps/web/public/competitors/sanofi.jpg.
+  photoUrl: string | null;
+  // Wikipedia article title used as a fallback when photoUrl is null.
+  // Disambiguated where needed because plain "Merck" / "UCB" resolve to
+  // disambig pages.
   wikipedia: string;
   // Curated therapy-area shorthand for the photo card. Two or three
   // entries each — picked for the Spain-relevant pipeline so the card
@@ -29,37 +35,37 @@ export type Competitor = {
 
 export const COMPETITORS: Competitor[] = [
   { name: "Sanofi", city: "Barcelona", country: "Spain", lat: 41.4087, lng: 2.2174,
-    wikipedia: "Sanofi", therapyAreas: ["Immunology", "Vaccines", "Rare disease"] },
+    photoUrl: "/competitors/sanofi.jpg", wikipedia: "Sanofi", therapyAreas: ["Immunology", "Vaccines", "Rare disease"] },
   { name: "Novartis", city: "Barcelona", country: "Spain", lat: 41.3981834, lng: 2.1806575,
-    wikipedia: "Novartis", therapyAreas: ["Cardiovascular", "Oncology", "Immunology"] },
+    photoUrl: "/competitors/novartis.jpg", wikipedia: "Novartis", therapyAreas: ["Cardiovascular", "Oncology", "Immunology"] },
   { name: "LEO Pharma", city: "Sant Cugat del Vallès", country: "Spain", lat: 41.4710, lng: 2.0879,
-    wikipedia: "LEO Pharma", therapyAreas: ["Dermatology", "Thrombosis"] },
+    photoUrl: null, wikipedia: "LEO Pharma", therapyAreas: ["Dermatology", "Thrombosis"] },
   { name: "AbbVie", city: "Madrid", country: "Spain", lat: 40.4769, lng: -3.6792,
-    wikipedia: "AbbVie", therapyAreas: ["Immunology", "Oncology", "Aesthetics"] },
+    photoUrl: null, wikipedia: "AbbVie", therapyAreas: ["Immunology", "Oncology", "Aesthetics"] },
   { name: "Pfizer", city: "Alcobendas", country: "Spain", lat: 40.5366, lng: -3.6307,
-    wikipedia: "Pfizer", therapyAreas: ["Vaccines", "Oncology", "Inflammation"] },
+    photoUrl: null, wikipedia: "Pfizer", therapyAreas: ["Vaccines", "Oncology", "Inflammation"] },
   { name: "Eli Lilly", city: "Alcobendas", country: "Spain", lat: 40.5398, lng: -3.6359,
-    wikipedia: "Eli Lilly and Company", therapyAreas: ["Diabetes", "Oncology", "Immunology"] },
+    photoUrl: null, wikipedia: "Eli Lilly and Company", therapyAreas: ["Diabetes", "Oncology", "Immunology"] },
   { name: "Johnson & Johnson", city: "Madrid", country: "Spain", lat: 40.4574, lng: -3.6105,
-    wikipedia: "Johnson & Johnson", therapyAreas: ["Immunology", "Oncology", "Neuroscience"] },
+    photoUrl: null, wikipedia: "Johnson & Johnson", therapyAreas: ["Immunology", "Oncology", "Neuroscience"] },
   { name: "UCB", city: "Madrid", country: "Spain", lat: 40.4419, lng: -3.6809,
-    wikipedia: "UCB (company)", therapyAreas: ["Immunology", "Neurology", "Bone"] },
+    photoUrl: null, wikipedia: "UCB (company)", therapyAreas: ["Immunology", "Neurology", "Bone"] },
   { name: "Galderma", city: "Madrid", country: "Spain", lat: 40.4360, lng: -3.6784,
-    wikipedia: "Galderma", therapyAreas: ["Dermatology", "Aesthetics"] },
+    photoUrl: null, wikipedia: "Galderma", therapyAreas: ["Dermatology", "Aesthetics"] },
   { name: "Incyte", city: "Madrid", country: "Spain", lat: 40.4279, lng: -3.7032,
-    wikipedia: "Incyte", therapyAreas: ["Oncology", "Dermatology", "MPN"] },
+    photoUrl: null, wikipedia: "Incyte", therapyAreas: ["Oncology", "Dermatology", "MPN"] },
   { name: "Roche", city: "Sant Cugat del Vallès", country: "Spain", lat: 41.4924849, lng: 2.0582393,
-    wikipedia: "Hoffmann-La Roche", therapyAreas: ["Oncology", "Immunology", "Ophthalmology"] },
+    photoUrl: "/competitors/roche.jpg", wikipedia: "Hoffmann-La Roche", therapyAreas: ["Oncology", "Immunology", "Ophthalmology"] },
   { name: "Merck", city: "Madrid", country: "Spain", lat: 40.4361, lng: -3.6755,
-    wikipedia: "Merck Group", therapyAreas: ["Oncology", "Neurology", "Fertility"] },
+    photoUrl: null, wikipedia: "Merck Group", therapyAreas: ["Oncology", "Neurology", "Fertility"] },
   { name: "GSK", city: "Tres Cantos", country: "Spain", lat: 40.6056, lng: -3.7113,
-    wikipedia: "GSK plc", therapyAreas: ["Vaccines", "HIV", "Respiratory"] },
+    photoUrl: null, wikipedia: "GSK plc", therapyAreas: ["Vaccines", "HIV", "Respiratory"] },
   { name: "Bayer", city: "Sant Joan Despí", country: "Spain", lat: 41.3696066, lng: 2.0777182,
-    wikipedia: "Bayer", therapyAreas: ["Cardiovascular", "Oncology", "Women's health"] },
+    photoUrl: "/competitors/bayer.jpg", wikipedia: "Bayer", therapyAreas: ["Cardiovascular", "Oncology", "Women's health"] },
   { name: "Boehringer Ingelheim", city: "Sant Cugat del Vallès", country: "Spain", lat: 41.4760, lng: 2.0723,
-    wikipedia: "Boehringer Ingelheim", therapyAreas: ["Cardiometabolic", "Oncology", "Respiratory"] },
-  { name: "AstraZeneca", city: "Madrid", country: "Spain", lat: 40.4530, lng: -3.6877,
-    wikipedia: "AstraZeneca", therapyAreas: ["Oncology", "Cardiorenal", "Respiratory"] },
+    photoUrl: null, wikipedia: "Boehringer Ingelheim", therapyAreas: ["Cardiometabolic", "Oncology", "Respiratory"] },
+  { name: "AstraZeneca", city: "Barcelona", country: "Spain", lat: 41.3840812, lng: 2.1505114,
+    photoUrl: "/competitors/astrazeneca.jpg", wikipedia: "AstraZeneca", therapyAreas: ["Oncology", "Cardiorenal", "Respiratory"] },
 ];
 
 export function makePharmaMarker(

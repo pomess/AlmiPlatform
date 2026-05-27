@@ -31,6 +31,12 @@ export function CompetitorPhotoCard({ selectedCompetitor }: Props) {
       setData(null);
       return;
     }
+    // Curated image wins — skip the Wikipedia round-trip entirely.
+    if (competitor.photoUrl) {
+      setLoading(false);
+      setData({ thumb: competitor.photoUrl, pageUrl: null });
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     setData(null);

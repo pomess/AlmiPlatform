@@ -334,7 +334,7 @@ export function DashboardPage() {
       curve: 1.4,
       essential: true,
     });
-    void hologramRef.current?.show(c);
+    hologramRef.current?.show(c);
     setSelectedCompetitor(company);
   }, []);
 
