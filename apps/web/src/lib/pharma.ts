@@ -21,7 +21,7 @@ export type Competitor = {
 
 export const COMPETITORS: Competitor[] = [
   { name: "Sanofi", city: "Barcelona", country: "Spain", lat: 41.4087, lng: 2.2174 },
-  { name: "Novartis", city: "Barcelona", country: "Spain", lat: 41.4028, lng: 2.1858 },
+  { name: "Novartis", city: "Barcelona", country: "Spain", lat: 41.3981834, lng: 2.1806575 },
   { name: "LEO Pharma", city: "Sant Cugat del Vallès", country: "Spain", lat: 41.4710, lng: 2.0879 },
   { name: "AbbVie", city: "Madrid", country: "Spain", lat: 40.4769, lng: -3.6792 },
   { name: "Pfizer", city: "Alcobendas", country: "Spain", lat: 40.5366, lng: -3.6307 },

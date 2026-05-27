@@ -389,7 +389,7 @@ Almirall (HQ) — Barcelona, Spain — 41.4039, 2.1374
 Sanofi — Barcelona office, Spain — 41.4087, 2.2174
   Drugs: Dupixent / dupilumab (IL-4Rα, AD; co-marketed with Regeneron)
 
-Novartis — Barcelona office, Spain — 41.4028, 2.1858
+Novartis — Barcelona office, Spain — 41.3981834, 2.1806575
   Drugs: Cosentyx / secukinumab (IL-17A, HS + psoriasis)
 
 LEO Pharma — Sant Cugat del Vallès, Spain — 41.4710, 2.0879
@@ -418,7 +418,7 @@ Roche — Sant Cugat del Vallès, Spain — 41.4924849, 2.0582393
 
 Merck (MSD) — Madrid, Spain — 40.4361, -3.6755
 GSK — Tres Cantos, Madrid, Spain — 40.6056, -3.7113
-Bayer — Sant Joan Despí, Spain — 41.3676, 2.0563
+Bayer — Sant Joan Despí, Spain — 41.3696066, 2.0777182
 Boehringer Ingelheim — Sant Cugat del Vallès, Spain — 41.4760, 2.0723
 AstraZeneca — Madrid, Spain — 40.4530, -3.6877
 

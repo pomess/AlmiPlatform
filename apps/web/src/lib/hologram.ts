@@ -117,23 +117,42 @@ export function attachHologramLayer(map: maplibregl.Map): HologramController {
     }
   }
 
+  // Paint the cluster of buildings into the scene root. Extracted so
+  // show() can call it twice — once with a fallback box for an instant
+  // response, and again with real OSM footprints when the network
+  // resolves.
+  function paintFootprints(list: Footprint[]) {
+    clearGroup(root);
+    for (const fp of list) {
+      const meshes = buildBuildingMeshes(fp);
+      meshes.forEach((mesh) => root.add(mesh));
+    }
+    map.triggerRepaint();
+  }
+
   async function show(c: Competitor) {
     const myToken = ++showToken;
     anchor = { lng: c.lng, lat: c.lat };
     startMs = performance.now();
     ensureLayer();
 
-    const footprints = await loadFootprints(c).catch(() => null);
-    if (myToken !== showToken) return; // superseded by a newer show()
-    clearGroup(root);
-    const list = footprints && footprints.length ? footprints : [fallbackFootprint()];
-
-    for (const fp of list) {
-      const meshes = buildBuildingMeshes(fp);
-      meshes.forEach((mesh) => root.add(mesh));
-    }
+    // Show a fallback box immediately so the hologram never appears to
+    // "miss" — even if Overpass is slow, blocked, or returns nothing.
     visible = true;
-    map.triggerRepaint();
+    paintFootprints([fallbackFootprint()]);
+
+    // Upgrade to real OSM footprints when they arrive. If a newer show()
+    // came in while we were waiting, drop this result on the floor.
+    try {
+      const footprints = await loadFootprints(c);
+      if (myToken !== showToken) return;
+      if (footprints.length) {
+        paintFootprints(footprints);
+      }
+    } catch {
+      // Network/Overpass error — fallback is already on screen, nothing
+      // to do. Don't clear the scene; that's the bug we're fixing.
+    }
   }
 
   function hide() {

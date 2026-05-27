@@ -323,14 +323,14 @@ export function DashboardPage() {
     if (!map) return;
     const c = COMPETITORS.find((x) => x.name === company);
     if (!c) return;
-    map.stop();
+    // No map.stop() — MapLibre chains a fresh flyTo cleanly. Stopping
+    // mid-flight produced visible camera jerks.
     map.flyTo({
       center: [c.lng, c.lat],
       zoom: 17,
       pitch: 60,
-      speed: 1.2,
+      speed: 0.7,
       curve: 1.4,
-      maxDuration: 2400,
       essential: true,
     });
     void hologramRef.current?.show(c);
