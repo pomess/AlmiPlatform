@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useDailyNews } from "../hooks/useDailyNews";
 import type { NewsSource } from "../lib/api";
-import DashboardVideoTile from "./DashboardVideoTile";
+// import DashboardVideoTile from "./DashboardVideoTile"; // disabled — video tile to be redesigned
 
 const LS_COLLAPSED = "disease360.news.collapsed";
 const LS_INTRO_DATE = "disease360.news.introPlayedDate";
@@ -335,7 +335,9 @@ export function DashboardNewsPanel({
         </>
       )}
     </aside>
+    {/* Video tile + hide/show button temporarily disabled — to be redesigned.
     {data?.video && !selectedCompetitor && <DashboardVideoTile video={data.video} />}
+    */}
     </>
   );
 }

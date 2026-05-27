@@ -160,6 +160,7 @@ export function useStreamChat(brain?: string) {
                   args: evt.args,
                   startedAt: Date.now(),
                   toolCallId: evt.tool_call_id,
+                  progressMessage: evt.narration || undefined,
                 },
               ]);
               break;

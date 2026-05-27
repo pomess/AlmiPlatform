@@ -246,6 +246,23 @@ def _sse(payload: dict) -> str:
     return f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
 
 
+def _tool_narration(name: str, args: dict) -> str:
+    """Short spoken narration for each tool call, streamed to the UI immediately."""
+    query = args.get("query", "") or args.get("q", "") or ""
+    path = args.get("path", "") or ""
+    brain = args.get("brain", "") or ""
+    if name == "search_wiki":
+        return f"Searching the database{f' for {query}' if query else ''}..."
+    if name == "get_page":
+        return f"Reading {path or 'a page'}..."
+    if name == "deep_research":
+        return f"Nothing found locally — researching online{f': {query}' if query else ''}..."
+    if name == "fly_to_location":
+        place = args.get("place", "") or ""
+        return f"Locating {place}..." if place else "Flying to location..."
+    return f"Running {name}..."
+
+
 @app.post("/chat/stream")
 async def chat_stream(req: ChatRequest):
     """Server-Sent Events stream of model tokens.
@@ -349,6 +366,7 @@ async def chat_stream(req: ChatRequest):
                                 "name": name,
                                 "args": args or {},
                                 "tool_call_id": tc_id,
+                                "narration": _tool_narration(name, args or {}),
                             }
                         )
 

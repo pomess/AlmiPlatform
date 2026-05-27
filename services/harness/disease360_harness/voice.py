@@ -636,6 +636,8 @@ TOOL_CUES: dict[str, list[str]] = {
     "list_brains": [
         "Listing your brains.",
     ],
+    # deep_research has no cue — the model narrates the escalation via
+    # SOUL.md instruction, so a cue would produce double-talk.
     # No cue for fly_to_location -- the map physically moves the moment
     # the tool call hits the client, which is feedback enough.
 }
@@ -772,19 +774,45 @@ class TTSPipeline:
         self._drain_buffer()
 
     def speak_now(self, text: str) -> None:
-        """Bypass the buffer and submit an exact phrase (e.g. a tool cue)."""
+        """Bypass the buffer and push a tool cue directly to the SSE stream.
+
+        If the phrase is pre-cached in _PCM_CACHE, its audio is pushed
+        immediately without going through the emitter queue — zero latency.
+        Otherwise falls back to inserting a synthesis job at the front.
+        """
         s = text.strip()
         if not s:
             return
-        # Tool cues should always be played verbatim and not merged into
-        # the model's reply text -- flush any pending merge first so order
-        # stays sane, then submit the cue immediately.
         if self._merge_buf:
             self._submit(self._merge_buf)
             self._merge_buf = ""
             self._first_submitted = True
-        self._submit(s)
+
+        cache_key = (self._voice, self._pace, _detect_speech_language(s), s)
+        cached_pcm = _PCM_CACHE.get(cache_key)
+        if cached_pcm:
+            asyncio.create_task(self._push_pcm_direct(cached_pcm))
+        else:
+            self._ensure_emitter()
+            task = asyncio.create_task(self._synthesize(s))
+            idx = getattr(self, "_emit_idx", len(self._jobs))
+            self._jobs.insert(idx, task)
+            self._jobs_changed.set()
         self._first_submitted = True
+
+    async def _push_pcm_direct(self, pcm: bytes) -> None:
+        """Push pre-cached PCM audio directly to the client, no queue."""
+        for off in range(0, len(pcm), self.AUDIO_CHUNK_BYTES):
+            chunk = pcm[off : off + self.AUDIO_CHUNK_BYTES]
+            await self._push(
+                {
+                    "type": "audio",
+                    "b64": base64.b64encode(chunk).decode("ascii"),
+                    "seq": self._seq,
+                    "rate": PLAYBACK_RATE,
+                }
+            )
+            self._seq += 1
 
     async def flush_remainder(self) -> None:
         # Pull any complete sentences still hiding in the buffer.
@@ -904,6 +932,7 @@ class TTSPipeline:
                     return
                 await self._jobs_changed.wait()
                 self._jobs_changed.clear()
+            self._emit_idx = idx
             try:
                 pcm = await self._jobs[idx]
             except asyncio.CancelledError:
@@ -1249,6 +1278,7 @@ async def _voice_turn_stream(
     from .api import _agent_for
     from .system_prompt import DEFAULT_BRAIN
     from .tools.memory_tools import reset_turn_budget, set_active_tenant
+    from disease360_runtime.research.tool import reset_research_budget
 
     resolved_thread = thread_id or uuid.uuid4().hex
     resolved_brain = brain or DEFAULT_BRAIN
@@ -1360,6 +1390,7 @@ async def _voice_turn_stream(
             }
             set_active_tenant(tenant_id)
             reset_turn_budget()
+            reset_research_budget()
 
             seen_tool_calls: set[str] = set()
             seen_tool_results: set[str] = set()

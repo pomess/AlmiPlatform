@@ -30,10 +30,10 @@ export const COMPETITORS: Competitor[] = [
   { name: "UCB", city: "Madrid", country: "Spain", lat: 40.4419, lng: -3.6809 },
   { name: "Galderma", city: "Madrid", country: "Spain", lat: 40.4360, lng: -3.6784 },
   { name: "Incyte", city: "Madrid", country: "Spain", lat: 40.4279, lng: -3.7032 },
-  { name: "Roche", city: "Sant Cugat del Vallès", country: "Spain", lat: 41.4685, lng: 2.0846 },
+  { name: "Roche", city: "Sant Cugat del Vallès", country: "Spain", lat: 41.4924849, lng: 2.0582393 },
   { name: "Merck", city: "Madrid", country: "Spain", lat: 40.4361, lng: -3.6755 },
   { name: "GSK", city: "Tres Cantos", country: "Spain", lat: 40.6056, lng: -3.7113 },
-  { name: "Bayer", city: "Sant Joan Despí", country: "Spain", lat: 41.3676, lng: 2.0563 },
+  { name: "Bayer", city: "Sant Joan Despí", country: "Spain", lat: 41.3696066, lng: 2.0777182 },
   { name: "Boehringer Ingelheim", city: "Sant Cugat del Vallès", country: "Spain", lat: 41.4760, lng: 2.0723 },
   { name: "AstraZeneca", city: "Madrid", country: "Spain", lat: 40.4530, lng: -3.6877 },
 ];
@@ -51,6 +51,7 @@ export function makePharmaMarker(
   el.dataset.company = name;
   el.innerHTML = `
     <svg viewBox="0 0 ${width} 80" width="${width}" height="80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="20" width="${width}" height="55" fill="transparent" class="pharma-pin-hit" />
       <circle cx="16" cy="64" r="3" class="pharma-pin-anchor" />
       <circle cx="16" cy="64" r="7" class="pharma-pin-home-ring" />
       <path d="M 16 64 L 44 40 L ${width - 10} 40" class="pharma-pin-line" />

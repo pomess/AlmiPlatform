@@ -45,7 +45,7 @@ async def fly_to_location(
     lat: float,
     lng: float,
     place: str,
-    zoom: float = 11.0,
+    zoom: float = 16.0,
 ) -> str:
     """Move the dashboard globe to a place and frame it for the user.
 
@@ -54,16 +54,16 @@ async def fly_to_location(
     longitude in decimal degrees. Pick `zoom` so the place actually fills
     the view — go close, not continental:
 
-    - 13-14: a single building, monument, statue, park, or street
-    - 11-12: a city or borough (default — use this when unsure)
-    - 9-10:  a metropolitan area or small region
+    - 16-17: street level, individual buildings clearly visible
+    - 14-15: a neighborhood, a pharma campus, a cluster of pins
+    - 12-13: a city or borough
+    - 9-11:  a metropolitan area or small region
     - 7-8:   a large region, state, or province
     - 5-6:   a country
     - 3-4:   a whole continent (only when the user explicitly asks)
 
-    `zoom` must be 1-14. Default to 11 (city framing) if the user just
-    names a place without further context, and prefer 13+ for specific
-    landmarks or buildings.
+    `zoom` must be 1-18. Default to 16 (street level) when discussing a
+    specific company or building. Use 12-13 only for broad city overviews.
     """
     bridge = get_active_bridge()
     if bridge is None:
@@ -413,7 +413,7 @@ Galderma — Madrid, Spain — 40.4360, -3.6784
 Incyte — Madrid, Spain — 40.4279, -3.7032
   Drugs: Povorcitinib (JAK1, HS, Ph III)
 
-Roche — Sant Cugat del Vallès, Spain — 41.4685, 2.0846
+Roche — Sant Cugat del Vallès, Spain — 41.4924849, 2.0582393
   Major Big Pharma player; broad oncology + immunology footprint.
 
 Merck (MSD) — Madrid, Spain — 40.4361, -3.6755

@@ -10,8 +10,24 @@ import {
   makeAlmirallMarker,
   makeCompetitorMarker,
 } from "../lib/pharma";
+import { attachHologramLayer, type HologramController } from "../lib/hologram";
 
 const STYLE_URL = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+
+// Match an arbitrary lat/lng (e.g. one the voice agent passed to
+// fly_to_location) against the known competitor list, within ~150 m, so
+// "fly to Pfizer" lights up the hologram even though the call came in
+// through a generic geocoded coordinate.
+const COMPETITOR_MATCH_RADIUS_M = 150;
+function findCompetitorAt(lat: number, lng: number) {
+  const cosLat = Math.cos((lat * Math.PI) / 180);
+  for (const c of COMPETITORS) {
+    const dx = (c.lng - lng) * 111320 * cosLat;
+    const dy = (c.lat - lat) * 111320;
+    if (Math.hypot(dx, dy) <= COMPETITOR_MATCH_RADIUS_M) return c;
+  }
+  return null;
+}
 
 const ROUTE_SOURCE_ID = "disease360-route";
 const ROUTE_GLOW_LAYER_ID = "disease360-route-glow";
@@ -206,6 +222,7 @@ export function DashboardPage() {
   const coordsRef = useRef<{ lat: number; lon: number } | null>(null);
   const homeMarkerRef = useRef<maplibregl.Marker | null>(null);
   const competitorMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const hologramRef = useRef<HologramController | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [selectedCompetitor, setSelectedCompetitor] = useState<string | null>(null);
   const [silentTextTurns, setSilentTextTurns] = useState<boolean>(() =>
@@ -240,6 +257,7 @@ export function DashboardPage() {
       map.setProjection({ type: "globe" });
       installRouteLayer(map);
       installPharmaPins();
+      hologramRef.current = attachHologramLayer(map);
       flyHome();
     });
     map.on("style.load", () => {
@@ -289,9 +307,34 @@ export function DashboardPage() {
       homeMarkerRef.current = null;
       competitorMarkersRef.current.forEach((m) => m.remove());
       competitorMarkersRef.current = [];
+      hologramRef.current?.dispose();
+      hologramRef.current = null;
       map.remove();
       mapRef.current = null;
     };
+  }, []);
+
+  // Re-fly to a competitor regardless of whether it was already selected.
+  // Lifting this out of the selectedCompetitor effect lets a re-click on
+  // the *currently* selected pin still trigger a fresh fly + hologram,
+  // which the previous toggle behavior swallowed.
+  const focusCompetitor = useCallback((company: string) => {
+    const map = mapRef.current;
+    if (!map) return;
+    const c = COMPETITORS.find((x) => x.name === company);
+    if (!c) return;
+    map.stop();
+    map.flyTo({
+      center: [c.lng, c.lat],
+      zoom: 17,
+      pitch: 60,
+      speed: 1.2,
+      curve: 1.4,
+      maxDuration: 2400,
+      essential: true,
+    });
+    void hologramRef.current?.show(c);
+    setSelectedCompetitor(company);
   }, []);
 
   useEffect(() => {
@@ -303,14 +346,22 @@ export function DashboardPage() {
       ) as HTMLElement | null;
       if (pin) {
         const company = pin.dataset.company || "";
-        setSelectedCompetitor((prev) => (prev === company ? null : company));
+        if (company) focusCompetitor(company);
       } else if (!(e.target as HTMLElement).closest(".dashboard-news-panel")) {
         setSelectedCompetitor(null);
       }
     }
     host.addEventListener("click", onClick);
     return () => host.removeEventListener("click", onClick);
-  }, []);
+  }, [focusCompetitor]);
+
+  // Hide the hologram whenever the selection is cleared (X button on the
+  // news panel, background click, voice "clear", etc.).
+  useEffect(() => {
+    if (!selectedCompetitor) {
+      hologramRef.current?.hide();
+    }
+  }, [selectedCompetitor]);
 
   function recenter() {
     const map = mapRef.current;
@@ -346,20 +397,27 @@ export function DashboardPage() {
         const lat = Number(args.lat);
         const lng = Number(args.lng);
         const zoomArg = Number(args.zoom);
-        // Default to a tight city framing (~11) when the model omits one so
-        // physical-place questions feel close, not continental.
-        const zoom = Number.isFinite(zoomArg) && zoomArg > 0 ? zoomArg : 11;
+        // Enforce minimum zoom 15 — the model often passes 11 from stale context.
+        const zoom = Number.isFinite(zoomArg) && zoomArg >= 15 ? zoomArg : 16;
         const place = typeof args.place === "string" ? args.place : undefined;
         if (!map || !Number.isFinite(lat) || !Number.isFinite(lng)) {
           return { ok: false, error: "invalid coordinates" };
         }
+        const matched = findCompetitorAt(lat, lng);
         map.flyTo({
           center: [lng, lat],
           zoom,
+          pitch: matched ? 60 : DASHBOARD_REST_PITCH,
           speed: 0.6,
           curve: 1.4,
           essential: true,
         });
+        if (matched) {
+          // Mirror the click flow so the news panel + hologram stay in sync.
+          setSelectedCompetitor(matched.name);
+        } else {
+          hologramRef.current?.hide();
+        }
         return { ok: true, place: place ?? null, lat, lng, zoom };
       }
 
