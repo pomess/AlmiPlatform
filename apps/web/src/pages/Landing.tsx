@@ -342,7 +342,7 @@ export function Landing() {
       <div className="section-2-dark">
       <div className="section-head" style={{ marginTop: 0, paddingTop: 80 }}>
         <h2>
-          The three things <em>your franchise team</em> will use weekly.
+          Your competitive landscape <em>at a glance.</em>
         </h2>
         <div className="meta">SECTION 02 / 03</div>
       </div>
