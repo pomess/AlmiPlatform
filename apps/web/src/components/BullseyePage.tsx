@@ -124,6 +124,7 @@ export function BullseyePage() {
   const [selected, setSelected] = useState<Drug | null>(
     DRUGS.find((d) => d.brand === "Ebglyss") ?? null,
   );
+  const [snapshotYear, setSnapshotYear] = useState<number | null>(null);
 
   // Zoom/pan state
   const [zoom, setZoom] = useState(1);
@@ -175,6 +176,16 @@ export function BullseyePage() {
     [indication],
   );
 
+  // For timeline slider: resolve where a drug was at a given year.
+  const getPhaseAtYear = useCallback((drug: Drug, year: number): Phase | null => {
+    let latest: Phase | null = null;
+    for (const p of PHASES) {
+      const entered = parseInt(drug.phaseYears?.[p] ?? "9999");
+      if (entered <= year) latest = p;
+    }
+    return latest;
+  }, []);
+
   const companies = useMemo(() => {
     const set = new Set<string>();
     filtered.forEach((d) => set.add(d.company));
@@ -201,17 +212,22 @@ export function BullseyePage() {
 
     const groups: Record<string, Drug[]> = {};
     filtered.forEach((d) => {
-      const key = `${d.company}__${d.status}`;
+      const effectivePhase = snapshotYear ? getPhaseAtYear(d, snapshotYear) : d.status;
+      if (!effectivePhase) return;
+      const key = `${d.company}__${effectivePhase}`;
       if (!groups[key]) groups[key] = [];
       groups[key].push(d);
     });
 
     return filtered.map((d) => {
-      const phaseIdx = PHASES.indexOf(d.status);
+      const effectivePhase = snapshotYear ? getPhaseAtYear(d, snapshotYear) : d.status;
+      if (!effectivePhase) return null;
+
+      const phaseIdx = PHASES.indexOf(effectivePhase);
       const radius = phaseIdx >= 0 ? PHASE_DOT_RADII[phaseIdx] : 0.78;
       const baseAngle = companyAngles[d.company] ?? 0;
 
-      const key = `${d.company}__${d.status}`;
+      const key = `${d.company}__${effectivePhase}`;
       const siblings = groups[key] || [];
       const idx = siblings.indexOf(d);
       const count = siblings.length;
@@ -224,8 +240,8 @@ export function BullseyePage() {
 
       const pos = polarToXY(angle, finalRadius);
       return { drug: d, ...pos, angle };
-    });
-  }, [filtered, companies]);
+    }).filter(Boolean) as { drug: Drug; x: number; y: number; angle: number }[];
+  }, [filtered, companies, snapshotYear, getPhaseAtYear]);
 
   return (
     <div className="bullseye-page page">
@@ -245,7 +261,11 @@ export function BullseyePage() {
                   onClick={() => { setIndication(id); setSelected(null); }}
                 >
                   {indicationLabel[id]}
-                  <span className="ct">{DRUGS.filter((d) => d.indication === id).length}</span>
+                  <span className="ct">{
+                    snapshotYear
+                      ? DRUGS.filter((d) => d.indication === id && getPhaseAtYear(d, snapshotYear)).length
+                      : DRUGS.filter((d) => d.indication === id).length
+                  }</span>
                 </button>
               ))}
             </div>
@@ -343,7 +363,7 @@ export function BullseyePage() {
                       cx={x} cy={y}
                       r={isSelected ? "1.6" : "1.2"}
                       className={`bull-dot${isSelected ? " active" : ""}${isAlmirall ? " almirall" : ""}`}
-                      style={{ fill: MODALITY_COLORS[drug.modality] }}
+                      style={{ fill: MODALITY_COLORS[drug.modality], transition: "cx 500ms ease, cy 500ms ease, opacity 400ms ease" }}
                     />
                     <text x={labelX} y={labelY} className={`bull-dot-label${isSelected ? " active" : ""}`}>
                       {drug.brand.length > 12 ? drug.brand.slice(0, 10) + "…" : drug.brand}
@@ -378,6 +398,40 @@ export function BullseyePage() {
               <span className="bull-center-title">{indication}</span>
               <span className="bull-center-sub">{indicationLabel[indication]}</span>
             </div>
+          </div>
+
+          {/* Timeline slider */}
+          <div className="bull-timeline-slider">
+            <label className="bull-tl-slider-label">
+              {snapshotYear ? snapshotYear : "Live"}
+            </label>
+            <input
+              type="range"
+              min={2001}
+              max={2026}
+              step={1}
+              value={snapshotYear ?? 2026}
+              onChange={(e) => {
+                const v = parseInt(e.target.value);
+                setSnapshotYear(v >= 2026 ? null : v);
+              }}
+              className="bull-tl-range"
+            />
+            <div className="bull-tl-ticks">
+              <span>2001</span>
+              <span>2008</span>
+              <span>2015</span>
+              <span>2022</span>
+              <span>Live</span>
+            </div>
+            {snapshotYear && (
+              <button
+                className="bull-tl-live-btn"
+                onClick={() => setSnapshotYear(null)}
+              >
+                Back to Live
+              </button>
+            )}
           </div>
         </div>
 
