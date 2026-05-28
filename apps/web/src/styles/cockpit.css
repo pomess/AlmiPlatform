@@ -1909,7 +1909,7 @@ body { overflow: hidden; }
   top: 16px;
   right: 16px;
   z-index: 5;
-  width: 260px;
+  width: 400px;
   display: flex;
   flex-direction: column;
   border-radius: 12px;
@@ -1924,15 +1924,17 @@ body { overflow: hidden; }
   color: var(--text-primary, #e5e7eb);
   overflow: hidden;
   animation: dashboard-photo-card-enter 420ms var(--ease-cinema, cubic-bezier(0.22, 1, 0.36, 1)) both;
-  transition: right 400ms var(--ease-cinema, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: right 400ms var(--ease-cinema, cubic-bezier(0.22, 1, 0.36, 1)),
+    width 400ms var(--ease-cinema, cubic-bezier(0.22, 1, 0.36, 1));
 }
-/* Shift the photo card left when the activity panel is visible */
+/* Shrink + shift the photo card left when the activity panel is visible */
 .dashboard-page:has(.dashboard-activity.is-live) .dashboard-photo-card,
 .dashboard-page:has(.dashboard-activity.is-listening) .dashboard-photo-card,
 .dashboard-page:has(.dashboard-activity.is-thinking) .dashboard-photo-card,
 .dashboard-page:has(.dashboard-activity.is-executing) .dashboard-photo-card,
 .dashboard-page:has(.dashboard-activity.is-speaking) .dashboard-photo-card {
   right: 410px;
+  width: 260px;
 }
 @keyframes dashboard-photo-card-enter {
   from { opacity: 0; transform: translateY(-6px) scale(0.985); filter: blur(4px); }

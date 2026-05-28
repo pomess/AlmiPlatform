@@ -348,7 +348,10 @@ export function DashboardPage() {
       if (pin) {
         const company = pin.dataset.company || "";
         if (company) focusCompetitor(company);
-      } else if (!(e.target as HTMLElement).closest(".dashboard-news-panel")) {
+      } else if (
+        !(e.target as HTMLElement).closest(".dashboard-news-panel") &&
+        !(e.target as HTMLElement).closest(".dashboard-composer")
+      ) {
         setSelectedCompetitor(null);
       }
     }
