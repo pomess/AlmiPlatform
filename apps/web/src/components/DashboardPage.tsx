@@ -414,8 +414,8 @@ export function DashboardPage() {
           essential: true,
         });
         if (matched) {
-          // Mirror the click flow so the news panel + hologram stay in sync.
           setSelectedCompetitor(matched.name);
+          void hologramRef.current?.show(matched);
         } else {
           hologramRef.current?.hide();
         }

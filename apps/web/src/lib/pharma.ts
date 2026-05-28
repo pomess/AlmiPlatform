@@ -34,7 +34,7 @@ export type Competitor = {
 };
 
 export const COMPETITORS: Competitor[] = [
-  { name: "Sanofi", city: "Barcelona", country: "Spain", lat: 41.4087, lng: 2.2174,
+  { name: "Sanofi", city: "Barcelona", country: "Spain", lat: 41.4366649, lng: 2.1807982,
     photoUrl: "/competitors/sanofi.jpg", wikipedia: "Sanofi", therapyAreas: ["Immunology", "Vaccines", "Rare disease"] },
   { name: "Novartis", city: "Barcelona", country: "Spain", lat: 41.3981834, lng: 2.1806575,
     photoUrl: "/competitors/novartis.jpg", wikipedia: "Novartis", therapyAreas: ["Cardiovascular", "Oncology", "Immunology"] },

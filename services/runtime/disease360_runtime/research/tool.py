@@ -154,19 +154,15 @@ def deep_research_tool() -> StructuredTool:
             if not report.markdown or report.markdown.strip() == "":
                 return (
                     f"Research completed but produced no findings for: {query}\n\n"
-                    "This may be due to a connectivity issue with Google Search. "
+                    "This may be due to a connectivity issue with the search API. "
                     "Try again or rephrase the query."
                 )
 
-            # Append compact metadata footer
             footer = (
                 f"\n\n---\n*Research complete — "
-                f"{len(report.citations)} sources, "
-                f"{report.budget.used:,} tokens "
-                f"({report.budget.pct_used:.0%} of budget)*"
+                f"{len(report.citations)} sources"
+                f" ({report.budget.note})*"
             )
-            if report.budget.early_stopped:
-                footer = footer[:-1] + " *[partial — budget limit reached]*"
 
             return report.markdown + footer
 

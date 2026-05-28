@@ -18,7 +18,7 @@ const SEARCH_RADIUS_M = 200;
 const BBOX_DEG = 0.002; // ~200m in each direction
 
 const COMPETITORS = [
-  { name: "Sanofi", lat: 41.4087, lng: 2.2174 },
+  { name: "Sanofi", lat: 41.4366649, lng: 2.1807982 },
   { name: "Novartis", lat: 41.3981834, lng: 2.1806575 },
   { name: "LEO Pharma", lat: 41.4710, lng: 2.0879 },
   { name: "AbbVie", lat: 40.4769, lng: -3.6792 },

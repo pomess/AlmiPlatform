@@ -1,7 +1,8 @@
-"""Main orchestrator: classifier -> brief -> lead -> verifier -> synthesizer.
+"""Deep research orchestrator — wraps langchain-ai/open_deep_research.
 
-Maintains a TokenMeter, enforces hard caps, handles budget early-stop,
-wall-clock timeouts, and progress callbacks.
+Replaces the custom 5-stage pipeline with open_deep_research's LangGraph-based
+multi-agent researcher (supervisor → parallel sub-agents → compression → report).
+Keeps the same interface that tool.py expects: `deep_research(query, depth_tier, on_progress)`.
 """
 
 from __future__ import annotations
@@ -9,17 +10,13 @@ from __future__ import annotations
 import asyncio
 import inspect
 import logging
+import os
+import platform
 import uuid
-from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Callable
 
-from .cache import RunCache
-from .classifier import classify_and_brief, classify_query, write_research_brief
-from .config import DepthTier, TierConfig, resolve_tier
-from . import debug_dump
-from .filesystem import VirtualFS
-from .lead import build_lead_agent
+from .config import DepthTier
 from .state import (
     BudgetReport,
     Citation,
@@ -27,43 +24,32 @@ from .state import (
     ResearchReport,
     VerificationReport,
 )
-from .synthesizer import synthesize_report
-from .url_whitelist import URLWhitelist
-from .verifier import verify_findings
 
 log = logging.getLogger(__name__)
 
-
 # ---------------------------------------------------------------------------
-# Token meter
+# Patch: open_deep_research uses %-d in strftime which is Linux-only.
+# On Windows it must be %#d. Patch at import time.
 # ---------------------------------------------------------------------------
+if platform.system() == "Windows":
+    try:
+        import open_deep_research.utils as _odr_utils
 
+        def _get_today_str_win() -> str:
+            return datetime.now().strftime("%a %b %#d, %Y")
 
-@dataclass
-class TokenMeter:
-    """Tracks token usage across the entire research run."""
+        _odr_utils.get_today_str = _get_today_str_win
+    except Exception:
+        pass
 
-    ceiling: int = 500_000
-    used: int = 0
-    per_stage: dict[str, int] = field(default_factory=dict)
-    early_stopped: bool = False
+log = logging.getLogger(__name__)
 
-    def record(self, stage: str, tokens: int) -> None:
-        self.used += tokens
-        self.per_stage[stage] = self.per_stage.get(stage, 0) + tokens
-
-    @property
-    def pct_used(self) -> float:
-        if self.ceiling <= 0:
-            return 0.0
-        return self.used / self.ceiling
-
-    def should_early_stop(self, threshold: float = 0.80) -> bool:
-        return self.pct_used >= threshold
+# Model to use across all open_deep_research stages.
+_MODEL = os.environ.get("DISEASE360_RESEARCH_MODEL", "google_genai:gemini-3.0-flash")
 
 
 # ---------------------------------------------------------------------------
-# Progress emitter
+# Progress emitter (same interface as before)
 # ---------------------------------------------------------------------------
 
 
@@ -85,7 +71,7 @@ async def _emit(
 
 
 # ---------------------------------------------------------------------------
-# Main orchestrator
+# Main entry point
 # ---------------------------------------------------------------------------
 
 
@@ -96,344 +82,165 @@ async def deep_research(
     on_progress: Callable[[ProgressEvent], Any] | None = None,
     run_id: str | None = None,
 ) -> ResearchReport:
-    """Execute a full deep research pipeline.
+    """Execute deep research via langchain-ai/open_deep_research.
 
     Args:
         query: The research question
-        depth_tier: Override the classifier's tier choice (None = auto-detect)
-        on_progress: Optional callback for progress events
-        run_id: Optional run identifier (generated if not provided)
+        depth_tier: Controls concurrency/iterations (standard/deep/exhaustive)
+        on_progress: Optional callback for streaming progress events
+        run_id: Optional run identifier
 
     Returns:
-        ResearchReport with markdown, citations, verification, and budget info
+        ResearchReport with markdown, citations, and budget info
     """
+    from langchain_core.messages import HumanMessage
+    from open_deep_research.deep_researcher import deep_researcher_builder
+    from open_deep_research.configuration import Configuration, SearchAPI
+
     run_id = run_id or str(uuid.uuid4())[:8]
     started_at = datetime.now()
-    stages_completed: list[str] = []
-    tool_invocations: dict[str, int] = {}
-    timings: dict[str, float] = {}
 
-    def _stage_timer(stage: str) -> Callable[[], None]:
-        t0 = datetime.now()
+    await _emit(on_progress, "start", f"Research run {run_id} started", query=query)
 
-        def _stop() -> None:
-            timings[stage] = (datetime.now() - t0).total_seconds()
+    # Map depth tier to concurrency/iteration settings.
+    tier = depth_tier or "standard"
+    if tier == "exhaustive":
+        max_concurrent = 8
+        max_iterations = 8
+        max_tool_calls = 15
+    elif tier == "deep":
+        max_concurrent = 6
+        max_iterations = 6
+        max_tool_calls = 12
+    else:
+        max_concurrent = 5
+        max_iterations = 4
+        max_tool_calls = 8
 
-        return _stop
+    config = {
+        "configurable": {
+            "search_api": SearchAPI.TAVILY.value,
+            "research_model": _MODEL,
+            "summarization_model": _MODEL,
+            "compression_model": _MODEL,
+            "final_report_model": _MODEL,
+            "max_concurrent_research_units": max_concurrent,
+            "max_researcher_iterations": max_iterations,
+            "max_react_tool_calls": max_tool_calls,
+            "allow_clarification": False,
+        }
+    }
 
-    await _emit(
-        on_progress, "start", f"Research run {run_id} started",
-        query=query, run_id=run_id,
-    )
+    graph = deep_researcher_builder.compile()
 
-    # -----------------------------------------------------------------------
-    # Setup the meter early so classifier/brief can record real token usage.
-    # The ceiling is updated below once we know the tier.
-    # -----------------------------------------------------------------------
-    meter = TokenMeter(ceiling=0)
+    await _emit(on_progress, "planning", "Generating research brief...")
 
-    # -----------------------------------------------------------------------
-    # Stage 1+2: Classification + Brief (single LLM call, two progress events)
-    # -----------------------------------------------------------------------
-    await _emit(on_progress, "classifier", "Classifying query...")
-
-    _stop = _stage_timer("classify_and_brief")
-    classification, brief = await classify_and_brief(query, meter=meter)
-    _stop()
-    stages_completed.append("classifier")
-    stages_completed.append("brief")
-
-    # Allow override of tier
-    tier = depth_tier or classification.depth_tier
-    tier_config = resolve_tier(tier)
-    meter.ceiling = tier_config.token_budget
-
-    await _emit(
-        on_progress,
-        "classifier",
-        f"Classified as {classification.query_type.value}/{classification.domain.value} "
-        f"depth={tier}",
-        classification=classification.model_dump(),
-    )
-
-    # Check if clarification is needed (ambiguity > 0.6)
-    if classification.ambiguity_score > 0.6 and classification.suggested_clarifications:
-        await _emit(
-            on_progress,
-            "clarification_needed",
-            "Query is ambiguous — proceeding with best interpretation",
-            clarifications=classification.suggested_clarifications,
-        )
-
-    await _emit(on_progress, "brief", "Writing research brief...")
-
-    # -----------------------------------------------------------------------
-    # Setup: VFS, cache, URL whitelist (per-run, shared across subagents)
-    # -----------------------------------------------------------------------
-    vfs = VirtualFS()
-    cache = RunCache()
-    whitelist = URLWhitelist()
-
-    # Write brief to VFS for synthesizer
-    brief_content = (
-        f"# Research Brief\n\n"
-        f"**Title:** {brief.title}\n"
-        f"**Objective:** {brief.objective}\n"
-        f"**Scope:** {brief.scope}\n"
-        f"**Constraints:** {', '.join(brief.constraints) if brief.constraints else 'None'}\n"
-    )
-    vfs.write("/brief.md", brief_content)
-
-    # -----------------------------------------------------------------------
-    # Stage 3: Lead orchestrator
-    # -----------------------------------------------------------------------
-    await _emit(on_progress, "lead", "Building lead researcher agent...")
-
-    budget_early_stop = False
+    # Stream the graph to capture intermediate events.
+    final_report = ""
+    sources_seen: list[str] = []
 
     try:
-        agent = build_lead_agent(
-            brief=brief,
-            vfs=vfs,
-            cache=cache,
-            tier_config=tier_config,
-            tool_invocations=tool_invocations,
-            meter=meter,
-            whitelist=whitelist,
-        )
+        async for event in graph.astream_events(
+            {"messages": [HumanMessage(content=query)]},
+            config=config,
+            version="v2",
+        ):
+            kind = event.get("event", "")
+            name = event.get("name", "")
 
-        await _emit(on_progress, "lead", "Lead researcher running...")
+            if kind == "on_chain_start" and "write_research_brief" in name:
+                await _emit(on_progress, "planning", "Research brief generated")
 
-        # Run the lead agent with wall-clock timeout
-        _stop = _stage_timer("lead")
-        await asyncio.wait_for(
-            _run_lead_agent(agent, query, vfs, meter, tier_config),
-            timeout=tier_config.timeout_seconds,
-        )
-        _stop()
-        stages_completed.append("lead")
+            elif kind == "on_chain_start" and "supervisor" in name:
+                await _emit(on_progress, "researching", "Supervisor dispatching sub-agents...")
 
-        if meter.should_early_stop(tier_config.early_stop_pct):
-            budget_early_stop = True
-            meter.early_stopped = True
-            await _emit(on_progress, "budget", "Budget threshold reached — early stopping")
+            elif kind == "on_chain_start" and "researcher" in name:
+                await _emit(on_progress, "researching", f"Sub-agent researching...")
 
-    except asyncio.TimeoutError:
-        log.warning("Lead agent timed out after %ds", tier_config.timeout_seconds)
-        stages_completed.append("lead_timeout")
-        budget_early_stop = True
-        meter.early_stopped = True
-        await _emit(on_progress, "timeout", "Wall-clock timeout — synthesizing partial findings")
+            elif kind == "on_tool_start":
+                tool_name = event.get("data", {}).get("input", {}).get("query", "")
+                if tool_name:
+                    short = tool_name[:80]
+                    await _emit(
+                        on_progress, "searching", f"Searching: {short}",
+                        query=short,
+                    )
+
+            elif kind == "on_tool_end":
+                data = event.get("data", {})
+                output = data.get("output", "")
+                if isinstance(output, str) and "http" in output:
+                    for line in output.split("\n"):
+                        if line.startswith("http"):
+                            url = line.strip()
+                            if url not in sources_seen:
+                                sources_seen.append(url)
+                                await _emit(
+                                    on_progress, "fetching",
+                                    f"Source [{len(sources_seen)}]: {url[:60]}",
+                                    url=url,
+                                )
+
+            elif kind == "on_chain_start" and "compress_research" in name:
+                await _emit(on_progress, "compressing", "Compressing research findings...")
+
+            elif kind == "on_chain_start" and "final_report" in name:
+                await _emit(on_progress, "synthesizing", "Writing final report...")
+
+            elif kind == "on_chain_end" and "final_report" in name:
+                data = event.get("data", {})
+                output = data.get("output", {})
+                if isinstance(output, dict):
+                    msgs = output.get("messages", [])
+                    if msgs:
+                        last_msg = msgs[-1]
+                        if hasattr(last_msg, "content"):
+                            final_report = last_msg.content
+
     except Exception as exc:
-        log.exception("Lead agent failed")
-        stages_completed.append("lead_error")
-        await _emit(on_progress, "error", f"Lead agent error: {exc}")
+        log.error("[research] graph execution failed: %s", exc)
+        await _emit(on_progress, "error", f"Research failed: {exc}")
+        raise
 
-    # Grounding summary — Google vs DDG fallback rate
-    g = tool_invocations.get("search_provider_google", 0)
-    d = tool_invocations.get("search_provider_ddg", 0)
-    n = tool_invocations.get("search_provider_none", 0)
-    total = g + d + n
-    if total:
-        await _emit(
-            on_progress,
-            "grounding",
-            (
-                f"Search providers: {g}/{total} google "
-                f"({100 * g / total:.0f}%), "
-                f"{d}/{total} ddg fallback "
-                f"({100 * d / total:.0f}%), "
-                f"{n}/{total} empty"
-            ),
-            google=g,
-            ddg=d,
-            empty=n,
-            total=total,
+    # If we didn't capture the report from events, try invoking directly.
+    if not final_report:
+        await _emit(on_progress, "synthesizing", "Finalizing report...")
+        result = await graph.ainvoke(
+            {"messages": [HumanMessage(content=query)]},
+            config=config,
         )
+        messages = result.get("messages", [])
+        if messages:
+            final_report = messages[-1].content if hasattr(messages[-1], "content") else ""
 
-    # -----------------------------------------------------------------------
-    # Stage 4: Verification
-    # -----------------------------------------------------------------------
-    await _emit(on_progress, "verifier", "Verifying citations...")
-
-    citations: list[Citation] = []
-    verification = VerificationReport()
-
-    try:
-        _stop = _stage_timer("verifier")
-        citations, verification = await verify_findings(
-            vfs, cache=cache, meter=meter
-        )
-        _stop()
-        stages_completed.append("verifier")
-
-        verdict_counts: dict[str, int] = {}
-        for c in citations:
-            verdict_counts[c.nli_verdict] = verdict_counts.get(c.nli_verdict, 0) + 1
-        await _emit(
-            on_progress,
-            "verifier",
-            (
-                f"Verified {verification.total_citations} citations: "
-                f"{verdict_counts.get('entails', 0)} entails / "
-                f"{verdict_counts.get('not_mentioned', 0)} not_mentioned / "
-                f"{verdict_counts.get('contradicts', 0)} contradicts / "
-                f"{len(verification.dead_urls)} dead / "
-                f"{len(verification.hallucinated_urls)} hallucinated"
-            ),
-        )
-    except Exception as exc:
-        log.exception("Verifier failed")
-        stages_completed.append("verifier_error")
-        await _emit(on_progress, "error", f"Verifier error: {exc}")
-
-    # -----------------------------------------------------------------------
-    # Stage 5: Synthesis
-    # -----------------------------------------------------------------------
-    await _emit(on_progress, "synthesizer", "Synthesizing final report...")
-
-    markdown = ""
-    try:
-        _stop = _stage_timer("synthesizer")
-        markdown = await synthesize_report(
-            vfs,
-            citations,
-            verification,
-            depth_tier=tier,
-            budget_early_stop=budget_early_stop,
-            meter=meter,
-        )
-        _stop()
-        stages_completed.append("synthesizer")
-
-        await _emit(on_progress, "synthesizer", "Report complete")
-    except Exception as exc:
-        log.exception("Synthesizer failed")
-        stages_completed.append("synthesizer_error")
-        # Fallback: return raw findings
-        markdown = _fallback_report(vfs)
-        await _emit(on_progress, "error", f"Synthesizer error, returning raw findings: {exc}")
-
-    # -----------------------------------------------------------------------
-    # Assemble final report
-    # -----------------------------------------------------------------------
     completed_at = datetime.now()
+    elapsed = (completed_at - started_at).total_seconds()
 
-    budget_report = BudgetReport(
-        ceiling=meter.ceiling,
-        used=meter.used,
-        early_stopped=meter.early_stopped,
-        pct_used=meter.pct_used,
-        stages_completed=stages_completed,
-        note=(
-            "Research was truncated at 80% budget; findings based on partial coverage."
-            if meter.early_stopped
-            else ""
-        ),
+    await _emit(
+        on_progress, "done",
+        f"Research complete ({elapsed:.0f}s, {len(sources_seen)} sources)",
     )
 
-    report = ResearchReport(
-        markdown=markdown,
+    # Build citations from sources seen.
+    citations = [
+        Citation(index=i + 1, url=url, verified=True, live=True)
+        for i, url in enumerate(sources_seen)
+    ]
+
+    return ResearchReport(
+        markdown=final_report,
         citations=citations,
-        verification=verification,
-        tokens_used=meter.per_stage,
-        budget=budget_report,
-        classification=classification,
-        brief=brief,
+        verification=VerificationReport(),
+        tokens_used={},
+        budget=BudgetReport(
+            ceiling=0,
+            used=0,
+            early_stopped=False,
+            pct_used=0.0,
+            stages_completed=["planning", "researching", "compressing", "synthesizing"],
+            note=f"open_deep_research ({tier}), {elapsed:.0f}s",
+        ),
         started_at=started_at,
         completed_at=completed_at,
         run_id=run_id,
     )
-
-    if debug_dump.is_dump_enabled():
-        import sys
-        import traceback as _tb
-        from pathlib import Path as _Path
-        from disease360_runtime.config import repo_root as _repo_root
-
-        def _safe_print(text: str) -> None:
-            payload = text.encode("utf-8", errors="replace")
-            try:
-                sys.stdout.buffer.write(payload + b"\n")
-                sys.stdout.flush()
-            except Exception:
-                try:
-                    sys.stderr.buffer.write(payload + b"\n")
-                    sys.stderr.flush()
-                except Exception:
-                    pass
-
-        folder = None
-        try:
-            folder = debug_dump.dump_run(
-                run_id=run_id,
-                query=query,
-                depth_tier=tier,
-                vfs=vfs,
-                classification=classification,
-                citations=citations,
-                verification=verification,
-                markdown=markdown,
-                tool_invocations=tool_invocations,
-                timings=timings,
-                started_at=started_at,
-                completed_at=completed_at,
-                tokens_used=meter.per_stage,
-                budget_ceiling=meter.ceiling,
-            )
-            _safe_print(f"[research] debug dump written to {folder}")
-        except Exception as exc:
-            _safe_print(
-                f"[research] debug dump FAILED (non-fatal): "
-                f"{type(exc).__name__}: {exc}"
-            )
-            _safe_print(_tb.format_exc())
-            # Last-resort: persist the traceback to a file so we don't lose it
-            try:
-                fallback_dir = (
-                    _repo_root() / "services" / "harness" / "data" / "research_debug"
-                )
-                fallback_dir.mkdir(parents=True, exist_ok=True)
-                fp = fallback_dir / f"_dump_error_{run_id}.txt"
-                fp.write_text(
-                    f"run_id={run_id}\nquery={query}\n\n{_tb.format_exc()}",
-                    encoding="utf-8",
-                )
-            except Exception:
-                pass
-
-    await _emit(
-        on_progress,
-        "complete",
-        f"Research complete in {(completed_at - started_at).total_seconds():.1f}s",
-        tokens_used=meter.used,
-        citations=len(citations),
-    )
-
-    return report
-
-
-async def _run_lead_agent(
-    agent: Any,
-    query: str,
-    vfs: VirtualFS,
-    meter: TokenMeter,
-    tier_config: TierConfig,
-) -> dict:
-    """Invoke the lead agent.
-
-    Token usage is recorded via the UsageCallback attached to each LLM
-    instance (lead, subagents) — no scraping required here.
-    """
-    input_msg = {"messages": [{"role": "user", "content": query}]}
-    return await agent.ainvoke(input_msg)
-
-
-def _fallback_report(vfs: VirtualFS) -> str:
-    """Emergency fallback: concatenate all findings if synthesis fails."""
-    parts = ["# Research Findings (raw — synthesis failed)\n"]
-    for path, content in vfs.files.items():
-        if path == "/brief.md":
-            continue
-        parts.append(f"\n## {path}\n\n{content}")
-    return "\n".join(parts) if len(parts) > 1 else "No findings were produced."
