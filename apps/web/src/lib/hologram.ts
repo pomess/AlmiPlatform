@@ -1,29 +1,72 @@
 // Cyan wireframe building hologram rendered as a MapLibre custom 3D layer.
-// Footprints are pre-baked from Nominatim (see scripts/fetch-footprints.mjs);
-// missing data uses procedural fallback shapes. The layer stays attached for
-// the life of the map; show()/hide() swap geometry in place to avoid GL
-// context churn.
+// Footprints come from OpenStreetMap Overpass; missing data falls back to
+// pre-baked static shapes (see scripts/fetch-footprints.mjs). The layer
+// stays attached for the life of the map; show()/hide() swap geometry in
+// place to avoid GL context churn.
 import maplibregl from "maplibre-gl";
 import * as THREE from "three";
 import type { Competitor } from "./pharma";
-import footprintData from "../data/footprints.json";
+import { COMPETITORS } from "./pharma";
+import staticFootprints from "../data/footprints.json";
 
 const LAYER_ID = "competitor-hologram";
 const HOLOGRAM_COLOR = 0x7be3ff;
+const FALLBACK_FOOTPRINT_M = { width: 60, depth: 40, height: 80 };
+const SEARCH_RADIUS_M = 200;
+
+type OsmNode = { type: "node"; id: number; lat: number; lon: number };
+type OsmWay = {
+  type: "way";
+  id: number;
+  geometry?: { lat: number; lon: number }[];
+  tags?: Record<string, string>;
+};
+type OsmRelation = {
+  type: "relation";
+  id: number;
+  members?: { type: string; role: string; geometry?: { lat: number; lon: number }[] }[];
+  tags?: Record<string, string>;
+};
+type OsmElement = OsmNode | OsmWay | OsmRelation;
 
 type Footprint = {
-  ringMeters: { x: number; y: number }[];
+  ringMeters: { x: number; y: number }[]; // local meters around anchor
   heightM: number;
 };
 
-// Pre-populate the cache from the static JSON at module load.
 const footprintCache = new Map<string, Footprint[]>();
-for (const [name, fps] of Object.entries(footprintData)) {
+
+// 1) Hydrate from the static JSON shipped with the build (always available).
+for (const [name, fps] of Object.entries(staticFootprints)) {
   footprintCache.set(name, fps as Footprint[]);
 }
 
+// 2) Override with localStorage (has real Overpass data from previous sessions).
+const LS_KEY = "disease360.hologram.footprints";
+try {
+  const stored = localStorage.getItem(LS_KEY);
+  if (stored) {
+    const parsed = JSON.parse(stored) as Record<string, Footprint[]>;
+    for (const [name, fps] of Object.entries(parsed)) {
+      footprintCache.set(name, fps);
+    }
+  }
+} catch { /* non-fatal */ }
+
+// Dev utility: run `exportFootprints()` in the browser console after buildings
+// have loaded to download the cache as footprints.json (for committing as static data).
+(window as unknown as Record<string, unknown>).__exportFootprints = () => {
+  const obj: Record<string, Footprint[]> = {};
+  for (const [name, fps] of footprintCache) obj[name] = fps;
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "footprints.json"; a.click();
+  URL.revokeObjectURL(url);
+};
+
 export type HologramController = {
-  show(c: Competitor): void;
+  show(c: Competitor): Promise<void>;
   hide(): void;
   dispose(): void;
 };
@@ -38,6 +81,10 @@ export function attachHologramLayer(map: maplibregl.Map): HologramController {
   let anchor: { lng: number; lat: number } | null = null;
   let visible = false;
   let startMs = performance.now();
+  // Tracks the latest show() so an in-flight Overpass response from a
+  // previous click doesn't paint over a newer hologram if the user
+  // ping-pongs between competitors faster than Overpass replies.
+  let showToken = 0;
 
   const customLayer: maplibregl.CustomLayerInterface = {
     id: LAYER_ID,
@@ -74,6 +121,8 @@ export function attachHologramLayer(map: maplibregl.Map): HologramController {
 
       const t = (performance.now() - startMs) / 1000;
 
+      // Drive the scanline shader uniform on every fill material under
+      // the cluster.
       root.traverse((obj) => {
         const mesh = obj as THREE.Mesh;
         if (mesh.isMesh) {
@@ -96,6 +145,7 @@ export function attachHologramLayer(map: maplibregl.Map): HologramController {
     }
   }
 
+  // Paint the cluster of buildings into the scene root.
   function paintFootprints(list: Footprint[]) {
     clearGroup(root);
     for (const fp of list) {
@@ -105,21 +155,38 @@ export function attachHologramLayer(map: maplibregl.Map): HologramController {
     map.triggerRepaint();
   }
 
-  function show(c: Competitor) {
+  async function show(c: Competitor) {
+    const myToken = ++showToken;
     anchor = { lng: c.lng, lat: c.lat };
     startMs = performance.now();
     ensureLayer();
     visible = true;
 
-    const footprints = footprintCache.get(c.name);
-    if (footprints && footprints.length) {
-      paintFootprints(footprints);
-    } else {
-      paintFootprints([fallbackFootprint()]);
+    // If already cached from the preload, paint instantly.
+    const cached = footprintCache.get(c.name);
+    if (cached && cached.length) {
+      paintFootprints(cached);
+      return;
     }
+
+    // Not cached yet — paint static fallback immediately so the hologram
+    // is visible while Overpass responds (avoids blank 10s waits).
+    paintFootprints(getStaticOrFallback(c.name));
+
+    try {
+      const footprints = await loadFootprints(c);
+      if (myToken !== showToken) return;
+      if (footprints.length) {
+        paintFootprints(footprints);
+      }
+    } catch {
+      // Overpass failed — static fallback is already showing.
+    }
+    map.triggerRepaint();
   }
 
   function hide() {
+    showToken++; // invalidate any in-flight show()
     visible = false;
     clearGroup(root);
     anchor = null;
@@ -127,6 +194,7 @@ export function attachHologramLayer(map: maplibregl.Map): HologramController {
   }
 
   function dispose() {
+    showToken++;
     visible = false;
     clearGroup(root);
     if (map.getLayer(LAYER_ID)) {
@@ -136,7 +204,21 @@ export function attachHologramLayer(map: maplibregl.Map): HologramController {
     renderer = null;
   }
 
-  ensureLayer();
+  // Preload all competitor footprints in the background so clicks are instant.
+  // Barcelona-area competitors first (map starts there), then the rest.
+  const barcelonaFirst = [...COMPETITORS].sort((a, b) => {
+    const aLocal = a.lat > 41;
+    const bLocal = b.lat > 41;
+    if (aLocal && !bLocal) return -1;
+    if (!aLocal && bLocal) return 1;
+    return 0;
+  });
+  (async () => {
+    for (const comp of barcelonaFirst) {
+      loadFootprints(comp).catch(() => {});
+      await new Promise((r) => setTimeout(r, 150));
+    }
+  })();
 
   return { show, hide, dispose };
 }
@@ -160,6 +242,7 @@ function buildBuildingMeshes(fp: Footprint): THREE.Object3D[] {
   });
   geom.computeVertexNormals();
 
+  // ── Hologram volume ────────────────────────────────────────────────
   const fillMaterial = new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
@@ -193,21 +276,27 @@ function buildBuildingMeshes(fp: Footprint): THREE.Object3D[] {
       }
 
       void main() {
+        // Fresnel: hot at grazing angles, cool head-on.
         float fres = pow(1.0 - max(dot(normalize(vNormal), normalize(vViewDir)), 0.0), 2.2);
 
+        // Vertical falloff — brighter at top, softer at base.
         float hN = clamp(vLocal.z / max(uHeight, 1.0), 0.0, 1.0);
         float vGrad = mix(0.18, 0.55, hN);
 
+        // Sweeping scanline (slow).
         float t = mod(uTime * 0.18, 1.0);
         float scanY = t * uHeight;
         float band = exp(-pow((vLocal.z - scanY) / max(uHeight * 0.035, 1.2), 2.0));
 
+        // Fine horizontal interference stripes (CRT-ish).
         float stripes = 0.5 + 0.5 * sin(vLocal.z * 1.6 - uTime * 1.2);
         stripes = pow(stripes, 6.0) * 0.18;
 
+        // Vertical noise streaks (data-rain feel).
         float streak = hash(vec2(floor(vLocal.x * 0.6 + vLocal.y * 0.6), 0.0));
         float streakLine = step(0.985, streak) * (0.4 + 0.6 * sin(uTime * 4.0 + streak * 30.0));
 
+        // Top edge bloom.
         float topGlow = smoothstep(0.85, 1.0, hN) * 0.45;
 
         float alpha = 0.10 + vGrad * 0.18 + band * 0.65 + fres * 0.55 + topGlow + stripes + streakLine * 0.25;
@@ -225,6 +314,7 @@ function buildBuildingMeshes(fp: Footprint): THREE.Object3D[] {
   });
   const fill = new THREE.Mesh(geom, fillMaterial);
 
+  // ── Crisp neon wireframe ────────────────────────────────────────────
   const edges = new THREE.EdgesGeometry(geom, 1);
   const lineMaterial = new THREE.LineBasicMaterial({
     color: HOLOGRAM_COLOR,
@@ -235,6 +325,7 @@ function buildBuildingMeshes(fp: Footprint): THREE.Object3D[] {
   });
   const wire = new THREE.LineSegments(edges, lineMaterial);
 
+  // Thicker, dimmer wireframe shell for a "bloom" double-stroke.
   const wireGlow = new THREE.LineSegments(
     edges,
     new THREE.LineBasicMaterial({
@@ -247,6 +338,7 @@ function buildBuildingMeshes(fp: Footprint): THREE.Object3D[] {
   );
   wireGlow.scale.set(1.015, 1.015, 1.005);
 
+  // ── Outline of footprint on ground (bright) ─────────────────────────
   const baseGeom = new THREE.BufferGeometry().setFromPoints(
     ring.map((p) => new THREE.Vector3(p.x, p.y, 0.5)),
   );
@@ -281,16 +373,163 @@ function disposeObject(obj: THREE.Object3D) {
   else mat?.dispose();
 }
 
+// ---------------------------------------------------------------------------
+// Overpass fetch + footprint conversion
+// ---------------------------------------------------------------------------
+
+function persistCache() {
+  try {
+    const obj: Record<string, Footprint[]> = {};
+    for (const [name, fps] of footprintCache) {
+      obj[name] = fps;
+    }
+    localStorage.setItem(LS_KEY, JSON.stringify(obj));
+  } catch { /* quota exceeded or unavailable — non-fatal */ }
+}
+
+async function loadFootprints(c: Competitor): Promise<Footprint[]> {
+  const cached = footprintCache.get(c.name);
+  if (cached) return cached;
+
+  const query = `[out:json][timeout:10];(way["building"](around:${SEARCH_RADIUS_M},${c.lat},${c.lng});relation["building"](around:${SEARCH_RADIUS_M},${c.lat},${c.lng}););out body geom;`;
+  const res = await fetch("https://overpass-api.de/api/interpreter", {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=UTF-8" },
+    body: query,
+  });
+  if (!res.ok) throw new Error(`overpass ${res.status}`);
+  const data = (await res.json()) as { elements?: OsmElement[] };
+  const elements = data.elements ?? [];
+
+  const out: Footprint[] = [];
+  for (const el of elements) {
+    if (el.type === "way" && el.geometry && el.geometry.length >= 3) {
+      const ring = projectRing(el.geometry, c.lat, c.lng);
+      out.push({ ringMeters: ring, heightM: parseHeight(el.tags) });
+    } else if (el.type === "relation" && el.members) {
+      const outer = el.members.find(
+        (m) => m.role === "outer" && m.geometry && m.geometry.length >= 3,
+      );
+      if (outer && outer.geometry) {
+        const ring = projectRing(outer.geometry, c.lat, c.lng);
+        out.push({ ringMeters: ring, heightM: parseHeight(el.tags) });
+      }
+    }
+  }
+
+  const selected = pickTargetBuilding(out);
+  footprintCache.set(c.name, selected);
+  persistCache();
+  return selected;
+}
+
+function projectRing(
+  geom: { lat: number; lon: number }[],
+  anchorLat: number,
+  anchorLng: number,
+): { x: number; y: number }[] {
+  const cosLat = Math.cos((anchorLat * Math.PI) / 180);
+  const ring: { x: number; y: number }[] = [];
+  for (const p of geom) {
+    const x = (p.lon - anchorLng) * 111320 * cosLat;
+    const y = (p.lat - anchorLat) * 111320;
+    ring.push({ x, y });
+  }
+  if (ring.length > 1) {
+    const a = ring[0];
+    const b = ring[ring.length - 1];
+    if (Math.abs(a.x - b.x) < 1e-6 && Math.abs(a.y - b.y) < 1e-6) {
+      ring.pop();
+    }
+  }
+  return ring;
+}
+
+function parseHeight(tags: Record<string, string> | undefined): number {
+  if (!tags) return 30;
+  const h = tags["height"] ?? tags["building:height"];
+  if (h) {
+    const n = parseFloat(h);
+    if (Number.isFinite(n) && n > 0) return n;
+  }
+  const levels = tags["building:levels"];
+  if (levels) {
+    const n = parseFloat(levels);
+    if (Number.isFinite(n) && n > 0) return n * 3.5;
+  }
+  return 30;
+}
+
 function fallbackFootprint(): Footprint {
+  const w = FALLBACK_FOOTPRINT_M.width / 2;
+  const d = FALLBACK_FOOTPRINT_M.depth / 2;
   return {
     ringMeters: [
-      { x: -30, y: -20 },
-      { x: 30, y: -20 },
-      { x: 30, y: 20 },
-      { x: -30, y: 20 },
+      { x: -w, y: -d },
+      { x: w, y: -d },
+      { x: w, y: d },
+      { x: -w, y: d },
     ],
-    heightM: 80,
+    heightM: FALLBACK_FOOTPRINT_M.height,
   };
+}
+
+// If Overpass fails, use static pre-baked data or the generic box.
+function getStaticOrFallback(name: string): Footprint[] {
+  const s = footprintCache.get(name);
+  if (s && s.length) return s;
+  return [fallbackFootprint()];
+}
+
+// ---------------------------------------------------------------------------
+// Building selection — pick the single target building from Overpass results
+// ---------------------------------------------------------------------------
+
+function pointInRing(ring: { x: number; y: number }[]): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i].x, yi = ring[i].y;
+    const xj = ring[j].x, yj = ring[j].y;
+    if ((yi > 0) !== (yj > 0) && 0 < (xj - xi) * (0 - yi) / (yj - yi) + xi) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+function ringArea(ring: { x: number; y: number }[]): number {
+  let area = 0;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    area += (ring[j].x + ring[i].x) * (ring[j].y - ring[i].y);
+  }
+  return Math.abs(area) / 2;
+}
+
+function ringCentroidDist(ring: { x: number; y: number }[]): number {
+  let cx = 0, cy = 0;
+  for (const p of ring) { cx += p.x; cy += p.y; }
+  cx /= ring.length;
+  cy /= ring.length;
+  return Math.hypot(cx, cy);
+}
+
+function pickTargetBuilding(footprints: Footprint[]): Footprint[] {
+  if (footprints.length <= 1) return footprints;
+
+  const CAMPUS_THRESHOLD = 15;
+  if (footprints.length <= CAMPUS_THRESHOLD) return footprints;
+
+  const containing = footprints.filter((fp) => pointInRing(fp.ringMeters));
+  if (containing.length >= 1) return containing;
+  if (containing.length > 1) {
+    containing.sort((a, b) => ringArea(a.ringMeters) - ringArea(b.ringMeters));
+    return [containing[0]];
+  }
+
+  const sorted = [...footprints].sort(
+    (a, b) => ringCentroidDist(a.ringMeters) - ringCentroidDist(b.ringMeters),
+  );
+  return [sorted[0]];
 }
 
 // ---------------------------------------------------------------------------
