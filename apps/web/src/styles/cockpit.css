@@ -85,6 +85,11 @@ body { overflow: hidden; }
   transition: color var(--t-fast), background var(--t-fast);
   display: inline-flex; align-items: center; gap: 8px;
 }
+.nav-pill button:focus { outline: none; }
+.nav-pill button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 .nav-pill button:hover { color: var(--text-primary); }
 .nav-pill button.active {
   color: var(--text-on-accent);
