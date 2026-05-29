@@ -30,6 +30,22 @@ function findCompetitorAt(lat: number, lng: number) {
   return null;
 }
 
+// Match the agent's free-text `place` against the known competitor list by
+// name. The voice agent supplies its own best-guess lat/lng, which can be
+// stale or imprecise; when the place clearly names a competitor we trust the
+// curated coordinates in pharma.ts instead so "where is Sanofi" always lands
+// on the real, up-to-date pin.
+function findCompetitorByName(place: string | undefined) {
+  if (!place) return null;
+  const q = place.trim().toLowerCase();
+  if (!q) return null;
+  for (const c of COMPETITORS) {
+    const name = c.name.toLowerCase();
+    if (q === name || q.includes(name) || name.includes(q)) return c;
+  }
+  return null;
+}
+
 const ROUTE_SOURCE_ID = "disease360-route";
 const ROUTE_GLOW_LAYER_ID = "disease360-route-glow";
 const ROUTE_LINE_LAYER_ID = "disease360-route-line";
@@ -398,16 +414,20 @@ export function DashboardPage() {
       const map = mapRef.current;
 
       if (name === "fly_to_location") {
-        const lat = Number(args.lat);
-        const lng = Number(args.lng);
         const zoomArg = Number(args.zoom);
         // Enforce minimum zoom 15 — the model often passes 11 from stale context.
         const zoom = Number.isFinite(zoomArg) && zoomArg >= 15 ? zoomArg : 16;
         const place = typeof args.place === "string" ? args.place : undefined;
+        // The agent's lat/lng is a best guess and can be stale. If `place`
+        // names a known competitor, trust the curated coordinates in
+        // pharma.ts over whatever the model passed.
+        const byName = findCompetitorByName(place);
+        const lat = byName ? byName.lat : Number(args.lat);
+        const lng = byName ? byName.lng : Number(args.lng);
         if (!map || !Number.isFinite(lat) || !Number.isFinite(lng)) {
           return { ok: false, error: "invalid coordinates" };
         }
-        const matched = findCompetitorAt(lat, lng);
+        const matched = byName ?? findCompetitorAt(lat, lng);
         map.flyTo({
           center: [lng, lat],
           zoom,
