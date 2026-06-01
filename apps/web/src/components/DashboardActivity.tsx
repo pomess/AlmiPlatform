@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { ToolActivity } from "../hooks/useStreamChat";
 import type { VoiceTurnStatus } from "../hooks/useVoiceTurn";
 import { renderMarkdown } from "../lib/markdown";
+import { downloadResearchReportPdf } from "../lib/reportPdf";
 
 // Replies longer than this collapse to a chevron-expanded preview so the
 // panel doesn't squat over half the map. Tuned to ~3-4 lines at the
@@ -274,32 +275,54 @@ export function DashboardActivity({
 
       {researchReport && (
         <div className="dashboard-activity__report">
-          <button
-            type="button"
-            className="dashboard-activity__report-toggle"
-            onClick={() => setReportExpanded((v) => !v)}
-            aria-expanded={reportExpanded}
-          >
-            <span>Full research report</span>
-            <svg
-              className={
-                "dashboard-activity__chevron" + (reportExpanded ? " is-up" : "")
-              }
-              width="10"
-              height="10"
-              viewBox="0 0 10 10"
-              aria-hidden="true"
+          <div className="dashboard-activity__report-head">
+            <button
+              type="button"
+              className="dashboard-activity__report-toggle"
+              onClick={() => setReportExpanded((v) => !v)}
+              aria-expanded={reportExpanded}
             >
-              <path
-                d="M2 3.5 L5 7 L8 3.5"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+              <span>Full research report</span>
+              <svg
+                className={
+                  "dashboard-activity__chevron" + (reportExpanded ? " is-up" : "")
+                }
+                width="10"
+                height="10"
+                viewBox="0 0 10 10"
+                aria-hidden="true"
+              >
+                <path
+                  d="M2 3.5 L5 7 L8 3.5"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="dashboard-activity__report-download"
+              onClick={() =>
+                downloadResearchReportPdf(researchReport, { query: transcript })
+              }
+              title="Download report as PDF"
+            >
+              <svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true">
+                <path
+                  d="M6 1 V7.5 M3.5 5.5 L6 8 L8.5 5.5 M2 10 H10"
+                  stroke="currentColor"
+                  strokeWidth="1.3"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span>PDF</span>
+            </button>
+          </div>
           {reportExpanded && (
             <div className="dashboard-activity__report-body dashboard-activity__md">
               {renderMarkdown(researchReport)}
