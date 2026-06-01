@@ -1498,15 +1498,34 @@ async def _voice_turn_stream(
                             tc_id = getattr(chunk, "tool_call_id", None) or getattr(
                                 chunk, "id", None
                             )
+                            tool_name = getattr(chunk, "name", "") or ""
                             if tc_id and tc_id not in seen_tool_results:
                                 seen_tool_results.add(tc_id)
                                 await push(
                                     {
                                         "type": "tool_done",
-                                        "name": getattr(chunk, "name", "") or "",
+                                        "name": tool_name,
                                         "tool_call_id": tc_id,
                                     }
                                 )
+                                # The deep_research tool returns the full
+                                # markdown report to the agent, which then
+                                # narrates only a short spoken summary (the
+                                # `token` stream + TTS). Surface the full
+                                # report to the cockpit too so the dashboard
+                                # can show it under the spoken TL;DR.
+                                if tool_name == "deep_research":
+                                    report_md = _flatten_content(
+                                        getattr(chunk, "content", None)
+                                    )
+                                    if report_md.strip():
+                                        await push(
+                                            {
+                                                "type": "research_report",
+                                                "tool_call_id": tc_id,
+                                                "markdown": report_md,
+                                            }
+                                        )
                             continue
 
                         if chunk_type not in ("ai", "AIMessageChunk", "AIMessage"):

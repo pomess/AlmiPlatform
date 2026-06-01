@@ -557,6 +557,7 @@ export function DashboardPage() {
         pttHeld={pttHeld}
         transcript={voice.transcript}
         reply={voice.reply}
+        researchReport={voice.researchReport}
         toolActivity={voice.toolActivity}
         error={voice.error}
       />

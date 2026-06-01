@@ -211,6 +211,7 @@ export type VoiceTurnEvent =
       };
     }
   | { type: "tool_call"; id: string; name: string; args: Record<string, unknown> }
+  | { type: "research_report"; markdown: string; tool_call_id?: string }
   | { type: "token"; text: string }
   | { type: "audio"; b64: string; seq: number; rate: number }
   | { type: "done"; thread_id: string; empty?: boolean }

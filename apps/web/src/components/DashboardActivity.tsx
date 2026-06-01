@@ -13,6 +13,7 @@ interface DashboardActivityProps {
   pttHeld: boolean;
   transcript: string | null;
   reply: string;
+  researchReport: string | null;
   toolActivity: ToolActivity[];
   error: string | null;
 }
@@ -104,6 +105,7 @@ export function DashboardActivity({
   pttHeld,
   transcript,
   reply,
+  researchReport,
   toolActivity,
   error,
 }: DashboardActivityProps) {
@@ -122,6 +124,7 @@ export function DashboardActivity({
     (status !== "idle" && status !== "capturing") ||
     transcript != null ||
     reply.length > 0 ||
+    (researchReport != null && researchReport.length > 0) ||
     toolActivity.length > 0;
 
   // Auto-hide a short moment after returning to idle so the panel doesn't
@@ -142,6 +145,14 @@ export function DashboardActivity({
   useEffect(() => {
     if (reply === "") setExpanded(false);
   }, [reply]);
+
+  // Full deep-research report expand/collapse. Defaults open so the report
+  // is visible the moment it lands (the spoken summary above is the TL;DR);
+  // the body is height-capped + scrollable so it never swallows the map.
+  const [reportExpanded, setReportExpanded] = useState(true);
+  useEffect(() => {
+    if (researchReport) setReportExpanded(true);
+  }, [researchReport]);
 
   // Hide unconditionally while the user is holding Space, even if the
   // fade-out timer hasn't fired yet -- the user wants a clean center-only
@@ -216,9 +227,14 @@ export function DashboardActivity({
 
       {reply && (
         <div className="dashboard-activity__reply">
+          {researchReport && (
+            <span className="dashboard-activity__reply-label">
+              TL;DR · spoken summary
+            </span>
+          )}
           <div
             className={
-              "dashboard-activity__reply-body " +
+              "dashboard-activity__reply-body dashboard-activity__md " +
               (replyExpanded ? "is-expanded" : "is-collapsed")
             }
           >
@@ -252,6 +268,42 @@ export function DashboardActivity({
                 />
               </svg>
             </button>
+          )}
+        </div>
+      )}
+
+      {researchReport && (
+        <div className="dashboard-activity__report">
+          <button
+            type="button"
+            className="dashboard-activity__report-toggle"
+            onClick={() => setReportExpanded((v) => !v)}
+            aria-expanded={reportExpanded}
+          >
+            <span>Full research report</span>
+            <svg
+              className={
+                "dashboard-activity__chevron" + (reportExpanded ? " is-up" : "")
+              }
+              width="10"
+              height="10"
+              viewBox="0 0 10 10"
+              aria-hidden="true"
+            >
+              <path
+                d="M2 3.5 L5 7 L8 3.5"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          {reportExpanded && (
+            <div className="dashboard-activity__report-body dashboard-activity__md">
+              {renderMarkdown(researchReport)}
+            </div>
           )}
         </div>
       )}

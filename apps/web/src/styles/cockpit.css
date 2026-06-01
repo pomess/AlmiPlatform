@@ -2322,20 +2322,21 @@ body { overflow: hidden; }
 .dashboard-activity__reply-body.is-expanded {
   max-height: none;
 }
-/* Markdown typography inside the reply -- compact for a small panel. */
-.dashboard-activity__reply-body p {
+/* Markdown typography shared by the spoken reply + the full research
+   report -- compact for a small panel. */
+.dashboard-activity__md p {
   margin: 0 0 0.5em 0;
 }
-.dashboard-activity__reply-body p:last-child { margin-bottom: 0; }
-.dashboard-activity__reply-body strong {
+.dashboard-activity__md p:last-child { margin-bottom: 0; }
+.dashboard-activity__md strong {
   color: oklch(0.97 0.05 260);
   font-weight: 600;
 }
-.dashboard-activity__reply-body em {
+.dashboard-activity__md em {
   color: var(--text-secondary);
   font-style: italic;
 }
-.dashboard-activity__reply-body code {
+.dashboard-activity__md code {
   font-family: var(--font-mono);
   font-size: 11.5px;
   padding: 1px 5px;
@@ -2344,7 +2345,7 @@ body { overflow: hidden; }
   border: 1px solid var(--border-hairline);
   color: oklch(0.95 0.10 175);
 }
-.dashboard-activity__reply-body pre {
+.dashboard-activity__md pre {
   margin: 0.4em 0;
   padding: 8px 10px;
   border-radius: 8px;
@@ -2354,42 +2355,116 @@ body { overflow: hidden; }
   font-size: 11.5px;
   line-height: 1.45;
 }
-.dashboard-activity__reply-body pre code {
+.dashboard-activity__md pre code {
   padding: 0;
   border: none;
   background: transparent;
 }
-.dashboard-activity__reply-body ul,
-.dashboard-activity__reply-body ol {
+.dashboard-activity__md ul,
+.dashboard-activity__md ol {
   margin: 0.4em 0;
   padding-left: 1.2em;
 }
-.dashboard-activity__reply-body li {
+.dashboard-activity__md li {
   margin: 0.15em 0;
 }
-.dashboard-activity__reply-body a {
+.dashboard-activity__md a {
   color: oklch(0.88 0.18 175);
   text-decoration: underline;
   text-decoration-color: oklch(0.88 0.18 175 / 0.4);
   text-underline-offset: 2px;
 }
-.dashboard-activity__reply-body a:hover {
+.dashboard-activity__md a:hover {
   text-decoration-color: oklch(0.88 0.18 175 / 0.8);
 }
-.dashboard-activity__reply-body h1,
-.dashboard-activity__reply-body h2,
-.dashboard-activity__reply-body h3,
-.dashboard-activity__reply-body h4 {
+.dashboard-activity__md h1,
+.dashboard-activity__md h2,
+.dashboard-activity__md h3,
+.dashboard-activity__md h4 {
   margin: 0.6em 0 0.3em 0;
   font-size: 13px;
   letter-spacing: 0.01em;
   color: oklch(0.97 0.05 260);
 }
-.dashboard-activity__reply-body blockquote {
+.dashboard-activity__md blockquote {
   margin: 0.4em 0;
   padding-left: 10px;
   border-left: 2px solid oklch(0.88 0.18 175 / 0.45);
   color: var(--text-secondary);
+}
+
+/* TL;DR eyebrow shown above the spoken summary when a full research report
+   sits below it -- tells the user what the voice is actually narrating. */
+.dashboard-activity__reply-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: oklch(0.88 0.18 175 / 0.85);
+}
+
+/* Full deep-research report: a collapsible, height-capped, scrollable
+   panel that carries the complete markdown the agent only narrated a
+   summary of. Capped so it never swallows the map. */
+.dashboard-activity__report {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-hairline);
+}
+.dashboard-activity__report-toggle {
+  pointer-events: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border: 1px solid var(--border-hairline);
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--bg-glass) 88%, transparent);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color var(--t-fast) var(--ease-cinema),
+    border-color var(--t-fast) var(--ease-cinema),
+    background var(--t-fast) var(--ease-cinema);
+}
+.dashboard-activity__report-toggle:hover {
+  color: oklch(0.95 0.10 175);
+  border-color: oklch(0.88 0.18 175 / 0.55);
+  background: color-mix(in oklch, var(--bg-glass) 75%, oklch(0.88 0.18 175 / 0.1));
+}
+.dashboard-activity__report-toggle:focus-visible {
+  outline: 1px solid oklch(0.88 0.18 175 / 0.6);
+  outline-offset: 2px;
+}
+.dashboard-activity__report-body {
+  /* The panel is click-through (pointer-events: none) so the map can be
+     panned beneath it; re-enable events here so wheel/scroll lands on the
+     report instead of the map. `overscroll-behavior: contain` stops the
+     scroll from chaining out to the map once the report hits an edge. */
+  pointer-events: auto;
+  overscroll-behavior: contain;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  word-break: break-word;
+  max-height: 42vh;
+  overflow-y: auto;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.88 0.18 175 / 0.3) transparent;
+}
+.dashboard-activity__report-body::-webkit-scrollbar { width: 6px; }
+.dashboard-activity__report-body::-webkit-scrollbar-track { background: transparent; }
+.dashboard-activity__report-body::-webkit-scrollbar-thumb {
+  background: oklch(0.88 0.18 175 / 0.3);
+  border-radius: 3px;
 }
 .dashboard-activity__expand {
   pointer-events: auto;

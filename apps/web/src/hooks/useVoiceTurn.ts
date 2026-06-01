@@ -53,6 +53,12 @@ export interface UseVoiceTurnReturn {
   transcript: string | null;
   /** Streaming reply text accumulated in the current turn. */
   reply: string;
+  /**
+   * Full deep-research report markdown for the current turn, or null when
+   * the agent didn't run deep research. The agent narrates only a short
+   * spoken summary (`reply`); this is the complete report behind it.
+   */
+  researchReport: string | null;
   /** Tool calls the agent made during the current turn. */
   toolActivity: ToolActivity[];
   /** Stop any in-flight playback / request. */
@@ -157,6 +163,7 @@ export function useVoiceTurn(opts: UseVoiceTurnOptions): UseVoiceTurnReturn {
   const [micReady, setMicReady] = useState(false);
   const [transcript, setTranscript] = useState<string | null>(null);
   const [reply, setReply] = useState("");
+  const [researchReport, setResearchReport] = useState<string | null>(null);
   const [toolActivity, setToolActivity] = useState<ToolActivity[]>([]);
   const [threadId, setThreadId] = useState<string | null>(
     threadIdProp ?? readSharedThreadId(),
@@ -382,6 +389,7 @@ export function useVoiceTurn(opts: UseVoiceTurnOptions): UseVoiceTurnReturn {
 
     setStatus("thinking");
     setReply("");
+    setResearchReport(null);
     setError(null);
     setTranscript(null);
     setToolActivity([]);
@@ -517,6 +525,12 @@ export function useVoiceTurn(opts: UseVoiceTurnOptions): UseVoiceTurnReturn {
             }),
           );
           break;
+        case "research_report":
+          // Full deep-research report markdown. Stored separately from the
+          // spoken `reply` so the dashboard can show the whole report with
+          // the narrated summary surfaced on top as a TL;DR.
+          setResearchReport(evt.markdown);
+          break;
         case "token":
           setReply((r) => r + evt.text);
           break;
@@ -586,6 +600,7 @@ export function useVoiceTurn(opts: UseVoiceTurnOptions): UseVoiceTurnReturn {
 
       setStatus("thinking");
       setReply("");
+      setResearchReport(null);
       setError(null);
       setTranscript(trimmed);
       setToolActivity([]);
@@ -643,6 +658,7 @@ export function useVoiceTurn(opts: UseVoiceTurnOptions): UseVoiceTurnReturn {
       handleRef.current?.cancel();
       setStatus("capturing");
       setReply("");
+      setResearchReport(null);
       setError(null);
       setTranscript(null);
       setToolActivity([]);
@@ -700,6 +716,7 @@ export function useVoiceTurn(opts: UseVoiceTurnOptions): UseVoiceTurnReturn {
     threadId,
     transcript,
     reply,
+    researchReport,
     toolActivity,
     cancel,
     submitText,
