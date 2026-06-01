@@ -93,7 +93,7 @@ export const api = {
 
 export type ChatStreamEvent =
   | { type: "meta"; thread_id: string }
-  | { type: "tool"; name: string; args: Record<string, unknown>; tool_call_id?: string }
+  | { type: "tool"; name: string; args: Record<string, unknown>; tool_call_id?: string; narration?: string }
   | { type: "tool_done"; name: string; tool_call_id: string }
   | {
       type: "tool_progress";
@@ -195,6 +195,21 @@ export type VoiceTurnEvent =
   | { type: "transcript"; text: string }
   | { type: "tool"; name: string; args: Record<string, unknown>; tool_call_id?: string }
   | { type: "tool_done"; name: string; tool_call_id: string }
+  | {
+      type: "tool_progress";
+      name: string;
+      message: string;
+      stage: string;
+      detail?: {
+        query?: string;
+        url?: string;
+        subagents?: number;
+        searches?: number;
+        sources?: number;
+        elapsed_s?: number;
+        [k: string]: unknown;
+      };
+    }
   | { type: "tool_call"; id: string; name: string; args: Record<string, unknown> }
   | { type: "token"; text: string }
   | { type: "audio"; b64: string; seq: number; rate: number }

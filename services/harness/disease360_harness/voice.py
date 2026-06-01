@@ -166,7 +166,10 @@ JARVIS_STYLE = (
     "tool. The user hears that sentence aloud while the lookup runs, so "
     "they are never sitting in silence.\n"
     "- Make it specific: name the brain, project, person, or page. Never "
-    "use empty filler like 'Looking.' or 'One moment.' on its own."
+    "use empty filler like 'Looking.' or 'One moment.' on its own.\n"
+    "- When you escalate to `deep_research` because a memory lookup turned "
+    "up nothing, do NOT announce the escalation — the system speaks that "
+    "line for you. Just call the tool silently."
 )
 
 
@@ -572,6 +575,10 @@ async def warm_cue_cache() -> None:
     phrases: list[str] = list(WARM_OPENERS)
     for lines in TOOL_CUES.values():
         phrases.extend(lines)
+    # Pre-render the deep-research escalation variants (en + es) so the
+    # announcement plays from cache with zero latency.
+    for lines in DEEP_RESEARCH_CUES.values():
+        phrases.extend(lines)
     seen: set[str] = set()
     for phrase in phrases:
         s = phrase.strip()
@@ -653,6 +660,53 @@ def _next_cue(tool_name: str) -> str | None:
     if rotor is None:
         return None
     return next(rotor)
+
+
+# ---------------------------------------------------------------------------
+# Deep-research escalation cue.
+#
+# When the agent escalates to `deep_research` after a memory lookup
+# (`search_wiki` / `get_page`) already ran in the same turn, we speak a
+# prerecorded line announcing the escalation so the user isn't left in
+# silence while the (minutes-long) web research runs. Variants add
+# variability; they are pre-rendered into _PCM_CACHE at startup so playback
+# is a zero-latency dict lookup. The es-* variants all contain " voy " so
+# `_detect_speech_language` tags them es-ES (correct accent + cache key);
+# the en-* variants resolve to en-US.
+# ---------------------------------------------------------------------------
+
+DEEP_RESEARCH_CUES: dict[str, list[str]] = {
+    "en": [
+        "I couldn't find anything relevant in our private database, "
+        "so I'll run a deep research on the internet.",
+        "Nothing useful in our private notes — let me launch a deep "
+        "search across the web.",
+        "Our internal records don't cover this, so I'm going to research "
+        "it online now.",
+    ],
+    "es": [
+        "No he encontrado nada relevante en nuestra base de datos privada, "
+        "así que voy a investigar en internet.",
+        "No hay nada útil en nuestras notas internas; voy a lanzar una "
+        "búsqueda profunda en la web.",
+        "Esto no está en nuestros registros internos, así que lo voy a "
+        "investigar en internet ahora.",
+    ],
+}
+
+_DEEP_RESEARCH_ROTORS: dict[str, Iterable[str]] = {
+    lang: itertools.cycle(lines) for lang, lines in DEEP_RESEARCH_CUES.items()
+}
+
+
+def _deep_research_cue(language_code: str) -> str:
+    """Pick the next escalation variant for the conversation language.
+
+    Spanish conversations (es-*) get the Spanish rotor; everything else
+    (en-*, ca-*, unknown) falls back to English per the EN+ES scope.
+    """
+    lang = "es" if language_code.startswith("es") else "en"
+    return next(_DEEP_RESEARCH_ROTORS[lang])
 
 
 # ---------------------------------------------------------------------------
@@ -1367,6 +1421,10 @@ async def _voice_turn_stream(
                 return
             await push({"type": "transcript", "text": transcript})
 
+            # Conversation language drives which prerecorded escalation
+            # variant we speak when deep_research follows a memory lookup.
+            convo_lang = _detect_speech_language(transcript)
+
             # Prepend a location tag the agent can lean on for implicit-origin
             # routing ("how do I get to X" with no starting point named).
             # Sanitize numerically and only add the tag when both fields are
@@ -1394,6 +1452,9 @@ async def _voice_turn_stream(
 
             seen_tool_calls: set[str] = set()
             seen_tool_results: set[str] = set()
+            # Tracks whether a memory lookup ran earlier this turn, so the
+            # deep_research escalation cue only fires as a follow-on.
+            memory_lookup_seen = False
             # Last seen usage_metadata across the whole stream. Gemini
             # accumulates token counts on the final AIMessageChunk; we
             # surface `cached_content_token_count` so we can confirm
@@ -1404,8 +1465,31 @@ async def _voice_turn_stream(
                 async for mode, data in agent.astream(
                     {"messages": [{"role": "user", "content": agent_input}]},
                     config=config,
-                    stream_mode=["messages"],
+                    stream_mode=["messages", "custom"],
                 ):
+                    if mode == "custom":
+                        # Deep-research pipeline progress, emitted via
+                        # langgraph's stream writer. Forward it as a
+                        # `tool_progress` event so the dashboard can show a
+                        # live status line under the deep_research step.
+                        if isinstance(data, dict) and "name" in data:
+                            evt_name = data["name"]
+                            payload = data.get("data", data)
+                        elif isinstance(data, tuple) and len(data) == 2:
+                            evt_name, payload = data
+                        else:
+                            evt_name, payload = "progress", data
+                        if evt_name == "research_progress" and isinstance(payload, dict):
+                            detail = payload.get("detail") or {}
+                            await push({
+                                "type": "tool_progress",
+                                "name": "deep_research",
+                                "message": payload.get("message", ""),
+                                "stage": payload.get("stage", ""),
+                                "detail": detail if isinstance(detail, dict) else {},
+                            })
+                        continue
+
                     if mode == "messages":
                         chunk, _meta = data
                         chunk_type = getattr(chunk, "type", None)
@@ -1426,6 +1510,18 @@ async def _voice_turn_stream(
                             continue
 
                         if chunk_type not in ("ai", "AIMessageChunk", "AIMessage"):
+                            continue
+
+                        # Only surface activity from the top-level agent node.
+                        # The deep_research tool runs its own LangGraph
+                        # (open_deep_research) whose supervisor emits internal
+                        # tool calls (ConductResearch, ResearchComplete, ...)
+                        # and tokens from nested nodes. Those must NOT show up
+                        # as top-level steps in the cockpit — the single
+                        # deep_research step + its live progress line covers
+                        # them. Gating here drops nested tool calls AND tokens.
+                        node = (_meta or {}).get("langgraph_node", "")
+                        if node and node not in ("model", "agent"):
                             continue
 
                         for tc in getattr(chunk, "tool_calls", None) or []:
@@ -1455,6 +1551,11 @@ async def _voice_turn_stream(
                                     "tool_call_id": tc_id,
                                 }
                             )
+                            if name in ("search_wiki", "get_page"):
+                                memory_lookup_seen = True
+                            if name == "deep_research" and memory_lookup_seen:
+                                tts.speak_now(_deep_research_cue(convo_lang))
+
                             cue = _next_cue(name)
                             if cue:
                                 tts.speak_now(cue)
@@ -1462,13 +1563,6 @@ async def _voice_turn_stream(
                         usage = getattr(chunk, "usage_metadata", None)
                         if usage is not None:
                             last_usage = usage
-
-                        # Only stream tokens from the top-level agent node.
-                        # Nested tool calls (e.g. deep_research internal LLMs)
-                        # produce chunks from other nodes — skip them.
-                        node = (_meta or {}).get("langgraph_node", "")
-                        if node and node not in ("model", "agent"):
-                            continue
 
                         text = _flatten_content(getattr(chunk, "content", None))
                         if text:

@@ -492,6 +492,31 @@ export function useVoiceTurn(opts: UseVoiceTurnOptions): UseVoiceTurnReturn {
             ),
           );
           break;
+        case "tool_progress":
+          // Deep-research pipeline progress. We keep only the latest
+          // tallies on the matching (still-running) tool so the UI shows
+          // ONE replacing status line rather than a growing log.
+          setToolActivity((prev) =>
+            prev.map((t) => {
+              if (t.name !== evt.name || t.finishedAt != null) return t;
+              const d = evt.detail || {};
+              const prevRP = t.researchProgress;
+              const num = (v: unknown, fallback: number) =>
+                typeof v === "number" && Number.isFinite(v) ? v : fallback;
+              return {
+                ...t,
+                researchProgress: {
+                  stage: evt.stage || prevRP?.stage || "",
+                  // Counts are monotonic from the backend; keep the max so a
+                  // late event missing a field never makes the number drop.
+                  subagents: Math.max(num(d.subagents, 0), prevRP?.subagents ?? 0),
+                  searches: Math.max(num(d.searches, 0), prevRP?.searches ?? 0),
+                  sources: Math.max(num(d.sources, 0), prevRP?.sources ?? 0),
+                },
+              };
+            }),
+          );
+          break;
         case "token":
           setReply((r) => r + evt.text);
           break;

@@ -12,6 +12,8 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
+import sys
 import uuid
 from typing import Any
 
@@ -431,9 +433,36 @@ async def chat_stream(req: ChatRequest):
     )
 
 
+def _configure_logging() -> None:
+    """Route INFO logs from our packages to stdout so the harness console
+    shows what the agent + deep-research pipeline are doing in real time.
+
+    Without this, Python's last-resort handler only surfaces WARNING+ — which
+    is why deep-research progress (`[research] ...`) was invisible while errors
+    leaked through. Level is overridable via DISEASE360_LOG_LEVEL.
+    """
+    level_name = os.environ.get("DISEASE360_LOG_LEVEL", "INFO").upper()
+    level = getattr(logging, level_name, logging.INFO)
+
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s %(levelname)-5s %(name)s: %(message)s", "%H:%M:%S")
+    )
+
+    for name in ("disease360_harness", "disease360_runtime", "disease360_memory"):
+        logger = logging.getLogger(name)
+        logger.setLevel(level)
+        # Guard against duplicate handlers if run() is re-entered (e.g. reload).
+        if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
+            logger.addHandler(handler)
+        # Our handler already prints to stdout; don't double-log via root/uvicorn.
+        logger.propagate = False
+
+
 def run() -> None:
     import uvicorn
 
+    _configure_logging()
     uvicorn.run("disease360_harness.api:app", host="127.0.0.1", port=8002, reload=False)
 
 

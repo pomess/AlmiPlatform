@@ -2227,6 +2227,65 @@ body { overflow: hidden; }
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
+/* Single, self-replacing deep-research status line under its step row.
+   Spans the text + elapsed columns and sits on the row below the name.
+   A pulsing dot + per-change fade/slide give it a live, streaming feel. */
+.dashboard-activity__research-status {
+  grid-column: 2 / 4;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 10.5px;
+  color: oklch(0.9 0.1 175);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.dashboard-activity__research-live {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: oklch(0.88 0.18 175);
+  animation: dashboard-research-pulse 1.4s ease-in-out infinite;
+}
+.dashboard-activity__research-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* Re-mounts on every content change (keyed by text) so this enter
+     animation replays, making each update read as a live tick. */
+  animation: dashboard-research-text-in 360ms var(--ease-cinema, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+@keyframes dashboard-research-pulse {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(0.8);
+    box-shadow: 0 0 0 0 oklch(0.88 0.18 175 / 0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 7px 1px oklch(0.88 0.18 175 / 0.6);
+  }
+}
+@keyframes dashboard-research-text-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-activity__research-live { animation: none; }
+  .dashboard-activity__research-text { animation: none; }
+}
 .dashboard-activity__reply {
   display: flex;
   flex-direction: column;

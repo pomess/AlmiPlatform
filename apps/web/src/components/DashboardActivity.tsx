@@ -61,6 +61,30 @@ function elapsedString(t: ToolActivity, now: number): string {
   return `${(ms / 1000).toFixed(2)}s`;
 }
 
+// Map raw research pipeline stages to clean, business-language phases.
+const RESEARCH_PHASE_LABELS: Record<string, string> = {
+  start: "Starting research",
+  planning: "Planning the investigation",
+  researching: "Researching",
+  searching: "Searching the web",
+  fetching: "Reading sources",
+  compressing: "Distilling findings",
+  synthesizing: "Writing the report",
+  done: "Research complete",
+  error: "Research failed",
+};
+
+// Build the single, self-contained status line shown under the
+// deep_research step, e.g. "Sub-agents dispatched: 13 | Researching".
+function researchStatusLine(rp: NonNullable<ToolActivity["researchProgress"]>): string {
+  const phase = RESEARCH_PHASE_LABELS[rp.stage] || "Researching";
+  const parts: string[] = [];
+  if (rp.subagents > 0) parts.push(`Sub-agents dispatched: ${rp.subagents}`);
+  if (rp.sources > 0) parts.push(`Sources: ${rp.sources}`);
+  parts.push(phase);
+  return parts.join(" | ");
+}
+
 function phaseFor(
   status: VoiceTurnStatus,
   hasRunningTool: boolean,
@@ -170,6 +194,20 @@ export function DashboardActivity({
                 <span className="dashboard-activity__step-elapsed">
                   {elapsedString(t, now)}
                 </span>
+                {!done && t.researchProgress && (
+                  <span className="dashboard-activity__research-status">
+                    <span
+                      className="dashboard-activity__research-live"
+                      aria-hidden="true"
+                    />
+                    <span
+                      key={researchStatusLine(t.researchProgress)}
+                      className="dashboard-activity__research-text"
+                    >
+                      {researchStatusLine(t.researchProgress)}
+                    </span>
+                  </span>
+                )}
               </li>
             );
           })}

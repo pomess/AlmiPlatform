@@ -45,7 +45,32 @@ if platform.system() == "Windows":
 log = logging.getLogger(__name__)
 
 # Model to use across all open_deep_research stages.
-_MODEL = os.environ.get("DISEASE360_RESEARCH_MODEL", "google_genai:gemini-3.0-flash")
+_MODEL = os.environ.get("DISEASE360_RESEARCH_MODEL", "google_genai:gemini-flash-latest")
+
+
+def _content_to_text(content: Any) -> str:
+    """Coerce a LangChain message `content` to a plain string.
+
+    Gemini 3 / flash models return `content` as a list of content blocks
+    (e.g. ``[{"type": "text", "text": "..."}]``) rather than a bare string.
+    `ResearchReport.markdown` is typed as `str`, so passing the raw list
+    crashes Pydantic validation. Flatten any list of blocks into text.
+    """
+    if content is None:
+        return ""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: list[str] = []
+        for block in content:
+            if isinstance(block, str):
+                parts.append(block)
+            elif isinstance(block, dict):
+                text = block.get("text")
+                if isinstance(text, str):
+                    parts.append(text)
+        return "".join(parts)
+    return str(content)
 
 
 # ---------------------------------------------------------------------------
@@ -117,6 +142,19 @@ async def deep_research(
         max_iterations = 4
         max_tool_calls = 8
 
+    log.info("=" * 70)
+    log.info("[research] RUN %s — deep research starting", run_id)
+    log.info("[research]   query        : %s", query)
+    log.info("[research]   depth tier   : %s", tier)
+    log.info("[research]   model        : %s", _MODEL)
+    log.info(
+        "[research]   limits       : %d concurrent units · %d iterations · %d tool calls",
+        max_concurrent,
+        max_iterations,
+        max_tool_calls,
+    )
+    log.info("=" * 70)
+
     config = {
         "configurable": {
             "search_api": SearchAPI.TAVILY.value,
@@ -138,6 +176,18 @@ async def deep_research(
     # Stream the graph to capture intermediate events.
     final_report = ""
     sources_seen: list[str] = []
+    subagent_count = 0
+    search_count = 0
+
+    # Every progress event carries the running tallies so the UI can render
+    # a single, self-contained status line (e.g. "Sub-agents dispatched: 13 |
+    # Researching") without having to accumulate counts itself.
+    def _counts() -> dict[str, int]:
+        return {
+            "subagents": subagent_count,
+            "searches": search_count,
+            "sources": len(sources_seen),
+        }
 
     try:
         async for event in graph.astream_events(
@@ -149,21 +199,30 @@ async def deep_research(
             name = event.get("name", "")
 
             if kind == "on_chain_start" and "write_research_brief" in name:
-                await _emit(on_progress, "planning", "Research brief generated")
+                log.info("[research] %s · PLAN — writing research brief", run_id)
+                await _emit(on_progress, "planning", "Research brief generated", **_counts())
 
             elif kind == "on_chain_start" and "supervisor" in name:
-                await _emit(on_progress, "researching", "Supervisor dispatching sub-agents...")
+                log.info("[research] %s · SUPERVISOR — dispatching sub-agents", run_id)
+                await _emit(
+                    on_progress, "researching", "Supervisor dispatching sub-agents...",
+                    **_counts(),
+                )
 
             elif kind == "on_chain_start" and "researcher" in name:
-                await _emit(on_progress, "researching", f"Sub-agent researching...")
+                subagent_count += 1
+                log.info("[research] %s · SUB-AGENT #%d — researching", run_id, subagent_count)
+                await _emit(on_progress, "researching", "Sub-agent researching...", **_counts())
 
             elif kind == "on_tool_start":
                 tool_name = event.get("data", {}).get("input", {}).get("query", "")
                 if tool_name:
                     short = tool_name[:80]
+                    search_count += 1
+                    log.info("[research] %s · SEARCH #%d — %s", run_id, search_count, short)
                     await _emit(
                         on_progress, "searching", f"Searching: {short}",
-                        query=short,
+                        query=short, **_counts(),
                     )
 
             elif kind == "on_tool_end":
@@ -175,17 +234,30 @@ async def deep_research(
                             url = line.strip()
                             if url not in sources_seen:
                                 sources_seen.append(url)
+                                log.info(
+                                    "[research] %s · SOURCE [%d] %s",
+                                    run_id,
+                                    len(sources_seen),
+                                    url[:80],
+                                )
                                 await _emit(
                                     on_progress, "fetching",
                                     f"Source [{len(sources_seen)}]: {url[:60]}",
-                                    url=url,
+                                    url=url, **_counts(),
                                 )
 
             elif kind == "on_chain_start" and "compress_research" in name:
-                await _emit(on_progress, "compressing", "Compressing research findings...")
+                log.info("[research] %s · COMPRESS — distilling findings", run_id)
+                await _emit(
+                    on_progress, "compressing", "Compressing research findings...",
+                    **_counts(),
+                )
 
             elif kind == "on_chain_start" and "final_report" in name:
-                await _emit(on_progress, "synthesizing", "Writing final report...")
+                log.info("[research] %s · SYNTHESIZE — writing final report", run_id)
+                await _emit(
+                    on_progress, "synthesizing", "Writing final report...", **_counts(),
+                )
 
             elif kind == "on_chain_end" and "final_report" in name:
                 data = event.get("data", {})
@@ -195,30 +267,48 @@ async def deep_research(
                     if msgs:
                         last_msg = msgs[-1]
                         if hasattr(last_msg, "content"):
-                            final_report = last_msg.content
+                            final_report = _content_to_text(last_msg.content)
 
     except Exception as exc:
-        log.error("[research] graph execution failed: %s", exc)
+        log.error("[research] %s · FAILED — %s", run_id, exc)
         await _emit(on_progress, "error", f"Research failed: {exc}")
         raise
 
     # If we didn't capture the report from events, try invoking directly.
     if not final_report:
-        await _emit(on_progress, "synthesizing", "Finalizing report...")
+        await _emit(on_progress, "synthesizing", "Finalizing report...", **_counts())
         result = await graph.ainvoke(
             {"messages": [HumanMessage(content=query)]},
             config=config,
         )
         messages = result.get("messages", [])
         if messages:
-            final_report = messages[-1].content if hasattr(messages[-1], "content") else ""
+            final_report = (
+                _content_to_text(messages[-1].content)
+                if hasattr(messages[-1], "content")
+                else ""
+            )
 
     completed_at = datetime.now()
     elapsed = (completed_at - started_at).total_seconds()
 
+    log.info("=" * 70)
+    log.info(
+        "[research] RUN %s — complete in %.0fs · %d sub-agents · %d searches · "
+        "%d sources · %d chars",
+        run_id,
+        elapsed,
+        subagent_count,
+        search_count,
+        len(sources_seen),
+        len(final_report),
+    )
+    log.info("=" * 70)
+
     await _emit(
         on_progress, "done",
         f"Research complete ({elapsed:.0f}s, {len(sources_seen)} sources)",
+        elapsed_s=round(elapsed), **_counts(),
     )
 
     # Build citations from sources seen.

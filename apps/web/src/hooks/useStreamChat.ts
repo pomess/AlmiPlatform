@@ -18,6 +18,16 @@ export interface ResearchStep {
   at: number;
 }
 
+/** Live tallies for the deep_research pipeline, used to render a single
+ * self-contained status line (e.g. "Sub-agents dispatched: 13 | Researching")
+ * that replaces itself as the run progresses. */
+export interface ResearchProgress {
+  stage: string;
+  subagents: number;
+  searches: number;
+  sources: number;
+}
+
 export interface ToolActivity {
   name: string;
   args: Record<string, unknown>;
@@ -27,6 +37,8 @@ export interface ToolActivity {
   progressMessage?: string;
   /** Most recent research-pipeline steps (newest last). Capped at 30. */
   steps?: ResearchStep[];
+  /** Latest deep_research tallies + phase (replaces, never stacks). */
+  researchProgress?: ResearchProgress;
 }
 
 // Shared with the voice hook so a thread started by speaking on the
