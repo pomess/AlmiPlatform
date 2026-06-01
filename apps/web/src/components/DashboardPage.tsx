@@ -366,7 +366,8 @@ export function DashboardPage() {
         if (company) focusCompetitor(company);
       } else if (
         !(e.target as HTMLElement).closest(".dashboard-news-panel") &&
-        !(e.target as HTMLElement).closest(".dashboard-composer")
+        !(e.target as HTMLElement).closest(".dashboard-composer") &&
+        !(e.target as HTMLElement).closest(".dashboard-activity")
       ) {
         setSelectedCompetitor(null);
       }
