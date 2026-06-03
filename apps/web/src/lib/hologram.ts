@@ -5,9 +5,12 @@
 // place to avoid GL context churn.
 import maplibregl from "maplibre-gl";
 import * as THREE from "three";
-import type { Competitor } from "./pharma";
-import { COMPETITORS } from "./pharma";
+import { ALMIRALL_HQ, COMPETITORS } from "./pharma";
 import staticFootprints from "../data/footprints.json";
+
+// Anything with a name + coordinate can carry a hologram (competitors and the
+// Almirall HQ alike). Competitor satisfies this structurally.
+export type HologramTarget = { name: string; lat: number; lng: number };
 
 const LAYER_ID = "competitor-hologram";
 const FALLBACK_FOOTPRINT_M = { width: 60, depth: 40, height: 80 };
@@ -140,7 +143,7 @@ try {
 };
 
 export type HologramController = {
-  show(c: Competitor): Promise<void>;
+  show(c: HologramTarget): Promise<void>;
   hide(): void;
   dispose(): void;
 };
@@ -233,7 +236,7 @@ export function attachHologramLayer(
     map.triggerRepaint();
   }
 
-  async function show(c: Competitor) {
+  async function show(c: HologramTarget) {
     const myToken = ++showToken;
     anchor = { lng: c.lng, lat: c.lat };
     startMs = performance.now();
@@ -282,9 +285,9 @@ export function attachHologramLayer(
     renderer = null;
   }
 
-  // Preload all competitor footprints in the background so clicks are instant.
-  // Barcelona-area competitors first (map starts there), then the rest.
-  const barcelonaFirst = [...COMPETITORS].sort((a, b) => {
+  // Preload Almirall HQ + competitor footprints in the background so clicks are
+  // instant. Barcelona-area sites first (map starts there), then the rest.
+  const barcelonaFirst = [ALMIRALL_HQ, ...COMPETITORS].sort((a, b) => {
     const aLocal = a.lat > 41;
     const bLocal = b.lat > 41;
     if (aLocal && !bLocal) return -1;
@@ -467,7 +470,7 @@ function persistCache() {
   } catch { /* quota exceeded or unavailable — non-fatal */ }
 }
 
-async function loadFootprints(c: Competitor): Promise<Footprint[]> {
+async function loadFootprints(c: HologramTarget): Promise<Footprint[]> {
   const cached = footprintCache.get(c.name);
   if (cached) return cached;
 

@@ -340,6 +340,8 @@ export function DashboardPage({ theme = "dark" }: { theme?: Theme }) {
       installPharmaPins();
       hologramRef.current = attachHologramLayer(map, theme);
       flyHome();
+      // Almirall HQ hologram is always on by default.
+      void hologramRef.current.show(ALMIRALL_HQ);
     });
     map.on("style.load", () => {
       map.setSky?.(SKY_SETTINGS[theme]);
@@ -421,33 +423,56 @@ export function DashboardPage({ theme = "dark" }: { theme?: Theme }) {
     setSelectedCompetitor(company);
   }, []);
 
+  // Fly into the Almirall HQ and raise its building hologram. The Almirall
+  // hologram is the resting/default state (always on), so this just clears any
+  // competitor selection and re-frames the HQ.
+  const focusAlmirall = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.flyTo({
+      center: [ALMIRALL_HQ.lng, ALMIRALL_HQ.lat],
+      zoom: 17,
+      pitch: 60,
+      speed: 0.7,
+      curve: 1.4,
+      essential: true,
+    });
+    setSelectedCompetitor(null);
+    void hologramRef.current?.show(ALMIRALL_HQ);
+  }, []);
+
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
     function onClick(e: MouseEvent) {
-      const pin = (e.target as HTMLElement).closest(
+      const target = e.target as HTMLElement;
+      const home = target.closest(".dashboard-pharma-pin--home");
+      const pin = target.closest(
         ".dashboard-pharma-pin--rival[data-company]",
       ) as HTMLElement | null;
-      if (pin) {
+      if (home) {
+        focusAlmirall();
+      } else if (pin) {
         const company = pin.dataset.company || "";
         if (company) focusCompetitor(company);
       } else if (
-        !(e.target as HTMLElement).closest(".dashboard-news-panel") &&
-        !(e.target as HTMLElement).closest(".dashboard-composer") &&
-        !(e.target as HTMLElement).closest(".dashboard-activity")
+        !target.closest(".dashboard-news-panel") &&
+        !target.closest(".dashboard-composer") &&
+        !target.closest(".dashboard-activity")
       ) {
         setSelectedCompetitor(null);
       }
     }
     host.addEventListener("click", onClick);
     return () => host.removeEventListener("click", onClick);
-  }, [focusCompetitor]);
+  }, [focusCompetitor, focusAlmirall]);
 
-  // Hide the hologram whenever the selection is cleared (X button on the
-  // news panel, background click, voice "clear", etc.).
+  // The Almirall HQ hologram is always on. When no competitor is selected
+  // (initial load, X button, background click, voice "clear"), fall back to
+  // showing the Almirall building rather than hiding the layer entirely.
   useEffect(() => {
     if (!selectedCompetitor) {
-      hologramRef.current?.hide();
+      void hologramRef.current?.show(ALMIRALL_HQ);
     }
   }, [selectedCompetitor]);
 
@@ -509,7 +534,9 @@ export function DashboardPage({ theme = "dark" }: { theme?: Theme }) {
           setSelectedCompetitor(matched.name);
           void hologramRef.current?.show(matched);
         } else {
-          hologramRef.current?.hide();
+          // No competitor here — return to the always-on Almirall hologram.
+          setSelectedCompetitor(null);
+          void hologramRef.current?.show(ALMIRALL_HQ);
         }
         return { ok: true, place: place ?? null, lat, lng, zoom };
       }
