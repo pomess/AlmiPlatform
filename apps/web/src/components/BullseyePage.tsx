@@ -1,6 +1,7 @@
 // Bullseye — radial competitive intelligence visualization
 // for Atopic Dermatitis (AD), Hidradenitis Suppurativa (HS), and Psoriasis (PSO).
 import { useCallback, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 
 type Indication = "AD" | "HS" | "PSO";
 type Phase = "Approved" | "Phase III" | "Phase II" | "Phase I" | "Preclinical";
@@ -126,19 +127,12 @@ export function BullseyePage() {
   );
   const [snapshotYear, setSnapshotYear] = useState<number | null>(null);
 
-  // Zoom/pan state
+  // Zoom and pan move the full chart stage together: SVG, background, labels.
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
-  const isPanning = useRef(false);
+  const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef({ x: 0, y: 0 });
   const panOrigin = useRef({ x: 0, y: 0 });
-
-  const viewBox = useMemo(() => {
-    const size = 100 / zoom;
-    const cx = 50 + pan.x - size / 2;
-    const cy = 50 + pan.y - size / 2;
-    return `${cx} ${cy} ${size} ${size}`;
-  }, [zoom, pan]);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
@@ -147,29 +141,28 @@ export function BullseyePage() {
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
-    isPanning.current = true;
+    setIsPanning(true);
     panStart.current = { x: e.clientX, y: e.clientY };
     panOrigin.current = { ...pan };
   }, [pan]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isPanning.current) return;
-    const svgEl = (e.currentTarget as SVGElement);
-    const rect = svgEl.getBoundingClientRect();
-    const scale = 100 / zoom / rect.width;
-    const dx = (e.clientX - panStart.current.x) * scale;
-    const dy = (e.clientY - panStart.current.y) * scale;
-    setPan({ x: panOrigin.current.x - dx, y: panOrigin.current.y - dy });
-  }, [zoom]);
+    if (!isPanning) return;
+    setPan({
+      x: panOrigin.current.x + e.clientX - panStart.current.x,
+      y: panOrigin.current.y + e.clientY - panStart.current.y,
+    });
+  }, [isPanning]);
 
   const handleMouseUp = useCallback(() => {
-    isPanning.current = false;
+    setIsPanning(false);
   }, []);
 
   const resetView = useCallback(() => {
     setZoom(1);
     setPan({ x: 0, y: 0 });
   }, []);
+  const hasViewOffset = zoom !== 1 || pan.x !== 0 || pan.y !== 0;
 
   const filtered = useMemo(
     () => DRUGS.filter((d) => d.indication === indication),
@@ -279,124 +272,141 @@ export function BullseyePage() {
             </div>
           </div>
 
-          <div className="bull-chart-wrap">
-            <div className="bull-chart-bg" />
-            {zoom > 1 && (
-              <button className="bull-zoom-reset" onClick={resetView}>Reset</button>
+          <div
+            className={`bull-chart-wrap${isPanning ? " is-panning" : ""}`}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+          >
+            {hasViewOffset && (
+              <button
+                className="bull-zoom-reset"
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={resetView}
+              >
+                Reset
+              </button>
             )}
-            <svg
-              viewBox={viewBox}
-              className={`bull-svg${isPanning.current ? " panning" : ""}`}
+            <div
+              className="bull-chart-stage"
+              style={{
+                "--bull-zoom": zoom,
+                "--bull-pan-x": `${pan.x}px`,
+                "--bull-pan-y": `${pan.y}px`,
+              } as CSSProperties}
               onWheel={handleWheel}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onClick={(e) => {
-                const t = e.target as SVGElement;
-                if (!t.closest(".bull-dot-group")) setSelected(null);
-              }}
             >
-              {/* Sector dividers */}
-              {companies.map((_, i) => {
-                const angleStep = ARC_SPAN / companies.length;
-                const angle = ARC_START + i * angleStep;
-                const inner = polarToXY(angle, 8);
-                const outer = polarToXY(angle, 46);
-                return (
-                  <line
-                    key={`sec-${i}`}
-                    x1={inner.x} y1={inner.y}
-                    x2={outer.x} y2={outer.y}
-                    className="bull-sector-line"
-                  />
-                );
-              })}
-
-              {/* Concentric rings */}
-              {PHASE_RADII.map((r, i) => (
-                <circle key={i} cx="50" cy="50" r={r * 50} className="bull-ring" />
-              ))}
-
-              {/* Phase labels in the reserved wedge at top */}
-              {PHASES.map((phase, i) => {
-                const r = PHASE_RADII[i] * 50;
-                const pos = polarToXY(-90, r);
-                return (
-                  <text key={phase} x={pos.x} y={pos.y + 1.2} className="bull-phase-label">
-                    {phase}
-                  </text>
-                );
-              })}
-
-              {/* Wedge boundary lines */}
-              <line
-                x1={polarToXY(ARC_START, 8).x} y1={polarToXY(ARC_START, 8).y}
-                x2={polarToXY(ARC_START, 46).x} y2={polarToXY(ARC_START, 46).y}
-                className="bull-wedge-line"
-              />
-              <line
-                x1={polarToXY(-90 - LABEL_WEDGE / 2, 8).x} y1={polarToXY(-90 - LABEL_WEDGE / 2, 8).y}
-                x2={polarToXY(-90 - LABEL_WEDGE / 2, 46).x} y2={polarToXY(-90 - LABEL_WEDGE / 2, 46).y}
-                className="bull-wedge-line"
-              />
-
-              {/* Drug dots with inline labels */}
-              {dots.map(({ drug, x, y }) => {
-                const isSelected = selected?.brand === drug.brand;
-                const isAlmirall = drug.company.toLowerCase().includes("almirall");
-                const labelX = x + 2;
-                const labelY = y + 0.5;
-                return (
-                  <g
-                    key={drug.brand + drug.inn}
-                    className="bull-dot-group"
-                    onClick={(e) => { e.stopPropagation(); setSelected(drug); }}
-                  >
-                    {isAlmirall && (
-                      <circle cx={x} cy={y} r="2.6" className="bull-dot-halo" />
-                    )}
-                    {isSelected && (
-                      <circle cx={x} cy={y} r="3" className="bull-dot-pulse" />
-                    )}
-                    <circle
-                      cx={x} cy={y}
-                      r={isSelected ? "1.6" : "1.2"}
-                      className={`bull-dot${isSelected ? " active" : ""}${isAlmirall ? " almirall" : ""}`}
-                      style={{ fill: MODALITY_COLORS[drug.modality], transition: "cx 500ms ease, cy 500ms ease, opacity 400ms ease" }}
+              <div className="bull-chart-bg" />
+              <svg
+                viewBox="0 0 100 100"
+                className="bull-svg"
+                onClick={(e) => {
+                  const t = e.target as SVGElement;
+                  if (!t.closest(".bull-dot-group")) setSelected(null);
+                }}
+              >
+                {/* Sector dividers */}
+                {companies.map((_, i) => {
+                  const angleStep = ARC_SPAN / companies.length;
+                  const angle = ARC_START + i * angleStep;
+                  const inner = polarToXY(angle, 8);
+                  const outer = polarToXY(angle, 46);
+                  return (
+                    <line
+                      key={`sec-${i}`}
+                      x1={inner.x} y1={inner.y}
+                      x2={outer.x} y2={outer.y}
+                      className="bull-sector-line"
                     />
-                    <text x={labelX} y={labelY} className={`bull-dot-label${isSelected ? " active" : ""}`}>
-                      {drug.brand.length > 12 ? drug.brand.slice(0, 10) + "…" : drug.brand}
+                  );
+                })}
+
+                {/* Concentric rings */}
+                {PHASE_RADII.map((r, i) => (
+                  <circle key={i} cx="50" cy="50" r={r * 50} className="bull-ring" />
+                ))}
+
+                {/* Phase labels in the reserved wedge at top */}
+                {PHASES.map((phase, i) => {
+                  const r = PHASE_RADII[i] * 50;
+                  const pos = polarToXY(-90, r);
+                  return (
+                    <text key={phase} x={pos.x} y={pos.y + 1.2} className="bull-phase-label">
+                      {phase}
                     </text>
-                  </g>
-                );
-              })}
-            </svg>
+                  );
+                })}
 
-            {/* Company labels as HTML (always horizontal) */}
-            <div className="bull-company-labels">
-              {companies.map((comp, i) => {
-                const angleStep = ARC_SPAN / companies.length;
-                const angle = ARC_START + (i + 0.5) * angleStep;
-                const pos = polarToXY(angle, 50);
-                const left = `${pos.x}%`;
-                const top = `${pos.y}%`;
-                return (
-                  <span
-                    key={comp}
-                    className="bull-comp-label"
-                    style={{ left, top }}
-                  >
-                    {comp.length > 20 ? comp.slice(0, 18) + "…" : comp}
-                  </span>
-                );
-              })}
-            </div>
+                {/* Wedge boundary lines */}
+                <line
+                  x1={polarToXY(ARC_START, 8).x} y1={polarToXY(ARC_START, 8).y}
+                  x2={polarToXY(ARC_START, 46).x} y2={polarToXY(ARC_START, 46).y}
+                  className="bull-wedge-line"
+                />
+                <line
+                  x1={polarToXY(-90 - LABEL_WEDGE / 2, 8).x} y1={polarToXY(-90 - LABEL_WEDGE / 2, 8).y}
+                  x2={polarToXY(-90 - LABEL_WEDGE / 2, 46).x} y2={polarToXY(-90 - LABEL_WEDGE / 2, 46).y}
+                  className="bull-wedge-line"
+                />
 
-            {/* Center label */}
-            <div className="bull-center-label">
-              <span className="bull-center-title">{indication}</span>
-              <span className="bull-center-sub">{indicationLabel[indication]}</span>
+                {/* Drug dots with inline labels */}
+                {dots.map(({ drug, x, y }) => {
+                  const isSelected = selected?.brand === drug.brand;
+                  const isAlmirall = drug.company.toLowerCase().includes("almirall");
+                  const labelX = x + 2;
+                  const labelY = y + 0.5;
+                  return (
+                    <g
+                      key={drug.brand + drug.inn}
+                      className="bull-dot-group"
+                      onClick={(e) => { e.stopPropagation(); setSelected(drug); }}
+                    >
+                      {isAlmirall && (
+                        <circle cx={x} cy={y} r="2.6" className="bull-dot-halo" />
+                      )}
+                      {isSelected && (
+                        <circle cx={x} cy={y} r="3" className="bull-dot-pulse" />
+                      )}
+                      <circle
+                        cx={x} cy={y}
+                        r={isSelected ? "1.6" : "1.2"}
+                        className={`bull-dot${isSelected ? " active" : ""}${isAlmirall ? " almirall" : ""}`}
+                        style={{ fill: MODALITY_COLORS[drug.modality], transition: "cx 500ms ease, cy 500ms ease, opacity 400ms ease" }}
+                      />
+                      <text x={labelX} y={labelY} className={`bull-dot-label${isSelected ? " active" : ""}`}>
+                        {drug.brand.length > 12 ? drug.brand.slice(0, 10) + "…" : drug.brand}
+                      </text>
+                    </g>
+                  );
+                })}
+              </svg>
+
+              {/* Company labels as HTML (always horizontal) */}
+              <div className="bull-company-labels">
+                {companies.map((comp, i) => {
+                  const angleStep = ARC_SPAN / companies.length;
+                  const angle = ARC_START + (i + 0.5) * angleStep;
+                  const pos = polarToXY(angle, 50);
+                  const left = `${pos.x}%`;
+                  const top = `${pos.y}%`;
+                  return (
+                    <span
+                      key={comp}
+                      className="bull-comp-label"
+                      style={{ left, top }}
+                    >
+                      {comp.length > 20 ? comp.slice(0, 18) + "…" : comp}
+                    </span>
+                  );
+                })}
+              </div>
+
+              {/* Center label */}
+              <div className="bull-center-label">
+                <span className="bull-center-title">{indication}</span>
+                <span className="bull-center-sub">{indicationLabel[indication]}</span>
+              </div>
             </div>
           </div>
 
@@ -424,14 +434,16 @@ export function BullseyePage() {
               <span>2022</span>
               <span>Live</span>
             </div>
-            {snapshotYear && (
+            <span className="bull-tl-action-slot">
               <button
                 className="bull-tl-live-btn"
                 onClick={() => setSnapshotYear(null)}
+                disabled={!snapshotYear}
+                aria-hidden={!snapshotYear}
               >
                 Back to Live
               </button>
-            )}
+            </span>
           </div>
         </div>
 

@@ -35,7 +35,7 @@ body { overflow: hidden; }
   padding: 4px 6px;
   border-radius: var(--r-sm);
 }
-.app-top a.brand-link:hover { background: oklch(1 0 0 / 0.03); }
+.app-top a.brand-link:hover { background: oklch(var(--wash) / 0.05); }
 .app-top .mark {
   height: 22px;
   width: auto;
@@ -67,7 +67,7 @@ body { overflow: hidden; }
   display: inline-flex;
   padding: 4px;
   border-radius: var(--r-full);
-  background: oklch(1 0 0 / 0.03);
+  background: oklch(var(--wash) / 0.04);
   border: 1px solid var(--border-hairline);
   gap: 2px;
 }
@@ -115,7 +115,7 @@ body { overflow: hidden; }
 .signout-btn {
   display: inline-flex; align-items: center; gap: 8px;
   height: 32px; padding: 0 12px;
-  background: oklch(1 0 0 / 0.03);
+  background: oklch(var(--wash) / 0.04);
   border: 1px solid var(--border-hairline);
   border-radius: var(--r-full);
   cursor: pointer;
@@ -127,7 +127,7 @@ body { overflow: hidden; }
   transition: all var(--t-fast);
 }
 .signout-btn:hover {
-  background: oklch(1 0 0 / 0.06);
+  background: oklch(var(--wash) / 0.08);
   border-color: var(--border-medium);
   color: var(--text-primary);
 }
@@ -140,14 +140,14 @@ body { overflow: hidden; }
   position: relative;
   display: inline-flex; align-items: center; gap: 10px;
   height: 32px; padding: 0 12px 0 10px;
-  background: oklch(1 0 0 / 0.03);
+  background: oklch(var(--wash) / 0.04);
   border: 1px solid var(--border-hairline);
   border-radius: var(--r-full);
   cursor: pointer;
   font: inherit; color: var(--text-primary); font-size: 12.5px;
   transition: all var(--t-fast);
 }
-.brain-pill:hover { background: oklch(1 0 0 / 0.06); border-color: var(--border-medium); }
+.brain-pill:hover { background: oklch(var(--wash) / 0.08); border-color: var(--border-medium); }
 .brain-pill .lbl {
   font-family: var(--font-mono); font-size: 10px;
   letter-spacing: 0.18em; color: var(--text-faint);
@@ -202,7 +202,7 @@ body { overflow: hidden; }
   color: var(--text-secondary);
   transition: background var(--t-fast);
 }
-.brain-menu .row:hover { background: oklch(1 0 0 / 0.04); color: var(--text-primary); }
+.brain-menu .row:hover { background: oklch(var(--wash) / 0.05); color: var(--text-primary); }
 .brain-menu .row.active { background: var(--accent-faint); color: var(--accent-bright); }
 .brain-menu .row .swatch { width: 8px; height: 8px; border-radius: 50%; }
 .brain-menu .row .name { font-size: 13px; }
@@ -280,7 +280,7 @@ body { overflow: hidden; }
   cursor: pointer;
   transition: all var(--t-fast);
 }
-.icon-btn:hover { color: var(--text-primary); background: oklch(1 0 0 / 0.04); border-color: var(--border-hairline); }
+.icon-btn:hover { color: var(--text-primary); background: oklch(var(--wash) / 0.05); border-color: var(--border-hairline); }
 .icon-btn svg { width: 16px; height: 16px; }
 
 /* messages list */
@@ -313,7 +313,7 @@ body { overflow: hidden; }
 }
 .msg.user { align-self: flex-end; align-items: flex-end; max-width: 80%; }
 .msg.user .body {
-  background: oklch(1 0 0 / 0.045);
+  background: oklch(var(--wash) / 0.05);
   border: 1px solid var(--border-hairline);
   border-radius: var(--r-md);
   padding: 12px 16px;
@@ -342,20 +342,20 @@ body { overflow: hidden; }
 .msg .body code:not(pre code) {
   font-family: var(--font-mono); font-size: 0.92em;
   padding: 1px 5px;
-  background: oklch(1 0 0 / 0.06);
+  background: oklch(var(--wash) / 0.08);
   border-radius: var(--r-xs);
   color: var(--accent-bright);
 }
 .msg .body pre {
   margin: 12px 0;
   padding: 14px 16px;
-  background: oklch(0.13 0.012 240);
+  background: var(--code-bg);
   border: 1px solid var(--border-hairline);
   border-radius: var(--r-md);
   overflow: auto;
   font-family: var(--font-mono); font-size: 12.5px;
   line-height: 1.55;
-  color: var(--text-secondary);
+  color: var(--code-fg);
 }
 .msg .body pre .k { color: var(--accent-bright); }
 .msg .body pre .s { color: var(--c-success); }
@@ -385,14 +385,14 @@ body { overflow: hidden; }
   align-self: stretch;
   font-family: var(--font-mono);
   border-radius: var(--r-md);
-  background: linear-gradient(135deg, oklch(0.16 0.014 240 / 0.7), oklch(0.14 0.01 240 / 0.4));
+  background: linear-gradient(135deg, oklch(var(--wash) / 0.05), oklch(var(--wash) / 0.02));
   border: 1px solid var(--border-hairline);
   overflow: hidden;
   transition: border-color var(--t-med), background var(--t-med);
 }
 .tool-group.running {
   border-color: oklch(0.82 0.17 var(--accent-hue) / 0.25);
-  background: linear-gradient(135deg, oklch(0.16 0.02 260 / 0.08), oklch(0.14 0.01 240 / 0.5));
+  background: linear-gradient(135deg, var(--accent-faint), oklch(var(--wash) / 0.03));
 }
 .tool-group.done:hover { border-color: var(--border-subtle); }
 
@@ -562,7 +562,7 @@ body { overflow: hidden; }
   color: var(--text-muted);
   text-decoration: none;
   font-size: 10.5px;
-  background: oklch(1 0 0 / 0.03);
+  background: oklch(var(--wash) / 0.04);
   border: 1px solid var(--border-hairline);
   border-radius: var(--r-full);
   padding: 2px 8px;
@@ -626,7 +626,7 @@ body { overflow: hidden; }
   min-height: 0;
   border-top: 1px solid var(--border-accent);
   padding: 14px 16px;
-  background: oklch(0.13 0.012 240 / 0.4);
+  background: oklch(var(--wash) / 0.04);
   font-family: var(--font-mono); font-size: 11.5px;
   display: flex; flex-direction: column; gap: 6px;
   max-height: 220px; overflow-y: auto;
@@ -643,7 +643,7 @@ body { overflow: hidden; }
 /* skeleton */
 .skel {
   height: 14px; border-radius: 4px;
-  background: linear-gradient(90deg, oklch(1 0 0 / 0.05), oklch(1 0 0 / 0.1), oklch(1 0 0 / 0.05));
+  background: linear-gradient(90deg, oklch(var(--wash) / 0.05), oklch(var(--wash) / 0.12), oklch(var(--wash) / 0.05));
   background-size: 200% 100%;
   animation: skelMove 1.6s linear infinite;
 }
@@ -699,12 +699,12 @@ body { overflow: hidden; }
   transition: all var(--t-fast);
 }
 .composer .send-btn:hover { background: var(--accent-bright); transform: translateY(-1px); }
-.composer .send-btn:disabled { background: oklch(1 0 0 / 0.06); color: var(--text-faint); box-shadow: none; cursor: not-allowed; transform: none; }
+.composer .send-btn:disabled { background: oklch(var(--wash) / 0.08); color: var(--text-faint); box-shadow: none; cursor: not-allowed; transform: none; }
 .composer .send-btn svg { width: 16px; height: 16px; }
 .composer kbd {
   font-family: var(--font-mono); font-size: 10px;
   padding: 1px 5px; border-radius: 3px;
-  background: oklch(1 0 0 / 0.06);
+  background: oklch(var(--wash) / 0.08);
   border: 1px solid var(--border-hairline);
   color: var(--text-secondary);
 }
@@ -737,7 +737,7 @@ body { overflow: hidden; }
   text-align: left;
   padding: 14px 16px;
   border-radius: var(--r-md);
-  background: oklch(1 0 0 / 0.025);
+  background: oklch(var(--wash) / 0.03);
   border: 1px solid var(--border-hairline);
   color: var(--text-secondary);
   font: inherit; font-size: 13.5px;
@@ -745,7 +745,7 @@ body { overflow: hidden; }
   cursor: pointer;
   transition: all var(--t-fast);
 }
-.suggestion:hover { background: oklch(1 0 0 / 0.05); border-color: var(--border-medium); color: var(--text-primary); }
+.suggestion:hover { background: oklch(var(--wash) / 0.06); border-color: var(--border-medium); color: var(--text-primary); }
 .suggestion .label {
   display: block;
   font-family: var(--font-mono); font-size: 10px;
@@ -795,7 +795,7 @@ body { overflow: hidden; }
    ============================================================ */
 .rail {
   display: flex; flex-direction: column;
-  background: oklch(0.155 0.014 240);
+  background: var(--bg-base);
   overflow-y: auto;
 }
 .rail .group {
@@ -822,7 +822,7 @@ body { overflow: hidden; }
 
 .bar {
   height: 4px; border-radius: 2px;
-  background: oklch(1 0 0 / 0.06);
+  background: oklch(var(--wash) / 0.08);
   position: relative; overflow: hidden;
   margin: 6px 0 8px;
 }
@@ -1225,7 +1225,7 @@ body { overflow: hidden; }
   word-break: break-word;
   transition: background var(--t-fast), color var(--t-fast);
 }
-.brain-sidebar .nav-item:hover { background: oklch(1 0 0 / 0.04); color: var(--text-primary); }
+.brain-sidebar .nav-item:hover { background: oklch(var(--wash) / 0.05); color: var(--text-primary); }
 .brain-sidebar .nav-item.active {
   background: var(--accent-faint);
   color: var(--accent-bright);
@@ -1240,7 +1240,7 @@ body { overflow: hidden; }
 .brain-sidebar input.filter {
   width: 100%;
   padding: 7px 10px;
-  background: oklch(1 0 0 / 0.03);
+  background: oklch(var(--wash) / 0.04);
   border: 1px solid var(--border-hairline);
   border-radius: var(--r-sm);
   color: var(--text-primary);
@@ -1279,18 +1279,18 @@ body { overflow: hidden; }
 .page-body code:not(pre code) {
   font-family: var(--font-mono); font-size: 0.9em;
   padding: 1px 5px;
-  background: oklch(1 0 0 / 0.06);
+  background: oklch(var(--wash) / 0.08);
   border-radius: var(--r-xs);
   color: var(--accent-bright);
 }
 .page-body pre {
   margin: 12px 0; padding: 14px 16px;
-  background: oklch(0.13 0.012 240);
+  background: var(--code-bg);
   border: 1px solid var(--border-hairline);
   border-radius: var(--r-md);
   overflow: auto;
   font-family: var(--font-mono); font-size: 12.5px;
-  line-height: 1.55; color: var(--text-secondary);
+  line-height: 1.55; color: var(--code-fg);
 }
 .page-body table {
   border-collapse: collapse;
@@ -1308,13 +1308,13 @@ body { overflow: hidden; }
   color: var(--text-muted); font-weight: 500;
   font-family: var(--font-mono); font-size: 11px;
   letter-spacing: 0.08em; text-transform: uppercase;
-  background: oklch(1 0 0 / 0.02);
+  background: oklch(var(--wash) / 0.03);
 }
 .page-body blockquote {
   margin: 12px 0; padding: 2px 14px;
   border-left: 2px solid var(--border-accent);
   color: var(--text-secondary);
-  background: oklch(1 0 0 / 0.015);
+  background: oklch(var(--wash) / 0.025);
   border-radius: 0 var(--r-sm) var(--r-sm) 0;
 }
 .page-body hr {
@@ -3347,6 +3347,24 @@ body { overflow: hidden; }
   max-width: min(580px, calc(100vh - 220px));
   margin: 0 auto;
   aspect-ratio: 1;
+  overflow: visible;
+  cursor: grab;
+}
+.bull-chart-wrap.is-panning {
+  cursor: grabbing;
+}
+.bull-chart-stage {
+  --bull-zoom: 1;
+  --bull-pan-x: 0px;
+  --bull-pan-y: 0px;
+  position: absolute;
+  inset: 0;
+  transform: translate3d(var(--bull-pan-x), var(--bull-pan-y), 0) scale(var(--bull-zoom));
+  transform-origin: 50% 50%;
+  transition: transform 180ms var(--ease-cinema);
+}
+.bull-chart-wrap.is-panning .bull-chart-stage {
+  transition: none;
 }
 .bull-chart-bg {
   position: absolute;
@@ -3362,15 +3380,13 @@ body { overflow: hidden; }
   pointer-events: none;
 }
 .bull-svg {
-  position: relative;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   display: block;
   z-index: 1;
-  cursor: grab;
-}
-.bull-svg.panning {
-  cursor: grabbing;
+  cursor: inherit;
 }
 .bull-zoom-reset {
   position: absolute;
@@ -3524,12 +3540,14 @@ body { overflow: hidden; }
 
 /* Timeline slider */
 .bull-timeline-slider {
+  position: relative;
+  z-index: 10;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
   margin-top: 8px;
-  background: oklch(0.12 0.02 240 / 0.6);
+  background: oklch(var(--wash) / 0.05);
   border-radius: 10px;
   border: 1px solid var(--border-hairline);
 }
@@ -3546,7 +3564,7 @@ body { overflow: hidden; }
   height: 4px;
   appearance: none;
   -webkit-appearance: none;
-  background: oklch(0.3 0.02 240);
+  background: oklch(var(--wash) / 0.18);
   border-radius: 2px;
   outline: none;
   cursor: pointer;
@@ -3582,6 +3600,11 @@ body { overflow: hidden; }
   color: var(--text-muted);
   display: none;
 }
+.bull-tl-action-slot {
+  display: inline-flex;
+  justify-content: flex-end;
+  flex: 0 0 92px;
+}
 .bull-tl-live-btn {
   font-family: var(--font-mono);
   font-size: 10px;
@@ -3594,6 +3617,10 @@ body { overflow: hidden; }
   color: oklch(0.88 0.18 175);
   cursor: pointer;
   white-space: nowrap;
+}
+.bull-tl-live-btn:disabled {
+  visibility: hidden;
+  pointer-events: none;
 }
 .bull-tl-live-btn:hover {
   background: oklch(0.88 0.18 175 / 0.2);
@@ -3910,3 +3937,159 @@ body { overflow: hidden; }
 .dashboard-pharma-pin--rival .pharma-pin-line,
 .dashboard-pharma-pin--rival .pharma-pin-tick { stroke: oklch(0.70 0.22 25 / 0.85); }
 .dashboard-pharma-pin--rival .pharma-pin-label { fill: oklch(0.85 0.16 25); }
+
+/* ============================================================
+   THEME TOGGLE (header control) + light-mode viz handling
+   ============================================================ */
+.theme-toggle {
+  width: 32px; height: 32px;
+  display: inline-grid; place-items: center;
+  background: oklch(var(--wash) / 0.04);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--r-full);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease-cinema),
+              border-color var(--t-fast) var(--ease-cinema),
+              color var(--t-fast) var(--ease-cinema);
+}
+.theme-toggle:hover {
+  background: oklch(var(--wash) / 0.08);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+.theme-toggle svg { width: 16px; height: 16px; }
+
+/* Dashboard globe imagery is authored white-on-dark, so it stays pinned to the
+   dark palette in light mode. Bullseye and Graph receive their own light SVG
+   palettes below. */
+.app[data-theme="light"] .dashboard-page {
+  --bg-void: oklch(0.13 0.012 240);
+  --bg-base: oklch(0.155 0.014 240);
+  --bg-surface: oklch(0.185 0.014 240);
+  --bg-surface-hover: oklch(0.215 0.016 240);
+  --bg-elevated: oklch(0.235 0.018 240);
+  --bg-glass: oklch(0.18 0.014 240 / 0.66);
+  --bg-glass-strong: oklch(0.20 0.016 240 / 0.86);
+  --border-hairline: oklch(1 0 0 / 0.06);
+  --border-subtle: oklch(1 0 0 / 0.09);
+  --border-medium: oklch(1 0 0 / 0.16);
+  --text-primary: oklch(0.97 0.005 240);
+  --text-secondary: oklch(0.78 0.012 240);
+  --text-muted: oklch(0.58 0.014 240);
+  --text-faint: oklch(0.42 0.012 240);
+  --accent: oklch(0.82 0.16 var(--accent-hue));
+  --accent-bright: oklch(0.88 0.18 var(--accent-hue));
+  --accent-glow: oklch(0.82 0.16 var(--accent-hue) / 0.32);
+  --accent-faint: oklch(0.82 0.16 var(--accent-hue) / 0.10);
+  --wash: 1 0 0;
+  color: var(--text-primary);
+}
+
+/* Graph light mode: the force-graph SVG has hardcoded presentation attributes
+   for the dark cockpit, so override them from the stylesheet. */
+.app[data-theme="light"] .graph-page {
+  background:
+    radial-gradient(900px 460px at 55% 18%, var(--accent-faint), transparent 60%),
+    linear-gradient(180deg, oklch(0.99 0.003 240), var(--bg-base));
+}
+.app[data-theme="light"] .graph-page .gedge {
+  stroke: oklch(0.24 0.04 260 / 0.36);
+}
+.app[data-theme="light"] .graph-page .gnode > circle:first-child {
+  opacity: 0.14;
+}
+.app[data-theme="light"] .graph-page .gnode > circle:nth-child(2) {
+  stroke: oklch(1 0 0 / 0.92);
+  filter: drop-shadow(0 2px 7px oklch(0.24 0.04 260 / 0.18));
+}
+.app[data-theme="light"] .graph-page .gnode:hover > circle:nth-child(2) {
+  stroke: var(--text-primary);
+  filter: drop-shadow(0 4px 12px oklch(0.24 0.04 260 / 0.26));
+}
+.app[data-theme="light"] .graph-page .graph-legend,
+.app[data-theme="light"] .graph-page .graph-stats .pill {
+  box-shadow: 0 8px 28px -20px oklch(0.20 0.04 260 / 0.34);
+}
+.app[data-theme="light"] .graph-page .node-flashcard .card-inner {
+  background:
+    linear-gradient(160deg,
+      color-mix(in oklch, var(--card-accent) 14%, transparent) 0%,
+      color-mix(in oklch, var(--card-accent) 4%, transparent) 42%,
+      oklch(1 0 0 / 0.96) 100%),
+    var(--bg-elevated);
+  box-shadow:
+    0 26px 56px -26px color-mix(in oklch, var(--card-accent) 30%, transparent),
+    var(--shadow-pop);
+}
+.app[data-theme="light"] .graph-page .node-flashcard .meta-pill {
+  background: oklch(var(--wash) / 0.05);
+}
+
+/* Bullseye light mode: invert the SVG layer instead of boxing it as a dark
+   widget. The chart should feel native to the light cockpit. */
+.app[data-theme="light"] .bull-chart-wrap {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+.app[data-theme="light"] .bull-chart-bg {
+  background: radial-gradient(
+    circle at center,
+    var(--accent-faint) 0%,
+    oklch(0.94 0.008 240 / 0.72) 42%,
+    oklch(0.90 0.010 240 / 0.34) 72%,
+    transparent 100%
+  );
+}
+.app[data-theme="light"] .bull-sector-line {
+  stroke: oklch(0.24 0.04 260 / 0.10);
+}
+.app[data-theme="light"] .bull-ring {
+  stroke: oklch(0.24 0.04 260 / 0.16);
+}
+.app[data-theme="light"] .bull-phase-label {
+  fill: var(--text-muted);
+}
+.app[data-theme="light"] .bull-wedge-line {
+  stroke: oklch(0.24 0.04 260 / 0.20);
+}
+.app[data-theme="light"] .bull-dot {
+  stroke: oklch(1 0 0 / 0.92);
+}
+.app[data-theme="light"] .bull-dot-group:hover .bull-dot {
+  filter: drop-shadow(0 2px 5px oklch(0.24 0.04 260 / 0.24));
+}
+.app[data-theme="light"] .bull-dot.active {
+  stroke: var(--text-primary);
+  filter: drop-shadow(0 2px 6px oklch(0.24 0.04 260 / 0.30));
+}
+.app[data-theme="light"] .bull-dot-pulse {
+  fill: var(--accent-faint);
+  stroke: var(--border-accent);
+}
+.app[data-theme="light"] .bull-dot-label {
+  fill: var(--text-muted);
+}
+.app[data-theme="light"] .bull-dot-group:hover .bull-dot-label,
+.app[data-theme="light"] .bull-dot-label.active {
+  fill: var(--text-primary);
+}
+.app[data-theme="light"] .bull-comp-label {
+  color: var(--text-secondary);
+  text-shadow: none;
+}
+.app[data-theme="light"] .bull-center-title {
+  color: var(--text-primary);
+}
+.app[data-theme="light"] .bull-center-sub {
+  color: var(--text-secondary);
+}
+
+/* The brain dropdown is pinned to a fixed dark slab in dark mode; in light
+   mode promote it to a light elevated surface so its token-coloured rows stay
+   legible. The row hover uses the --wash token, so it inverts automatically. */
+.app[data-theme="light"] .brain-menu {
+  background: var(--bg-elevated) !important;
+  box-shadow: var(--shadow-pop), 0 0 0 1px var(--border-subtle);
+}

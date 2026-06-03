@@ -270,11 +270,11 @@ export type ChatMsg =
       steps?: ResearchStep[];
     };
 
-function SkeletonAnswer() {
+function SkeletonAnswer({ assistantLabel = "DISEASE360" }: { assistantLabel?: string }) {
   return (
     <div className="msg">
       <div className="meta">
-        <span className="who jarvis">DISEASE360</span>
+        <span className="who jarvis">{assistantLabel}</span>
         <span>·</span>
       </div>
       <div style={{ display: "grid", gap: 8, maxWidth: 520 }}>
@@ -291,11 +291,15 @@ export function ChatStream({
   streaming,
   footer,
   onWikilinkClick,
+  assistantLabel = "DISEASE360",
+  userLabel = "BRUNO",
 }: {
   items: ChatMsg[];
   streaming: boolean;
   footer?: ReactNode;
   onWikilinkClick?: (target: string) => void;
+  assistantLabel?: string;
+  userLabel?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -347,7 +351,7 @@ export function ChatStream({
       rendered.push(
         <div className="msg user" key={i}>
           <div className="meta">
-            <span className="who">BRUNO</span>
+            <span className="who">{userLabel}</span>
             <span>{m.ts}</span>
           </div>
           <div className="body">{renderMarkdown(m.content)}</div>
@@ -356,13 +360,13 @@ export function ChatStream({
       return;
     }
     if (streaming && m.content === "" && i === items.length - 1) {
-      rendered.push(<SkeletonAnswer key={i} />);
+      rendered.push(<SkeletonAnswer key={i} assistantLabel={assistantLabel} />);
       return;
     }
     rendered.push(
       <div className="msg" key={i}>
         <div className="meta">
-          <span className="who jarvis">DISEASE360</span>
+          <span className="who jarvis">{assistantLabel}</span>
           <span>{m.ts}</span>
         </div>
         <div className="body">{renderMarkdown(m.content)}</div>
@@ -388,10 +392,12 @@ export function Composer({
   onSend,
   streaming,
   tokenInfo,
+  showResearch = true,
 }: {
   onSend: (text: string, opts?: { useResearch?: boolean }) => void;
   streaming: boolean;
   tokenInfo?: { tokens: number; max: number };
+  showResearch?: boolean;
 }) {
   const [val, setVal] = useState("");
   const [researchMode, setResearchMode] = useState(false);
@@ -438,14 +444,16 @@ export function Composer({
             <kbd>↵</kbd> SEND · <kbd>⇧↵</kbd> NEWLINE
           </span>
           <span style={{ display: "flex", gap: 14, alignItems: "center" }}>
-            <button
-              className={"research-toggle" + (researchMode ? " active" : "")}
-              onClick={() => setResearchMode((v) => !v)}
-              title={researchMode ? "Deep research ON — click to disable" : "Enable deep research mode"}
-              type="button"
-            >
-              {I.search} RESEARCH
-            </button>
+            {showResearch && (
+              <button
+                className={"research-toggle" + (researchMode ? " active" : "")}
+                onClick={() => setResearchMode((v) => !v)}
+                title={researchMode ? "Deep research ON — click to disable" : "Enable deep research mode"}
+                type="button"
+              >
+                {I.search} RESEARCH
+              </button>
+            )}
             {tokenInfo && (
               <span style={{ color: "var(--text-muted)" }} className="mono">
                 {tokenInfo.tokens}/{tokenInfo.max} TOK

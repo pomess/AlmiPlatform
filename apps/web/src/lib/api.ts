@@ -188,6 +188,89 @@ function chatStream(
   return { cancel: () => controller.abort(), done };
 }
 
+// --- Vera (Databricks serving endpoint) -----------------------------------
+//
+// Vera is a separate assistant backed by a Databricks-served MLflow
+// ResponsesAgent. The browser never holds the Databricks token: it posts the
+// visible conversation history to the harness, which proxies to Databricks and
+// streams the answer back using the same SSE envelope as the Chat tab.
+
+export type VeraStreamEvent =
+  | { type: "meta"; thread_id: string }
+  | { type: "token"; text: string }
+  | { type: "done"; thread_id: string }
+  | { type: "error"; message: string };
+
+export interface VeraStreamHandle {
+  cancel: () => void;
+  done: Promise<void>;
+}
+
+function veraStream(
+  req: { messages: { role: "user" | "assistant"; content: string }[]; thread_id?: string | null },
+  onEvent: (e: VeraStreamEvent) => void,
+): VeraStreamHandle {
+  const controller = new AbortController();
+
+  const done = (async () => {
+    let res: Response;
+    try {
+      res = await fetch("/api/harness/vera/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tenant_id: getActiveTenant(), ...req }),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      if ((err as Error).name === "AbortError") return;
+      onEvent({ type: "error", message: (err as Error).message });
+      return;
+    }
+
+    if (!res.ok || !res.body) {
+      onEvent({ type: "error", message: `${res.status} ${res.statusText}` });
+      return;
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+
+    try {
+      while (true) {
+        const { value, done: streamDone } = await reader.read();
+        if (streamDone) break;
+        buf += decoder.decode(value, { stream: true });
+
+        let idx: number;
+        while ((idx = buf.indexOf("\n\n")) !== -1) {
+          const frame = buf.slice(0, idx);
+          buf = buf.slice(idx + 2);
+          const dataLines: string[] = [];
+          for (const line of frame.split("\n")) {
+            if (line.startsWith("data:")) dataLines.push(line.slice(5).trimStart());
+          }
+          if (dataLines.length === 0) continue;
+          try {
+            const evt = JSON.parse(dataLines.join("\n")) as VeraStreamEvent;
+            onEvent(evt);
+          } catch {
+            // ignore malformed frame
+          }
+        }
+      }
+    } catch (err) {
+      if ((err as Error).name !== "AbortError") {
+        onEvent({ type: "error", message: (err as Error).message });
+      }
+    }
+  })();
+
+  return { cancel: () => controller.abort(), done };
+}
+
+export { veraStream };
+
 // --- streaming voice turn -------------------------------------------------
 
 export type VoiceTurnEvent =

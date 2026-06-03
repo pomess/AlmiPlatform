@@ -46,6 +46,13 @@
   --layer-wiki: oklch(0.72 0.14 295);
   --layer-raw: oklch(0.74 0.13 235);
 
+  /* ----- overlay wash (subtle fill over a surface) -----
+     Dark theme lifts with white; light theme deepens with navy ink.
+     Used for chrome hover/active fills so they invert correctly. */
+  --wash: 1 0 0;
+  --code-bg: oklch(0.13 0.012 240);
+  --code-fg: var(--text-secondary);
+
   /* ----- radii ----- */
   --r-xs: 4px;
   --r-sm: 6px;
@@ -75,6 +82,59 @@
   --t-fast: 140ms;
   --t-med: 280ms;
   --t-slow: 520ms;
+}
+
+/* ============================================================
+   LIGHT THEME — scoped to the cockpit shell (.app[data-theme="light"]).
+   The landing has its own light palette (body.on-landing) and is untouched.
+   Data-visualisation canvases (globe, force graph, bullseye radar) stay dark
+   and re-pin the dark palette below, the same way the landing keeps its dark
+   "screenshot" panels. ============================================================ */
+.app[data-theme="light"] {
+  color-scheme: light;
+  /* The cockpit inherits its text colour from <body> (which reads :root's
+     dark --text-primary). Re-assert colour here so the light ink ramp
+     actually propagates to descendants. */
+  color: var(--text-primary);
+
+  /* background stack — warm paper whites with a faint navy cast */
+  --bg-void: oklch(0.93 0.006 240);
+  --bg-base: oklch(0.985 0.003 240);
+  --bg-surface: oklch(1 0 0);
+  --bg-surface-hover: oklch(0.965 0.004 240);
+  --bg-elevated: oklch(1 0 0);
+  --bg-glass: oklch(0.99 0.003 240 / 0.78);
+  --bg-glass-strong: oklch(0.99 0.003 240 / 0.92);
+
+  /* borders — low-opacity navy ink, not gray */
+  --border-hairline: oklch(0.20 0.04 260 / 0.08);
+  --border-subtle: oklch(0.20 0.04 260 / 0.13);
+  --border-medium: oklch(0.20 0.04 260 / 0.22);
+  --border-accent: oklch(0.62 0.13 var(--accent-hue) / 0.55);
+
+  /* text — navy ink ramp */
+  --text-primary: oklch(0.22 0.04 260);
+  --text-secondary: oklch(0.38 0.04 260);
+  --text-muted: oklch(0.52 0.04 260);
+  --text-faint: oklch(0.64 0.03 260);
+  --text-on-accent: oklch(0.20 0.04 260);
+
+  /* accent — drop the mint a touch so it reads on white */
+  --accent: oklch(0.70 0.15 var(--accent-hue));
+  --accent-bright: oklch(0.62 0.15 var(--accent-hue));
+  --accent-dim: oklch(0.58 0.12 var(--accent-hue));
+  --accent-glow: oklch(0.72 0.15 var(--accent-hue) / 0.22);
+  --accent-faint: oklch(0.72 0.15 var(--accent-hue) / 0.12);
+
+  /* shadows — softer, cooler, no inset white */
+  --shadow-card: 0 1px 2px oklch(0.20 0.04 260 / 0.04), 0 8px 28px -16px oklch(0.20 0.04 260 / 0.28);
+  --shadow-pop: 0 2px 4px oklch(0.20 0.04 260 / 0.06), 0 24px 56px -22px oklch(0.20 0.04 260 / 0.34);
+  --glow-accent: 0 0 0 1px var(--border-accent), 0 0 20px -4px var(--accent-glow);
+
+  /* overlay wash deepens with navy ink on light surfaces */
+  --wash: 0.22 0.05 260;
+  --code-bg: oklch(0.96 0.005 240);
+  --code-fg: oklch(0.30 0.04 260);
 }
 
 /* ----- base ----- */

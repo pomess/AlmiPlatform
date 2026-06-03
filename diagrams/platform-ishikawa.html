@@ -5,74 +5,186 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Disease360 Platform — Ishikawa (Fishbone) Diagram</title>
 <style>
+  /* Geist + Geist Mono — same source as apps/web/src/styles/fonts.css */
+  @import url("https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap");
   :root {
-    --bg: #0f1320;
-    --panel: #171c2e;
-    --ink: #e7ecf6;
-    --muted: #97a2bd;
-    --spine: #7e8aa8;
-    --works: #4f9dff;
-    --works-soft: #1d3a63;
-    --planned: #f2b04a;
-    --planned-soft: #5a4318;
-    --mvp: #8b6cff;
-    --line: #2a3247;
+    /* Landing palette: light navy-on-white surface + Almirall mint accent */
+    --bg: oklch(0.985 0.003 240);
+    --panel: oklch(0.97 0.004 240);
+    --ink: oklch(0.20 0.04 260);
+    --secondary: oklch(0.36 0.04 260);
+    --muted: oklch(0.50 0.04 260);
+    --faint: oklch(0.66 0.03 260);
+    --spine: oklch(0.50 0.04 260);
+    --accent: oklch(0.82 0.16 175);
+    --accent-bright: oklch(0.88 0.18 175);
+    --accent-deep: oklch(0.42 0.10 175);
+    --accent-glow: oklch(0.82 0.16 175 / 0.32);
+    --accent-faint: oklch(0.82 0.16 175 / 0.10);
+    --border-hairline: oklch(0.20 0.04 260 / 0.08);
+    --border-subtle: oklch(0.20 0.04 260 / 0.14);
+    --border-medium: oklch(0.20 0.04 260 / 0.22);
+    --page-glow-a: oklch(0.82 0.16 175 / 0.07);
+    --page-glow-b: oklch(0.82 0.16 175 / 0.08);
+    --hover-bg: oklch(0.20 0.04 260 / 0.04);
+    --svg-text-halo: oklch(0.985 0.003 240 / 0.9);
+    --modal-overlay: oklch(0.20 0.04 260 / 0.32);
+    --modal-surface-a: oklch(1 0 0 / 0.92);
+    --modal-surface-b: oklch(0.985 0.003 240 / 0.92);
+    --cat-bg: oklch(1 0 0 / 0.6);
+    --diagram-bg-a: oklch(0.985 0.003 240);
+    --diagram-bg-b: oklch(0.965 0.005 240);
+    --diagram-grid: oklch(0.20 0.04 260 / 0.05);
+    --diagram-aurora: oklch(0.82 0.16 175 / 0.16);
+    --diagram-aurora-zero: oklch(0.82 0.16 175 / 0);
+    --head-bg: oklch(1 0 0 / 0.92);
+    --head-border: oklch(0.82 0.16 175 / 0.55);
+    --head-subtext: oklch(0.42 0.10 175);
+    --export-bg: #fbfcfe;
+    --works-line: oklch(0.62 0.13 175);
+    --works-text: oklch(0.40 0.09 175);
+    --works-chip: oklch(0.82 0.16 175 / 0.12);
+    --planned-line: oklch(0.50 0.04 260);
+    --planned-text: oklch(0.36 0.04 260);
+    --planned-chip: oklch(0.20 0.04 260 / 0.05);
+    --mvp-line: oklch(0.62 0.16 295);
+    --mvp-text: oklch(0.42 0.13 295);
+    --mvp-chip: oklch(0.72 0.14 295 / 0.12);
+    --font-sans: "Geist", "Geist Sans", -apple-system, "Segoe UI", system-ui, sans-serif;
+    --font-mono: "Geist Mono", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    /* status accents */
+    --works: var(--accent);
+    --planned: var(--muted);
+    --mvp: oklch(0.72 0.14 295);
+  }
+  body[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: oklch(0.13 0.012 240);
+    --panel: oklch(0.185 0.014 240);
+    --ink: oklch(0.97 0.005 240);
+    --secondary: oklch(0.78 0.012 240);
+    --muted: oklch(0.58 0.014 240);
+    --faint: oklch(0.42 0.012 240);
+    --spine: oklch(0.78 0.012 240);
+    --border-hairline: oklch(1 0 0 / 0.06);
+    --border-subtle: oklch(1 0 0 / 0.09);
+    --border-medium: oklch(1 0 0 / 0.16);
+    --page-glow-a: oklch(0.82 0.16 175 / 0.16);
+    --page-glow-b: oklch(0.62 0.13 175 / 0.14);
+    --hover-bg: oklch(1 0 0 / 0.04);
+    --svg-text-halo: oklch(0.105 0.012 240 / 0.55);
+    --modal-overlay: oklch(0 0 0 / 0.70);
+    --modal-surface-a: oklch(0.20 0.016 240 / 0.96);
+    --modal-surface-b: oklch(0.16 0.014 240 / 0.96);
+    --cat-bg: oklch(1 0 0 / 0.035);
+    --diagram-bg-a: oklch(0.205 0.016 240);
+    --diagram-bg-b: oklch(0.145 0.014 240);
+    --diagram-grid: oklch(1 0 0 / 0.018);
+    --diagram-aurora: oklch(0.82 0.16 175 / 0.18);
+    --diagram-aurora-zero: oklch(0.82 0.16 175 / 0);
+    --head-bg: oklch(0.18 0.014 240 / 0.98);
+    --head-border: oklch(0.82 0.16 175 / 0.55);
+    --head-subtext: var(--accent-bright);
+    --export-bg: #151923;
+    --works-line: oklch(0.84 0.16 175);
+    --works-text: oklch(0.88 0.18 175);
+    --works-chip: oklch(0.82 0.16 175 / 0.11);
+    --planned-line: oklch(0.72 0.03 245);
+    --planned-text: oklch(0.82 0.018 245);
+    --planned-chip: oklch(1 0 0 / 0.035);
+    --mvp-line: oklch(0.78 0.15 295);
+    --mvp-text: oklch(0.86 0.10 295);
+    --mvp-chip: oklch(0.72 0.14 295 / 0.12);
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
-    font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; }
+    font-family: var(--font-sans); font-feature-settings: "ss01", "ss02", "cv11";
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; overflow: hidden; }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(1200px 600px at 70% -10%, var(--page-glow-a), transparent 60%),
+      radial-gradient(900px 500px at 10% 110%, var(--page-glow-b), transparent 60%);
+  }
   header {
     position: fixed; top: 0; left: 0; right: 0; z-index: 10;
     display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
-    padding: 10px 18px; background: rgba(15,19,32,0.92);
-    border-bottom: 1px solid var(--line); backdrop-filter: blur(6px);
+    padding: 12px 24px; background: color-mix(in oklch, var(--bg) 70%, transparent);
+    border-bottom: 1px solid var(--border-hairline);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   }
-  header h1 { font-size: 16px; margin: 0; font-weight: 650; letter-spacing: .2px; }
-  header .sub { font-size: 12px; color: var(--muted); }
-  .legend { display: flex; gap: 16px; align-items: center; margin-left: auto; font-size: 12px; }
+  header h1 {
+    font-size: 17px; margin: 0; font-weight: 600; letter-spacing: -0.012em;
+    color: var(--ink);
+  }
+  header .sub {
+    font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-top: 3px;
+    letter-spacing: 0.02em;
+  }
+  .legend { display: flex; gap: 16px; align-items: center; margin-left: auto;
+    font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .12em; }
   .legend span { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
-  .dot { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
-  .dot.works { background: var(--works); }
-  .dot.planned { background: var(--planned); }
-  .dot.mvp { background: var(--mvp); }
-  .btn { font-size: 12px; color: var(--ink); background: var(--panel);
-    border: 1px solid var(--line); border-radius: 7px; padding: 6px 10px; cursor: pointer; }
-  .btn:hover { border-color: var(--works); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px currentColor; }
+  .dot.works { background: var(--works); color: var(--accent-glow); }
+  .dot.planned { background: var(--planned); color: transparent; }
+  .dot.mvp { background: var(--mvp); color: oklch(0.72 0.14 295 / 0.4); }
+  .btn { font-family: var(--font-mono); font-size: 11px; color: var(--secondary);
+    background: transparent; border: 1px solid var(--border-hairline); border-radius: var(--r-full, 999px);
+    padding: 7px 13px; cursor: pointer; letter-spacing: 0.04em;
+    transition: color 140ms, background 140ms, border-color 140ms; }
+  .btn:hover { color: var(--ink); border-color: var(--border-medium); background: var(--hover-bg); }
   .hint { font-size: 11px; color: var(--muted); }
-  #stage { position: absolute; left: 0; right: 0; bottom: 0; top: 84px; }
-  svg { width: 100%; height: 100%; display: block; cursor: grab; }
+  #stage { position: absolute; left: 0; right: 0; bottom: 0; top: 70px; padding: 0; }
+  svg { width: 100%; height: 100%; display: block; cursor: grab; background: transparent; }
   svg.dragging { cursor: grabbing; }
   text { user-select: none; }
+  #svg > g[data-bone] > line { filter: drop-shadow(0 1px 3px oklch(0.20 0.04 260 / 0.10)); }
+  #svg > g[data-bone] > rect:not(.bone-hit) {
+    filter: drop-shadow(0 8px 24px -12px oklch(0.20 0.04 260 / 0.30));
+  }
+  #svg > g[data-bone] > circle { filter: drop-shadow(0 0 6px currentColor); }
+  #svg text { paint-order: stroke; stroke: var(--svg-text-halo); stroke-width: 2.4px; stroke-linejoin: round; }
   .bone-hit { cursor: pointer; }
   .bone-hit:hover ~ .bone-label rect, .bone-hit:hover + .bone-label rect { filter: brightness(1.25); }
+  .noscript-note {
+    height: 100%; display: grid; place-items: center; text-align: center;
+    font-family: var(--font-mono); color: var(--muted); border: 1px solid var(--border-hairline);
+    background: radial-gradient(circle at 50% 40%, var(--modal-surface-a), var(--modal-surface-b) 70%);
+  }
 
   /* modal */
   #modal { position: fixed; inset: 0; z-index: 50; display: none;
-    background: rgba(5,8,16,0.78); padding: 26px; overflow: auto; }
+    background: var(--modal-overlay); padding: 26px; overflow: auto;
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
   #modal.open { display: block; }
-  .modal-card { max-width: 1500px; margin: 0 auto; background: var(--panel);
-    border: 1px solid var(--line); border-radius: 14px; padding: 22px 26px 30px; }
+  .modal-card { max-width: 1500px; margin: 0 auto;
+    background: linear-gradient(180deg, var(--modal-surface-a), var(--modal-surface-b));
+    border: 1px solid var(--border-subtle); border-radius: 18px; padding: 24px 28px 32px;
+    box-shadow: 0 1px 0 oklch(1 0 0 / 0.6) inset, 0 30px 80px -20px oklch(0.20 0.04 260 / 0.30); }
   .modal-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
-  .modal-head h2 { margin: 0; font-size: 18px; }
+  .modal-head h2 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.012em; color: var(--ink); }
+  .modal-head .sub { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.02em; }
   .modal-head .x { margin-left: auto; }
   .cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
     gap: 16px; margin-top: 18px; }
-  .cat { background: #131829; border: 1px solid var(--line); border-radius: 11px; padding: 14px 16px; }
-  .cat h3 { margin: 0 0 10px; font-size: 13.5px; color: var(--mvp); letter-spacing: .2px; }
+  .cat { background: var(--cat-bg); border: 1px solid var(--border-subtle); border-radius: var(--r-lg, 14px); padding: 14px 16px; }
+  .cat h3 { margin: 0 0 10px; font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent-deep); }
   .cat ul { margin: 0; padding-left: 16px; }
-  .cat li { font-size: 12.5px; line-height: 1.5; color: var(--ink); margin-bottom: 5px; }
+  .cat li { font-size: 12.5px; line-height: 1.5; color: var(--secondary); margin-bottom: 5px; }
 </style>
 </head>
 <body>
 <header>
   <div>
     <h1>Disease360 Platform — Ishikawa Diagram</h1>
-    <div class="sub">Each purple bone (Medical Deep Research, OMNI) is a full sub-project &mdash; click it to expand its own fishbone.</div>
+    <div class="sub">A standalone platform map: click nested bones to expand their detailed fishbones.</div>
   </div>
   <div class="legend">
     <span><i class="dot mvp"></i> MVP (nested fish)</span>
     <span><i class="dot works"></i> Works today</span>
     <span><i class="dot planned"></i> Planned / blocker</span>
+    <button class="btn" id="theme-toggle" aria-pressed="false">Dark theme</button>
     <button class="btn" id="reset">Reset view</button>
     <button class="btn" id="export">Download PNG</button>
   </div>
@@ -80,6 +192,10 @@
 
 <div id="stage">
   <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  <noscript>
+    <style>#svg { display: none; }</style>
+    <div class="noscript-note">This standalone diagram needs JavaScript enabled to render the interactive fishbone.</div>
+  </noscript>
 </div>
 
 <div id="modal">
@@ -258,7 +374,7 @@ const BONES = [
     title: "Memory & Knowledge Vault",
     status: "works",
     items: [
-      { t: "Postgres-canonical vault under RLS", s: "planned" },
+      { t: "Project-scoped knowledge vault", s: "planned" },
       { t: "Brains \u2192 Pages model", s: "works" },
       { t: "Wikilink graph (orphans / broken links)", s: "works" },
       { t: "FTS full-text search (FTS5)", s: "works" },
@@ -282,16 +398,16 @@ const BONES = [
     ],
   },
   {
-    title: "Approval Gate & Governance",
-    status: "works",
+    title: "Projects & Governance",
+    status: "planned",
     items: [
-      { t: "HumanInTheLoop middleware", s: "works" },
-      { t: "Persisted SQLite approval queue (survives restarts)", s: "works" },
-      { t: "Multi-channel approval queue", s: "works" },
-      { t: "Audit log (logs/audit.jsonl)", s: "works" },
-      { t: "policies/actions.yaml (allow / require / never)", s: "works" },
-      { t: "Tamper-evident hash-chaining", s: "planned" },
-      { t: "Network policy enforcement (network.yaml)", s: "planned" },
+      { t: "User-created project spaces", s: "planned" },
+      { t: "Project-scoped data uploads", s: "planned" },
+      { t: "Ingestion into centralized data layer", s: "planned" },
+      { t: "Graph generation per project", s: "planned" },
+      { t: "Project-only retrieval scope", s: "planned" },
+      { t: "Approval gate for mutating actions", s: "works" },
+      { t: "Audit log and source lineage", s: "works" },
     ],
   },
   {
@@ -301,35 +417,22 @@ const BONES = [
       { t: "React 19 + Vite cockpit", s: "works" },
       { t: "Typer CLI (ask / approvals / brains / switch)", s: "works" },
       { t: "Force-directed graph view (3D flashcard)", s: "works" },
-      { t: "Voice STT / TTS", s: "planned" },
+      { t: "Voice STT / TTS", s: "works" },
       { t: "Gesture recognition pipeline", s: "planned" },
       { t: "DND window / heartbeat scheduler", s: "planned" },
     ],
   },
   {
-    title: "Multi-tenancy & Security",
-    status: "planned",
-    items: [
-      { t: "Supabase auth / JWT verified on backend", s: "planned" },
-      { t: "tenant_id scoping", s: "planned" },
-      { t: "RLS cross-tenant isolation", s: "planned" },
-      { t: "Secret redaction at model boundary", s: "planned" },
-      { t: "Hosted deploy / Docker / health checks", s: "planned" },
-      { t: "CI (GitHub Actions)", s: "planned" },
-    ],
-  },
-  {
     title: "OMNI (Meeting Intelligence)",
-    status: "mvp",
-    note: "pharma meeting platform, nested",
+    status: "planned",
     categories: OMNI_CATEGORIES,
     items: [
-      { t: "Real-time Capture & STT", s: "works" },
-      { t: "Meeting Intelligence & Analysis", s: "works" },
-      { t: "OMNI Voice Assistant", s: "works" },
-      { t: "TOMMY Diabetes Deep Agent", s: "works" },
-      { t: "Data & Persistence", s: "works" },
-      { t: "UX & Frontend", s: "works" },
+      { t: "Real-time Capture & STT", s: "planned" },
+      { t: "Meeting Intelligence & Analysis", s: "planned" },
+      { t: "OMNI Voice Assistant", s: "planned" },
+      { t: "TOMMY Diabetes Deep Agent", s: "planned" },
+      { t: "Data & Persistence", s: "planned" },
+      { t: "UX & Frontend", s: "planned" },
     ],
   },
 ];
@@ -339,11 +442,39 @@ const BONES = [
  * ------------------------------------------------------------------ */
 const NS = "http://www.w3.org/2000/svg";
 const svg = document.getElementById("svg");
+const themeToggle = document.getElementById("theme-toggle");
+const SVG_THEME_VARS = [
+  "--ink", "--secondary", "--muted", "--spine", "--accent", "--accent-deep",
+  "--accent-faint", "--mvp", "--hover-bg", "--diagram-bg-a", "--diagram-bg-b",
+  "--diagram-grid", "--diagram-aurora", "--diagram-aurora-zero", "--head-bg",
+  "--head-border", "--head-subtext", "--works-line", "--works-text", "--works-chip",
+  "--planned-line", "--planned-text", "--planned-chip", "--mvp-line", "--mvp-text",
+  "--mvp-chip",
+];
+
+function syncSvgThemeVars() {
+  const styles = getComputedStyle(document.body);
+  SVG_THEME_VARS.forEach(name => {
+    svg.style.setProperty(name, styles.getPropertyValue(name).trim());
+  });
+}
+
+function applyTheme(theme) {
+  document.body.dataset.theme = theme;
+  syncSvgThemeVars();
+  themeToggle.textContent = theme === "dark" ? "Light theme" : "Dark theme";
+  themeToggle.setAttribute("aria-pressed", String(theme === "dark"));
+  localStorage.setItem("platform-ishikawa-theme", theme);
+}
+
+applyTheme(localStorage.getItem("platform-ishikawa-theme") || "light");
 
 const COLORS = {
-  works:   { line: "#4f9dff", text: "#cfe2ff", chip: "#1d3a63" },
-  planned: { line: "#f2b04a", text: "#ffe6bd", chip: "#5a4318" },
-  mvp:     { line: "#8b6cff", text: "#ddd2ff", chip: "#332a66" },
+  // works = Almirall mint (live today), planned = neutral navy (not yet),
+  // mvp = violet (nested sub-project) — all drawn from the landing palette.
+  works:   { line: "var(--works-line)", text: "var(--works-text)", chip: "var(--works-chip)" },
+  planned: { line: "var(--planned-line)", text: "var(--planned-text)", chip: "var(--planned-chip)" },
+  mvp:     { line: "var(--mvp-line)", text: "var(--mvp-text)", chip: "var(--mvp-chip)" },
 };
 
 function el(tag, attrs, parent) {
@@ -378,25 +509,39 @@ const boneDY = cy - 120; // vertical reach (leaves headroom for tip labels)
 svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
 svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
-// background
-el("rect", { x: 0, y: 0, width: W, height: H, fill: "#0f1320" }, svg);
+// background — light surface + mint aurora + faint navy grid (mirrors landing .hero)
+const INK = "var(--ink)";
+const MUTED = "var(--muted)";
+const SPINE = "var(--spine)";
+const defs = el("defs", {}, svg);
+const bg = el("radialGradient", { id: "diagramBg", cx: "50%", cy: "40%", r: "75%" }, defs);
+el("stop", { offset: "0%", "stop-color": "var(--diagram-bg-a)" }, bg);
+el("stop", { offset: "100%", "stop-color": "var(--diagram-bg-b)" }, bg);
+const aurora = el("radialGradient", { id: "diagramAurora", cx: "50%", cy: "50%", r: "50%" }, defs);
+el("stop", { offset: "0%", "stop-color": "var(--diagram-aurora)" }, aurora);
+el("stop", { offset: "70%", "stop-color": "var(--diagram-aurora-zero)" }, aurora);
+const grid = el("pattern", { id: "navyGrid", width: 64, height: 64, patternUnits: "userSpaceOnUse" }, defs);
+el("path", { d: "M 64 0 L 0 0 0 64", fill: "none", stroke: "var(--diagram-grid)", "stroke-width": 1 }, grid);
+el("rect", { x: -W, y: -H, width: W * 3, height: H * 3, fill: "url(#diagramBg)" }, svg);
+el("rect", { x: -W, y: -H, width: W * 3, height: H * 3, fill: "url(#navyGrid)" }, svg);
+el("ellipse", { cx: W * 0.5, cy: H * 0.42, rx: W * 0.42, ry: H * 0.5, fill: "url(#diagramAurora)" }, svg);
 
 // spine
 el("line", { x1: spineLeft, y1: cy, x2: headX, y2: cy,
-  stroke: "#7e8aa8", "stroke-width": 4 }, svg);
+  stroke: SPINE, "stroke-width": 5, "stroke-linecap": "round" }, svg);
 // arrow into head
 const arrow = el("polygon", { points: `${headX},${cy-12} ${headX+26},${cy} ${headX},${cy+12}`,
-  fill: "#7e8aa8" }, svg);
+  fill: SPINE }, svg);
 
 // head box
 const hg = el("g", {}, svg);
 const headLines = HEAD.split("\n");
 const hbw = 300, hbh = 96;
 el("rect", { x: headX + 30, y: cy - hbh/2, width: hbw, height: hbh, rx: 14,
-  fill: "#10245a", stroke: "#4f9dff", "stroke-width": 2.5 }, hg);
+  fill: "var(--head-bg)", stroke: "var(--head-border)", "stroke-width": 2.5 }, hg);
 headLines.forEach((ln, i) => {
   el("text", { x: headX + 30 + hbw/2, y: cy - 6 + i*26, "text-anchor": "middle",
-    fill: "#eaf1ff", "font-size": i === 0 ? 19 : 14, "font-weight": i === 0 ? 700 : 500 }, hg)
+    fill: i === 0 ? INK : "var(--head-subtext)", "font-size": i === 0 ? 20 : 14, "font-weight": i === 0 ? 700 : 560 }, hg)
     .textContent = ln;
 });
 
@@ -411,22 +556,25 @@ BONES.forEach((bone, i) => {
   const tipY = top ? cy - boneDY : cy + boneDY;
 
   const c = COLORS[bone.status];
-  const g = el("g", {}, svg);
+  const g = el("g", { "data-bone": i }, svg);
+  if (bone.categories) g.setAttribute("style", "cursor:zoom-in");
 
   // bone line
   el("line", { x1: ax, y1: ay, x2: tipX, y2: tipY,
-    stroke: c.line, "stroke-width": 3 }, g);
+    stroke: c.line, "stroke-width": 3.5, "stroke-linecap": "round" }, g);
 
   // category/label chip at the tip
   const labelLines = wrap(bone.title, 22);
   const chipW = 250, chipH = 22 + labelLines.length * 17;
   const chipX = tipX - chipW/2;
   const chipY = top ? tipY - chipH - 4 : tipY + 4;
-  el("rect", { x: chipX, y: chipY, width: chipW, height: chipH, rx: 8,
+  el("rect", { x: chipX, y: chipY, width: chipW, height: chipH, rx: 10,
     fill: c.chip, stroke: c.line, "stroke-width": 2 }, g);
+  const labelCenterY = chipY + chipH / 2;
   labelLines.forEach((ln, k) => {
-    el("text", { x: tipX, y: chipY + 18 + k*17, "text-anchor": "middle",
-      fill: "#ffffff", "font-size": 13.5, "font-weight": 700 }, g).textContent = ln;
+    el("text", { x: tipX, y: labelCenterY - (labelLines.length - 1) * 8.5 + k * 17,
+      "text-anchor": "middle", "dominant-baseline": "central",
+      fill: c.text, "font-size": 14.5, "font-weight": 760 }, g).textContent = ln;
   });
   if (bone.note) {
     el("text", { x: tipX, y: chipY + chipH + 14, "text-anchor": "middle",
@@ -441,13 +589,13 @@ BONES.forEach((bone, i) => {
     const py = ay + (tipY - ay) * tt;
     const ic = COLORS[it.s];
     // small connector tick to the right (toward spine side)
-    el("circle", { cx: px, cy: py, r: 3, fill: ic.line }, g);
+    el("circle", { cx: px, cy: py, r: 4, fill: ic.line, style: `color:${ic.line}` }, g);
     const lines = wrap(it.t, 30);
     const lh = 13.5;
     const baseY = py - ((lines.length - 1) * lh) / 2 + 4;
     lines.forEach((ln, li) => {
       el("text", { x: px + 12, y: baseY + li*lh, "text-anchor": "start",
-        fill: ic.text, "font-size": 12 }, g).textContent = ln;
+        fill: ic.text, "font-size": 13, "font-weight": 520 }, g).textContent = ln;
     });
   });
 
@@ -463,8 +611,8 @@ BONES.forEach((bone, i) => {
   }
 });
 
-// title strip on canvas
-el("text", { x: 40, y: 50, fill: "#97a2bd", "font-size": 15, "font-weight": 600 }, svg)
+// caption — bottom-left corner, clear of the first bone's labels
+el("text", { x: 40, y: H - 26, fill: MUTED, "font-size": 16, "font-weight": 600 }, svg)
   .textContent = "Effect (head):  a per-client AI workspace.  Bones = the platform's pieces.";
 
 /* ------------------------------------------------------------------ *
@@ -473,7 +621,7 @@ el("text", { x: 40, y: 50, fill: "#97a2bd", "font-size": 15, "font-weight": 600 
 function openModal(bone) {
   document.getElementById("modal-title").textContent = bone.title;
   document.getElementById("modal-sub").textContent =
-    "The original Scientific Insights Expert AI System fishbone — one bone of the platform.";
+    "Nested detail view for this platform component.";
   const wrapEl = document.getElementById("modal-cats");
   wrapEl.innerHTML = "";
   bone.categories.forEach(cat => {
@@ -538,6 +686,9 @@ svg.addEventListener("pointerup", endDrag);
 svg.addEventListener("pointerleave", endDrag);
 
 document.getElementById("reset").addEventListener("click", resetView);
+themeToggle.addEventListener("click", () => {
+  applyTheme(document.body.dataset.theme === "dark" ? "light" : "dark");
+});
 
 /* ------------------------------------------------------------------ *
  *  EXPORT — rasterize the full SVG to a high-res PNG
@@ -556,7 +707,8 @@ function exportPNG(scale = 3) {
     canvas.width = W * scale;
     canvas.height = H * scale;
     const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#0f1320";
+    const themeStyles = getComputedStyle(document.body);
+    ctx.fillStyle = themeStyles.getPropertyValue("--export-bg").trim() || "#fbfcfe";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     URL.revokeObjectURL(url);

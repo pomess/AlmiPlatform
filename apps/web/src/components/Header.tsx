@@ -14,6 +14,8 @@ interface HeaderProps {
   brains: DisplayBrain[];
   setBrain: (b: DisplayBrain) => void;
   dnd?: boolean;
+  theme?: "dark" | "light";
+  onToggleTheme?: () => void;
 }
 
 export function Header({
@@ -23,6 +25,8 @@ export function Header({
   brains,
   setBrain,
   dnd,
+  theme = "dark",
+  onToggleTheme,
 }: HeaderProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -44,6 +48,7 @@ export function Header({
 
   const tabs: Tab[] = [
     { id: "chat", label: "Chat" },
+    { id: "vera", label: "Vera" },
     { id: "dashboard", label: "Dashboard" },
     { id: "bullseye", label: "Bullseye" },
     { id: "graph", label: "Graph" },
@@ -55,7 +60,11 @@ export function Header({
     <header className="app-top">
       <div className="left">
         <a className="brand-link" href="/" title="Landing">
-          <img className="mark" src="/logos/almirall_logo_white.svg" alt="Almirall" />
+          <img
+            className="mark"
+            src={theme === "light" ? "/logos/almirall_logo_navy.svg" : "/logos/almirall_logo_white.svg"}
+            alt="Almirall"
+          />
         </a>
         <span className="corner">
           <span className="live"></span>
@@ -82,6 +91,33 @@ export function Header({
       </nav>
 
       <div className="right">
+        {onToggleTheme && (
+          <button
+            className="theme-toggle"
+            onClick={onToggleTheme}
+            aria-pressed={theme === "light"}
+            aria-label={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
+            title={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
+          >
+            {theme === "light" ? (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4.2" />
+                <line x1="12" y1="2.5" x2="12" y2="5" />
+                <line x1="12" y1="19" x2="12" y2="21.5" />
+                <line x1="2.5" y1="12" x2="5" y2="12" />
+                <line x1="19" y1="12" x2="21.5" y2="12" />
+                <line x1="4.9" y1="4.9" x2="6.6" y2="6.6" />
+                <line x1="17.4" y1="17.4" x2="19.1" y2="19.1" />
+                <line x1="4.9" y1="19.1" x2="6.6" y2="17.4" />
+                <line x1="17.4" y1="6.6" x2="19.1" y2="4.9" />
+              </svg>
+            )}
+          </button>
+        )}
         {showBrain && brain && (
           <div ref={ref} style={{ position: "relative" }}>
             <button className="brain-pill" onClick={() => setOpen((o) => !o)}>

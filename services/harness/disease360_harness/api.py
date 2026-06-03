@@ -17,10 +17,12 @@ import sys
 import uuid
 from typing import Any
 
+import httpx
+from disease360_runtime.config import get as config_get
+from disease360_runtime.research.tool import reset_research_budget
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
-from disease360_runtime.research.tool import reset_research_budget
 from pydantic import BaseModel
 
 from . import audit
@@ -77,6 +79,25 @@ class ChatResponse(BaseModel):
     thread_id: str
     final_text: str
     raw_messages: list[dict]
+
+
+class VeraMessage(BaseModel):
+    role: str
+    content: str
+
+
+class VeraRequest(BaseModel):
+    messages: list[VeraMessage]
+    tenant_id: str = DEFAULT_TENANT_ID
+    thread_id: str | None = None
+
+
+# Default Databricks serving endpoint for Vera (the genai-d360-assistant
+# MLflow ResponsesAgent). Overridable via DATABRICKS_VERA_ENDPOINT.
+DEFAULT_VERA_ENDPOINT = (
+    "https://adb-3337810075168014.14.azuredatabricks.net"
+    "/serving-endpoints/genai-d360-assistant/invocations"
+)
 
 
 _AGENTS: dict[tuple[str, str, str, bool], Any] = {}
@@ -419,6 +440,147 @@ async def chat_stream(req: ChatRequest):
                 yield _sse({"type": "done", "thread_id": thread_id})
             else:
                 yield _sse({"type": "error", "message": str(e)})
+
+    return StreamingResponse(
+        gen(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
+    )
+
+
+def _extract_vera_text(data: Any) -> str:
+    """Normalize a Databricks / MLflow ResponsesAgent reply to plain text.
+
+    Databricks-served agents return a few different shapes depending on the
+    underlying interface (OpenAI Responses, chat completions, or a raw MLflow
+    predictions envelope). We probe the common ones in order and fall back to a
+    string dump so the UI always gets *something* rather than a blank turn.
+    """
+    if data is None:
+        return ""
+    if isinstance(data, str):
+        return data
+
+    if isinstance(data, dict):
+        # OpenAI Responses convenience field.
+        direct = data.get("output_text")
+        if isinstance(direct, str) and direct:
+            return direct
+
+        # OpenAI Responses: output is a list of items, assistant message items
+        # carry a `content` list of {type: output_text|text, text: ...} blocks.
+        output = data.get("output")
+        if isinstance(output, list):
+            parts: list[str] = []
+            for item in output:
+                if not isinstance(item, dict):
+                    continue
+                content = item.get("content")
+                if isinstance(content, str):
+                    parts.append(content)
+                elif isinstance(content, list):
+                    for block in content:
+                        if isinstance(block, dict) and isinstance(block.get("text"), str):
+                            parts.append(block["text"])
+                        elif isinstance(block, str):
+                            parts.append(block)
+            if parts:
+                return "".join(parts)
+
+        # Chat-completions shape.
+        choices = data.get("choices")
+        if isinstance(choices, list) and choices:
+            first = choices[0]
+            if isinstance(first, dict):
+                msg = first.get("message") or {}
+                if isinstance(msg, dict):
+                    return _flatten_content(msg.get("content"))
+                if isinstance(first.get("text"), str):
+                    return first["text"]
+
+        # messages[-1] envelope.
+        messages = data.get("messages")
+        if isinstance(messages, list) and messages:
+            last = messages[-1]
+            if isinstance(last, dict):
+                return _flatten_content(last.get("content"))
+
+        # Raw MLflow predictions.
+        preds = data.get("predictions")
+        if isinstance(preds, list) and preds:
+            head = preds[0]
+            if isinstance(head, str):
+                return head
+            return _flatten_content(head)
+        if isinstance(preds, str):
+            return preds
+
+    if isinstance(data, list):
+        parts = [p for p in (_extract_vera_text(x) for x in data) if p]
+        if parts:
+            return "".join(parts)
+
+    return str(data)
+
+
+@app.post("/vera/stream")
+async def vera_stream(req: VeraRequest):
+    """Proxy a turn to the Databricks-served Vera agent.
+
+    The browser sends the visible conversation history; we forward it to the
+    Databricks serving endpoint with a server-side PAT (never exposed to the
+    client) and re-emit the reply over the same SSE envelope the Chat tab uses
+    (`meta` / `token` / `done` / `error`).
+    """
+    thread_id = req.thread_id or str(uuid.uuid4())
+    endpoint = config_get("DATABRICKS_VERA_ENDPOINT") or DEFAULT_VERA_ENDPOINT
+    token = config_get("DATABRICKS_VERA_TOKEN") or config_get("DATABRICKS_TOKEN")
+
+    async def gen():
+        yield _sse({"type": "meta", "thread_id": thread_id})
+        if not token:
+            yield _sse(
+                {
+                    "type": "error",
+                    "message": (
+                        "Vera is not configured: set DATABRICKS_VERA_TOKEN (or "
+                        "DATABRICKS_TOKEN) in policies/secrets.env."
+                    ),
+                }
+            )
+            return
+
+        payload = {
+            "input": [{"role": m.role, "content": m.content} for m in req.messages],
+            "stream": False,
+        }
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        }
+        try:
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                resp = await client.post(endpoint, headers=headers, json=payload)
+                resp.raise_for_status()
+                data = resp.json()
+            text = _extract_vera_text(data)
+            if text:
+                yield _sse({"type": "token", "text": text})
+            yield _sse({"type": "done", "thread_id": thread_id})
+        except httpx.HTTPStatusError as e:
+            body = e.response.text[:500] if e.response is not None else ""
+            yield _sse(
+                {
+                    "type": "error",
+                    "message": f"Databricks returned {e.response.status_code}: {body}",
+                }
+            )
+        except Exception as e:  # pragma: no cover - network/runtime failures
+            yield _sse({"type": "error", "message": f"{type(e).__name__}: {e}"})
 
     return StreamingResponse(
         gen(),
