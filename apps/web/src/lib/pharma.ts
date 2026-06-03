@@ -5,8 +5,10 @@
 import maplibregl from "maplibre-gl";
 
 export const ALMIRALL_HQ = {
-  lat: 41.4039,
-  lng: 2.1374,
+  // HQ building fronting Ronda del General Mitre, 151 (Sant Gervasi, 08022).
+  // Geocoded from the street address (OSM Nominatim), nudged onto the frontage.
+  lat: 41.40363,
+  lng: 2.13897,
   name: "Almirall",
   city: "Barcelona, Spain",
 } as const;
