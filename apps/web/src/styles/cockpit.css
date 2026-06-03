@@ -3898,11 +3898,14 @@ body { overflow: hidden; }
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
+/* Never clip the label if the width estimate is a hair short — the SVG should
+   let the text and leader line overflow its box rather than crop the name. */
+.dashboard-pharma-pin svg {
+  overflow: visible;
+}
 .dashboard-pharma-pin .pharma-pin-home-ring {
   fill: none;
   stroke-width: 1.2;
-  transform-origin: 16px 64px;
-  animation: dashboard-locus-ring 2.4s ease-out infinite;
 }
 .dashboard-pharma-pin--dot,
 .dashboard-pharma-pin--dot svg {

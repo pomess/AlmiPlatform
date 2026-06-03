@@ -7,6 +7,7 @@ import { DashboardNewsPanel } from "./DashboardNewsPanel";
 import { useVoiceTurn } from "../hooks/useVoiceTurn";
 import {
   ALMIRALL_HQ,
+  ALMIRALL_PIN,
   COMPETITORS,
   makeAlmirallMarker,
   makeCompetitorMarker,
@@ -362,7 +363,7 @@ export function DashboardPage({ theme = "dark" }: { theme?: Theme }) {
       if (cancelled) return;
       coordsRef.current = { lat: ALMIRALL_HQ.lat, lon: ALMIRALL_HQ.lng };
       homeMarkerRef.current = makeAlmirallMarker()
-        .setLngLat([ALMIRALL_HQ.lng, ALMIRALL_HQ.lat])
+        .setLngLat([ALMIRALL_PIN.lng, ALMIRALL_PIN.lat])
         .addTo(map);
       competitorMarkersRef.current = COMPETITORS.map((c) =>
         makeCompetitorMarker(c).setLngLat([c.lng, c.lat]).addTo(map),

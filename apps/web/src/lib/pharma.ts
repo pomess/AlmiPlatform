@@ -7,11 +7,19 @@ import maplibregl from "maplibre-gl";
 export const ALMIRALL_HQ = {
   // HQ building fronting Ronda del General Mitre, 151 (Sant Gervasi, 08022).
   // Point sits inside the front building's footprint (OSM way 809175709) so the
-  // hologram + pin land on it rather than the block set back behind it.
+  // hologram + camera centre on it rather than the block set back behind it.
   lat: 41.40353,
   lng: 2.13819,
   name: "Almirall",
   city: "Barcelona, Spain",
+} as const;
+
+// The home pin's anchor dot is placed at the building's south-west (bottom-left
+// on a north-up view) corner so it reads clear of the translucent hologram
+// volume rather than being buried in its centre.
+export const ALMIRALL_PIN = {
+  lat: 41.40335,
+  lng: 2.13789,
 } as const;
 
 export type Competitor = {
@@ -77,11 +85,35 @@ export function makePharmaMarker(
   variant: "home" | "rival",
 ): maplibregl.Marker {
   const label = `${name.toUpperCase()} · ${city.toUpperCase()}`;
-  const width = Math.max(180, 70 + label.length * 6.5);
+  // Label is 10px mono with 0.14em letter-spacing (~7.4px advance per glyph).
+  // The text starts at x=48, so size the SVG to fit the full label plus a
+  // right margin; otherwise long names are clipped by the SVG viewport.
+  const width = Math.max(200, 56 + label.length * 7.6);
   const el = document.createElement("div");
   el.className = `dashboard-pharma-pin dashboard-pharma-pin--${variant}`;
   el.title = `${name} — ${city}`;
   el.dataset.company = name;
+  // The home pin sits on the always-on HQ hologram, anchored at the building's
+  // bottom-left corner — so it mirrors: the anchor dot is on the right and the
+  // label/leader extend LEFT onto the dark map, clear of the bright hologram.
+  // Rival pins keep the default left-anchored dot with the label to the right.
+  if (variant === "home") {
+    el.innerHTML = `
+      <svg viewBox="0 0 ${width} 80" width="${width}" height="80" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="20" width="${width}" height="55" fill="transparent" class="pharma-pin-hit" />
+        <circle cx="${width - 16}" cy="64" r="3" class="pharma-pin-anchor" />
+        <circle cx="${width - 16}" cy="64" r="7" class="pharma-pin-home-ring" />
+        <path d="M ${width - 16} 64 L ${width - 44} 40 L 10 40" class="pharma-pin-line" />
+        <path d="M 10 40 L 10 34" class="pharma-pin-tick" />
+        <text x="${width - 48}" y="35" text-anchor="end" class="pharma-pin-label">${label}</text>
+      </svg>
+    `;
+    return new maplibregl.Marker({
+      element: el,
+      anchor: "bottom-right",
+      offset: [16, 16],
+    });
+  }
   el.innerHTML = `
     <svg viewBox="0 0 ${width} 80" width="${width}" height="80" xmlns="http://www.w3.org/2000/svg">
       <rect x="0" y="20" width="${width}" height="55" fill="transparent" class="pharma-pin-hit" />
