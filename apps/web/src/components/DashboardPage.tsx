@@ -233,6 +233,30 @@ function writeComposerSilent(silent: boolean): void {
   }
 }
 
+// The push-to-talk voice agent is opt-in: it stays off until the user
+// flips the dashboard toggle, at which point we acquire the mic. The
+// choice is persisted so it survives reloads. Default is `false` (off).
+const VOICE_ENABLED_STORAGE_KEY = "disease360.dashboard.voiceEnabled";
+
+function readVoiceEnabled(): boolean {
+  try {
+    return window.localStorage.getItem(VOICE_ENABLED_STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function writeVoiceEnabled(enabled: boolean): void {
+  try {
+    window.localStorage.setItem(
+      VOICE_ENABLED_STORAGE_KEY,
+      enabled ? "true" : "false",
+    );
+  } catch {
+    /* ignore quota / privacy errors */
+  }
+}
+
 export function DashboardPage() {
   const hostRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -244,6 +268,9 @@ export function DashboardPage() {
   const [selectedCompetitor, setSelectedCompetitor] = useState<string | null>(null);
   const [silentTextTurns, setSilentTextTurns] = useState<boolean>(() =>
     readComposerSilent(),
+  );
+  const [voiceEnabled, setVoiceEnabled] = useState<boolean>(() =>
+    readVoiceEnabled(),
   );
 
   useEffect(() => {
@@ -409,6 +436,7 @@ export function DashboardPage() {
 
   const voice = useVoiceTurn({
     page: "dashboard",
+    enabled: voiceEnabled,
     pttActive: pttHeld,
     getUserLocation,
     onToolCall: (name, args) => {
@@ -464,6 +492,12 @@ export function DashboardPage() {
   // Space = push-to-talk. Capture phase so it beats the browser's default
   // "activate focused button" handling of Space.
   useEffect(() => {
+    // No mic, no push-to-talk: when the voice agent is disabled, Space
+    // behaves normally (and the mic is never acquired by the hook).
+    if (!voiceEnabled) {
+      setPttHeld(false);
+      return;
+    }
     const isTyping = (target: EventTarget | null) => {
       const el = target as HTMLElement | null;
       if (!el) return false;
@@ -502,7 +536,7 @@ export function DashboardPage() {
       window.removeEventListener("keyup", onKeyUp, true);
       window.removeEventListener("blur", onBlur);
     };
-  }, []);
+  }, [voiceEnabled]);
 
   const voiceLabel = (() => {
     if (voice.status === "error") return voice.error ?? "Voice error — click to retry";
@@ -522,13 +556,26 @@ export function DashboardPage() {
     return "HOLD SPACE TO SPEAK";
   })();
 
-  const micButtonClass = (() => {
-    if (voice.status === "error") return "is-error";
-    if (pttHeld || voice.status === "capturing") return "is-listening";
-    if (voice.status === "thinking") return "is-connecting";
-    if (voice.status === "speaking") return "is-speaking";
-    return voice.micReady ? "is-armed" : "is-idle";
+  // Turn-state glow for the single voice control. Only meaningful while
+  // voice is active; off collapses to a plain crossed-mic circle.
+  const voiceTurnClass = (() => {
+    if (!voiceEnabled) return "";
+    if (voice.status === "error") return " is-error";
+    if (pttHeld || voice.status === "capturing") return " is-listening";
+    if (voice.status === "thinking") return " is-connecting";
+    if (voice.status === "speaking") return " is-speaking";
+    return "";
   })();
+
+  // Single control: activate / deactivate. Turning off also stops any
+  // in-flight playback so the assistant doesn't keep talking after the
+  // user collapses the control.
+  function toggleVoice() {
+    const next = !voiceEnabled;
+    writeVoiceEnabled(next);
+    setVoiceEnabled(next);
+    if (!next) voice.cancel();
+  }
 
   return (
     <div
@@ -542,16 +589,19 @@ export function DashboardPage() {
       <DashboardNewsPanel
         selectedCompetitor={selectedCompetitor}
         onDismissCompetitor={() => setSelectedCompetitor(null)}
+        voiceEnabled={voiceEnabled}
       />
       <CompetitorPhotoCard selectedCompetitor={selectedCompetitor} />
-      <div
-        className={`dashboard-ptt-bar${pttHeld ? " is-active" : ""}`}
-        role="status"
-        aria-live="polite"
-      >
-        <span className="dot" aria-hidden="true" />
-        <span className="label">{pttBarLabel}</span>
-      </div>
+      {voiceEnabled && (
+        <div
+          className={`dashboard-ptt-bar${pttHeld ? " is-active" : ""}`}
+          role="status"
+          aria-live="polite"
+        >
+          <span className="dot" aria-hidden="true" />
+          <span className="label">{pttBarLabel}</span>
+        </div>
+      )}
       <DashboardActivity
         status={voice.status}
         pttHeld={pttHeld}
@@ -580,17 +630,17 @@ export function DashboardPage() {
       </button>
       <button
         type="button"
-        className={`dashboard-mic ${micButtonClass}`}
-        onClick={() => {
-          if (voice.status === "thinking" || voice.status === "speaking") {
-            voice.cancel();
-          }
-        }}
-        aria-label={voiceLabel}
-        aria-pressed={pttHeld}
-        title={voiceLabel}
+        className={`dashboard-voice-toggle${voiceEnabled ? " is-on" : ""}${voiceTurnClass}`}
+        onClick={toggleVoice}
+        aria-pressed={voiceEnabled}
+        aria-label={voiceEnabled ? voiceLabel : "Activate the voice agent"}
+        title={
+          voiceEnabled
+            ? voiceLabel
+            : "Activate the voice agent (enables the microphone)"
+        }
       >
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
           <path
             d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"
             fill="currentColor"
@@ -602,7 +652,17 @@ export function DashboardPage() {
             strokeWidth="1.6"
             strokeLinecap="round"
           />
+          {!voiceEnabled && (
+            <path
+              d="M4 4l16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            />
+          )}
         </svg>
+        <span className="dashboard-voice-toggle-label">VOICE ON</span>
       </button>
       <DashboardComposer
         onSubmit={(text) => {

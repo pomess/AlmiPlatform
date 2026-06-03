@@ -598,6 +598,33 @@ async def warm_cue_cache() -> None:
     )
 
 
+# Voice warming is opt-in: the cockpit calls POST /voice/warm only when the
+# user activates the voice agent. Guarded so repeat activations (or multiple
+# tabs) don't re-render the cue cache concurrently.
+_VOICE_WARMED = False
+_VOICE_WARM_LOCK = asyncio.Lock()
+
+
+@router.post("/voice/warm")
+async def voice_warm() -> dict:
+    """Warm the shared genai client + pre-render cue phrases on demand.
+
+    Triggered by the cockpit when the user turns Voice Activation on, so an
+    idle dashboard never pays (or triggers) the TTS warm cost. Idempotent:
+    once warmed, subsequent calls return immediately.
+    """
+    global _VOICE_WARMED
+    if _VOICE_WARMED:
+        return {"ok": True, "warmed": True, "cached": True}
+    async with _VOICE_WARM_LOCK:
+        if _VOICE_WARMED:
+            return {"ok": True, "warmed": True, "cached": True}
+        warm_genai_client()
+        await warm_cue_cache()
+        _VOICE_WARMED = True
+    return {"ok": True, "warmed": True}
+
+
 @router.get("/voice/sample")
 async def voice_sample(voice: str, text: str | None = None) -> Response:
     if voice not in VOICE_NAMES:

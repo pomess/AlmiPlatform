@@ -35,7 +35,6 @@ from .tools.memory_tools import (
     set_active_tenant,
 )
 from .voice import router as voice_router
-from .voice import warm_cue_cache, warm_genai_client
 
 log = logging.getLogger(__name__)
 
@@ -53,16 +52,15 @@ app.include_router(voice_router)
 
 @app.on_event("startup")
 async def _warmup() -> None:
-    """Warm up expensive lazily-initialised resources so the first voice
-    turn doesn't eat their setup cost on the hot path.
+    """Warm up cheap, always-on resources at startup.
 
-    - `warm_genai_client()` builds the shared `genai.Client` once.
-    - `warm_cue_cache()` pre-renders TTS for tool cues + common openers
-      so `TTSPipeline.speak_now(...)` returns instantly when the agent
-      emits a verbal connector before a long-running tool.
+    Voice warming is intentionally NOT done here: the voice agent is
+    opt-in, so `warm_genai_client()` + `warm_cue_cache()` only run when the
+    cockpit hits `POST /voice/warm` (i.e. when the user flips Voice
+    Activation on). An idle dashboard never spins up TTS or pre-renders
+    cue phrases. Only the news cache — which is unrelated to voice — warms
+    eagerly here.
     """
-    warm_genai_client()
-    asyncio.create_task(warm_cue_cache())
     asyncio.create_task(warm_news_cache())
 
 

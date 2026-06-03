@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Disease360 Platform — Ishikawa (Fishbone) Diagram</title>
+<style>
+  :root {
+    --bg: #0f1320;
+    --panel: #171c2e;
+    --ink: #e7ecf6;
+    --muted: #97a2bd;
+    --spine: #7e8aa8;
+    --works: #4f9dff;
+    --works-soft: #1d3a63;
+    --planned: #f2b04a;
+    --planned-soft: #5a4318;
+    --mvp: #8b6cff;
+    --line: #2a3247;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; }
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    padding: 10px 18px; background: rgba(15,19,32,0.92);
+    border-bottom: 1px solid var(--line); backdrop-filter: blur(6px);
+  }
+  header h1 { font-size: 16px; margin: 0; font-weight: 650; letter-spacing: .2px; }
+  header .sub { font-size: 12px; color: var(--muted); }
+  .legend { display: flex; gap: 16px; align-items: center; margin-left: auto; font-size: 12px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
+  .dot { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+  .dot.works { background: var(--works); }
+  .dot.planned { background: var(--planned); }
+  .dot.mvp { background: var(--mvp); }
+  .btn { font-size: 12px; color: var(--ink); background: var(--panel);
+    border: 1px solid var(--line); border-radius: 7px; padding: 6px 10px; cursor: pointer; }
+  .btn:hover { border-color: var(--works); }
+  .hint { font-size: 11px; color: var(--muted); }
+  #stage { position: absolute; left: 0; right: 0; bottom: 0; top: 84px; }
+  svg { width: 100%; height: 100%; display: block; cursor: grab; }
+  svg.dragging { cursor: grabbing; }
+  text { user-select: none; }
+  .bone-hit { cursor: pointer; }
+  .bone-hit:hover ~ .bone-label rect, .bone-hit:hover + .bone-label rect { filter: brightness(1.25); }
+
+  /* modal */
+  #modal { position: fixed; inset: 0; z-index: 50; display: none;
+    background: rgba(5,8,16,0.78); padding: 26px; overflow: auto; }
+  #modal.open { display: block; }
+  .modal-card { max-width: 1500px; margin: 0 auto; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 14px; padding: 22px 26px 30px; }
+  .modal-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .modal-head h2 { margin: 0; font-size: 18px; }
+  .modal-head .x { margin-left: auto; }
+  .cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 16px; margin-top: 18px; }
+  .cat { background: #131829; border: 1px solid var(--line); border-radius: 11px; padding: 14px 16px; }
+  .cat h3 { margin: 0 0 10px; font-size: 13.5px; color: var(--mvp); letter-spacing: .2px; }
+  .cat ul { margin: 0; padding-left: 16px; }
+  .cat li { font-size: 12.5px; line-height: 1.5; color: var(--ink); margin-bottom: 5px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Disease360 Platform — Ishikawa Diagram</h1>
+    <div class="sub">Each purple bone (Medical Deep Research, OMNI) is a full sub-project &mdash; click it to expand its own fishbone.</div>
+  </div>
+  <div class="legend">
+    <span><i class="dot mvp"></i> MVP (nested fish)</span>
+    <span><i class="dot works"></i> Works today</span>
+    <span><i class="dot planned"></i> Planned / blocker</span>
+    <button class="btn" id="reset">Reset view</button>
+    <button class="btn" id="export">Download PNG</button>
+  </div>
+</header>
+
+<div id="stage">
+  <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<div id="modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2 id="modal-title"></h2>
+      <span class="sub" id="modal-sub"></span>
+      <button class="btn x" id="modal-close">Close</button>
+    </div>
+    <div class="cats" id="modal-cats"></div>
+  </div>
+</div>
+
+<script>
+/* ------------------------------------------------------------------ *
+ *  DATA MODEL
+ *  head  = the platform (effect)
+ *  bones = the platform's pieces (causes/components)
+ *  status: "works" | "planned" | "mvp"
+ *  The MVP bone carries `categories` = the original 8-bone fishbone,
+ *  shown both as labels along its bone and as a nested detail modal.
+ * ------------------------------------------------------------------ */
+const HEAD = "Disease360 Platform\n(per-client AI workspace)";
+
+const MVP_CATEGORIES = [
+  { name: "1. Data & Knowledge Foundation", items: [
+    "PubMed API integration for literature search",
+    "KOLs (Key Opinion Leaders) — minutes, metadata",
+    "GlobalData (market & competitor data)",
+    "EMA (European Medicines Agency data)",
+    "FDA (drug metadata, approvals)",
+    "ClinicalTrials.gov (clinical trial data)",
+    "BioNCP (genetic & disease data)",
+    "Real-time clinical trial updates & global congress ingestion",
+    "Intelligence & news streaming",
+    "Expanded data lakes incl. market access & patent intelligence",
+  ]},
+  { name: "2. Orchestration & Tools", items: [
+    "Regulatory intelligence extraction tools",
+    "Clinical trial monitoring tools",
+    "Competitor intelligence tools",
+    "SQL-based & structured queries",
+    "Vector search",
+    "Web search tool (news, abstracts, updates)",
+    "Landscape visualization engines",
+    "Predictive & trend modeling tools",
+    "Autonomous workflow execution",
+    "EORs, reports & dossiers",
+  ]},
+  { name: "3. Intelligence & Reasoning Layer", items: [
+    "Multi-source synthesis & conflict detection",
+    "Cross-source comparison & adaptive reasoning",
+    "Evidence hierarchy & confidence scoring",
+    "Complex multi-hop reasoning across sources & subagents",
+    "Predictive insight generation",
+    "Clinical trial trends",
+    "Competitor evolution",
+    "Market forecasting",
+  ]},
+  { name: "4. Trust, Transparency & Governance", items: [
+    "Mandatory citations with inline links",
+    "Data lineage tracking & source-conflict detection",
+    "Transparency in conflicts between sources",
+    "Specific source referenced in citations",
+    "No hallucination — flags when evidence is insufficient",
+    "Reliability score per source or claim",
+    "Real-time feeds from congresses, publications, patents",
+    "Global citation scoring for source reliability",
+    "Alignment with AlphaSense & Veeva for KOL/market research",
+  ]},
+  { name: "5. Domain Intelligence Subagents", items: [
+    "Autonomous execution of complex workflows (EORs, reports)",
+    "Multi-agent coordination for patient journeys & market access",
+    "Specialized subagents: Market Access, Pricing, Patient Journey",
+    "PubMed specialist",
+    "KOLs specialist",
+    "GlobalData specialist",
+    "ClinicalTrials.gov specialist",
+    "FDA & EMA specialist",
+    "Web search specialist",
+  ]},
+  { name: "6. Skills (Structured Analysis)", items: [
+    "Regulatory Intelligence Overview (full regulatory view of a drug)",
+    "Treatment Landscape Synthesis (multi-source treatment data)",
+    "KOL Intelligence Synthesis (expert opinions & insights)",
+    "Patient Funnel (volume & treatment-share analysis)",
+    "Bullseye Chart (competitor landscape, molecular-level)",
+    "Diagrammatic / skill-based advanced visualizations",
+    "Specialized skills per subagent with concrete process guidelines",
+  ]},
+  { name: "7. Query Understanding & Knowledge Extraction", items: [
+    "Interpret highly domain-specific, complex medical queries",
+    "Enhanced entity extraction (disease, drug, gene)",
+    "Intent detection & routing to the right subagent",
+    "Extraction of key entities (disease, drug, country)",
+    "Domain & disease detection",
+    "Decomposition of complex questions",
+    "Requests clarification when it lacks information",
+  ]},
+  { name: "8. User Experience & Outputs", items: [
+    "Interactive dashboards & automated report generation",
+    "Newsletters / alerts on new findings & emerging trends",
+    "Automated PPT/PDF reports with dynamic content",
+    "Mermaid diagrams display",
+    "Advanced exportable visualizations (charts, molecular Bullseye)",
+    "Inline citations & references",
+    "Markdown tables & structured summaries (with citations)",
+  ]},
+];
+
+const OMNI_CATEGORIES = [
+  { name: "1. Real-time Capture & STT", items: [
+    "Live mic capture \u2192 WebSocket PCM streaming",
+    "Real-time STT via Gemini Live (bidirectional)",
+    "Batch STT fallback (3s PCM buffers)",
+    "Hallucination filtering (drops filler outputs)",
+    "Speaker extraction & deduplication",
+    "Upload mode (audio file or pasted transcript)",
+  ]},
+  { name: "2. Meeting Intelligence & Analysis", items: [
+    "Live transcript with speaker labels",
+    "AI-generated agenda / checklist from objectives",
+    "Automatic checklist progress tracking",
+    "Action items, decisions & notes extraction",
+    "Sentiment & energy timeline",
+    "Nudges (missing-topic suggestions)",
+  ]},
+  { name: "3. OMNI Voice Assistant", items: [
+    "\"Hey OMNI\" direct-address detection",
+    "Mid-meeting Q&A (Gemini, optional TOMMY context)",
+    "Text-to-speech responses (Gemini TTS)",
+    "End-of-meeting spoken summary",
+  ]},
+  { name: "4. TOMMY Diabetes Deep Agent", items: [
+    "Deep Agent on LangGraph (Gemini 2.5 Flash)",
+    "BioMCP tools (PubMed, ClinicalTrials.gov, OpenFDA)",
+    "Gene / variant / disease / drug lookups",
+    "DuckDuckGo web_search fallback",
+    "Streamed reasoning (per-tool NDJSON steps)",
+    "Inline citations",
+    "Chart generation (propose_chart \u2192 Recharts)",
+  ]},
+  { name: "5. Data & Persistence", items: [
+    "SQLite meetings store",
+    "TOMMY conversations as JSON files",
+    "Queryable post-meeting document",
+  ]},
+  { name: "6. UX & Frontend", items: [
+    "React 19 + Vite + TypeScript",
+    "Cinematic landing with animated orb",
+    "TommyOrb (Three.js) / VoiceOrb (mic-reactive)",
+    "Recharts visualizations",
+    "Markdown rendering (GFM tables)",
+    "Light / dark theme",
+  ]},
+];
+
+const BONES = [
+  {
+    title: "Medical Deep Research (MVP)",
+    status: "mvp",
+    note: "the existing fishbone, nested",
+    categories: MVP_CATEGORIES,
+    items: [
+      { t: "Data & Knowledge Foundation", s: "works" },
+      { t: "Orchestration & Tools", s: "works" },
+      { t: "Intelligence & Reasoning Layer", s: "works" },
+      { t: "Trust, Transparency & Governance", s: "works" },
+      { t: "Domain Intelligence Subagents", s: "works" },
+      { t: "Skills (Structured Analysis)", s: "works" },
+      { t: "Query Understanding & Extraction", s: "works" },
+      { t: "User Experience & Outputs", s: "works" },
+    ],
+  },
+  {
+    title: "Memory & Knowledge Vault",
+    status: "works",
+    items: [
+      { t: "Postgres-canonical vault under RLS", s: "planned" },
+      { t: "Brains \u2192 Pages model", s: "works" },
+      { t: "Wikilink graph (orphans / broken links)", s: "works" },
+      { t: "FTS full-text search (FTS5)", s: "works" },
+      { t: "Hot cache (~500 tokens, always loaded)", s: "works" },
+      { t: "Lint (schema & integrity checks)", s: "works" },
+      { t: "Ingest / solve cycle (plan \u2192 approve \u2192 apply)", s: "works" },
+      { t: "Immutable raw captures", s: "planned" },
+      { t: "Markdown export / Obsidian", s: "works" },
+    ],
+  },
+  {
+    title: "Harness & Agent Runtime",
+    status: "works",
+    items: [
+      { t: "Deep Agents on LangGraph", s: "works" },
+      { t: "SSE streaming chat", s: "works" },
+      { t: "Threads bound to a brain", s: "works" },
+      { t: "Single LLMClient (Gemini Flash + Ollama fallback)", s: "works" },
+      { t: "Per-turn tool budgets", s: "works" },
+      { t: "Prompt cache", s: "works" },
+    ],
+  },
+  {
+    title: "Approval Gate & Governance",
+    status: "works",
+    items: [
+      { t: "HumanInTheLoop middleware", s: "works" },
+      { t: "Persisted SQLite approval queue (survives restarts)", s: "works" },
+      { t: "Multi-channel approval queue", s: "works" },
+      { t: "Audit log (logs/audit.jsonl)", s: "works" },
+      { t: "policies/actions.yaml (allow / require / never)", s: "works" },
+      { t: "Tamper-evident hash-chaining", s: "planned" },
+      { t: "Network policy enforcement (network.yaml)", s: "planned" },
+    ],
+  },
+  {
+    title: "Cockpit & Channels",
+    status: "works",
+    items: [
+      { t: "React 19 + Vite cockpit", s: "works" },
+      { t: "Typer CLI (ask / approvals / brains / switch)", s: "works" },
+      { t: "Force-directed graph view (3D flashcard)", s: "works" },
+      { t: "Voice STT / TTS", s: "planned" },
+      { t: "Gesture recognition pipeline", s: "planned" },
+      { t: "DND window / heartbeat scheduler", s: "planned" },
+    ],
+  },
+  {
+    title: "Multi-tenancy & Security",
+    status: "planned",
+    items: [
+      { t: "Supabase auth / JWT verified on backend", s: "planned" },
+      { t: "tenant_id scoping", s: "planned" },
+      { t: "RLS cross-tenant isolation", s: "planned" },
+      { t: "Secret redaction at model boundary", s: "planned" },
+      { t: "Hosted deploy / Docker / health checks", s: "planned" },
+      { t: "CI (GitHub Actions)", s: "planned" },
+    ],
+  },
+  {
+    title: "OMNI (Meeting Intelligence)",
+    status: "mvp",
+    note: "pharma meeting platform, nested",
+    categories: OMNI_CATEGORIES,
+    items: [
+      { t: "Real-time Capture & STT", s: "works" },
+      { t: "Meeting Intelligence & Analysis", s: "works" },
+      { t: "OMNI Voice Assistant", s: "works" },
+      { t: "TOMMY Diabetes Deep Agent", s: "works" },
+      { t: "Data & Persistence", s: "works" },
+      { t: "UX & Frontend", s: "works" },
+    ],
+  },
+];
+
+/* ------------------------------------------------------------------ *
+ *  RENDER
+ * ------------------------------------------------------------------ */
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("svg");
+
+const COLORS = {
+  works:   { line: "#4f9dff", text: "#cfe2ff", chip: "#1d3a63" },
+  planned: { line: "#f2b04a", text: "#ffe6bd", chip: "#5a4318" },
+  mvp:     { line: "#8b6cff", text: "#ddd2ff", chip: "#332a66" },
+};
+
+function el(tag, attrs, parent) {
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+}
+
+function wrap(text, max) {
+  const words = text.split(" ");
+  const lines = [];
+  let cur = "";
+  for (const w of words) {
+    if ((cur + " " + w).trim().length > max && cur) { lines.push(cur); cur = w; }
+    else cur = (cur + " " + w).trim();
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+// canvas geometry
+const W = 2680, H = 1180;
+const cy = H / 2;
+const spineLeft = 150;
+const headX = W - 360;
+const spineSpan = headX - spineLeft;
+
+const boneDX = 250;      // horizontal reach of each bone
+const boneDY = cy - 120; // vertical reach (leaves headroom for tip labels)
+
+svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+// background
+el("rect", { x: 0, y: 0, width: W, height: H, fill: "#0f1320" }, svg);
+
+// spine
+el("line", { x1: spineLeft, y1: cy, x2: headX, y2: cy,
+  stroke: "#7e8aa8", "stroke-width": 4 }, svg);
+// arrow into head
+const arrow = el("polygon", { points: `${headX},${cy-12} ${headX+26},${cy} ${headX},${cy+12}`,
+  fill: "#7e8aa8" }, svg);
+
+// head box
+const hg = el("g", {}, svg);
+const headLines = HEAD.split("\n");
+const hbw = 300, hbh = 96;
+el("rect", { x: headX + 30, y: cy - hbh/2, width: hbw, height: hbh, rx: 14,
+  fill: "#10245a", stroke: "#4f9dff", "stroke-width": 2.5 }, hg);
+headLines.forEach((ln, i) => {
+  el("text", { x: headX + 30 + hbw/2, y: cy - 6 + i*26, "text-anchor": "middle",
+    fill: "#eaf1ff", "font-size": i === 0 ? 19 : 14, "font-weight": i === 0 ? 700 : 500 }, hg)
+    .textContent = ln;
+});
+
+// distribute bones along the spine, alternating top/bottom
+const n = BONES.length;
+BONES.forEach((bone, i) => {
+  const top = i % 2 === 0;
+  // attach point along spine (leftmost bones first, head on the right)
+  const ax = spineLeft + (spineSpan * (i + 1)) / (n + 1);
+  const ay = cy;
+  const tipX = ax - boneDX;
+  const tipY = top ? cy - boneDY : cy + boneDY;
+
+  const c = COLORS[bone.status];
+  const g = el("g", {}, svg);
+
+  // bone line
+  el("line", { x1: ax, y1: ay, x2: tipX, y2: tipY,
+    stroke: c.line, "stroke-width": 3 }, g);
+
+  // category/label chip at the tip
+  const labelLines = wrap(bone.title, 22);
+  const chipW = 250, chipH = 22 + labelLines.length * 17;
+  const chipX = tipX - chipW/2;
+  const chipY = top ? tipY - chipH - 4 : tipY + 4;
+  el("rect", { x: chipX, y: chipY, width: chipW, height: chipH, rx: 8,
+    fill: c.chip, stroke: c.line, "stroke-width": 2 }, g);
+  labelLines.forEach((ln, k) => {
+    el("text", { x: tipX, y: chipY + 18 + k*17, "text-anchor": "middle",
+      fill: "#ffffff", "font-size": 13.5, "font-weight": 700 }, g).textContent = ln;
+  });
+  if (bone.note) {
+    el("text", { x: tipX, y: chipY + chipH + 14, "text-anchor": "middle",
+      fill: c.text, "font-size": 11, "font-style": "italic" }, g).textContent = "(" + bone.note + ")";
+  }
+
+  // sub-items laid along the bone, fanning toward the spine
+  const m = bone.items.length;
+  bone.items.forEach((it, k) => {
+    const tt = (k + 1) / (m + 1);
+    const px = ax + (tipX - ax) * tt;
+    const py = ay + (tipY - ay) * tt;
+    const ic = COLORS[it.s];
+    // small connector tick to the right (toward spine side)
+    el("circle", { cx: px, cy: py, r: 3, fill: ic.line }, g);
+    const lines = wrap(it.t, 30);
+    const lh = 13.5;
+    const baseY = py - ((lines.length - 1) * lh) / 2 + 4;
+    lines.forEach((ln, li) => {
+      el("text", { x: px + 12, y: baseY + li*lh, "text-anchor": "start",
+        fill: ic.text, "font-size": 12 }, g).textContent = ln;
+    });
+  });
+
+  // clickable hitbox over the whole bone for expand (MVP opens nested detail)
+  const hit = el("rect", {
+    x: Math.min(ax, tipX) - 140, y: Math.min(ay, tipY) - 10,
+    width: Math.abs(ax - tipX) + 200, height: Math.abs(ay - tipY) + chipH + 30,
+    fill: "transparent", class: "bone-hit",
+  }, g);
+  if (bone.categories) {
+    hit.style.cursor = "zoom-in";
+    g.addEventListener("click", () => openModal(bone));
+  }
+});
+
+// title strip on canvas
+el("text", { x: 40, y: 50, fill: "#97a2bd", "font-size": 15, "font-weight": 600 }, svg)
+  .textContent = "Effect (head):  a per-client AI workspace.  Bones = the platform's pieces.";
+
+/* ------------------------------------------------------------------ *
+ *  MODAL — nested MVP fishbone detail
+ * ------------------------------------------------------------------ */
+function openModal(bone) {
+  document.getElementById("modal-title").textContent = bone.title;
+  document.getElementById("modal-sub").textContent =
+    "The original Scientific Insights Expert AI System fishbone — one bone of the platform.";
+  const wrapEl = document.getElementById("modal-cats");
+  wrapEl.innerHTML = "";
+  bone.categories.forEach(cat => {
+    const card = document.createElement("div");
+    card.className = "cat";
+    const h = document.createElement("h3");
+    h.textContent = cat.name;
+    card.appendChild(h);
+    const ul = document.createElement("ul");
+    cat.items.forEach(it => {
+      const li = document.createElement("li");
+      li.textContent = it;
+      ul.appendChild(li);
+    });
+    card.appendChild(ul);
+    wrapEl.appendChild(card);
+  });
+  document.getElementById("modal").classList.add("open");
+}
+document.getElementById("modal-close").addEventListener("click",
+  () => document.getElementById("modal").classList.remove("open"));
+document.getElementById("modal").addEventListener("click", e => {
+  if (e.target.id === "modal") e.target.classList.remove("open");
+});
+
+/* ------------------------------------------------------------------ *
+ *  PAN / ZOOM
+ * ------------------------------------------------------------------ */
+const view = { x: 0, y: 0, w: W, h: H };
+function applyView() { svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.w} ${view.h}`); }
+function resetView() { view.x = 0; view.y = 0; view.w = W; view.h = H; applyView(); }
+applyView();
+
+svg.addEventListener("wheel", e => {
+  e.preventDefault();
+  const rect = svg.getBoundingClientRect();
+  const mx = view.x + (e.clientX - rect.left) / rect.width * view.w;
+  const my = view.y + (e.clientY - rect.top) / rect.height * view.h;
+  const factor = e.deltaY > 0 ? 1.12 : 0.89;
+  const nw = Math.min(W * 2.5, Math.max(W * 0.18, view.w * factor));
+  const nh = nw * (H / W);
+  view.x = mx - (mx - view.x) * (nw / view.w);
+  view.y = my - (my - view.y) * (nh / view.h);
+  view.w = nw; view.h = nh;
+  applyView();
+}, { passive: false });
+
+let drag = null;
+svg.addEventListener("pointerdown", e => {
+  drag = { sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y };
+  svg.classList.add("dragging"); svg.setPointerCapture(e.pointerId);
+});
+svg.addEventListener("pointermove", e => {
+  if (!drag) return;
+  const rect = svg.getBoundingClientRect();
+  view.x = drag.vx - (e.clientX - drag.sx) / rect.width * view.w;
+  view.y = drag.vy - (e.clientY - drag.sy) / rect.height * view.h;
+  applyView();
+});
+function endDrag() { drag = null; svg.classList.remove("dragging"); }
+svg.addEventListener("pointerup", endDrag);
+svg.addEventListener("pointerleave", endDrag);
+
+document.getElementById("reset").addEventListener("click", resetView);
+
+/* ------------------------------------------------------------------ *
+ *  EXPORT — rasterize the full SVG to a high-res PNG
+ * ------------------------------------------------------------------ */
+function exportPNG(scale = 3) {
+  const clone = svg.cloneNode(true);
+  clone.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  clone.setAttribute("width", W);
+  clone.setAttribute("height", H);
+  const xml = new XMLSerializer().serializeToString(clone);
+  const svgBlob = new Blob([xml], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(svgBlob);
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = W * scale;
+    canvas.height = H * scale;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#0f1320";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(url);
+    canvas.toBlob(blob => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "disease360-platform-ishikawa.png";
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }, "image/png");
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); alert("Export failed — try a different browser."); };
+  img.src = url;
+}
+document.getElementById("export").addEventListener("click", () => exportPNG(3));
+</script>
+</body>
+</html>

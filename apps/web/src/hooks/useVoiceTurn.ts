@@ -3,6 +3,7 @@ import {
   openStreamingStt,
   postVoiceToolResult,
   voiceTurn,
+  warmVoice,
   type StreamingSttSession,
   type VoiceTurnEvent,
   type VoiceTurnHandle,
@@ -25,6 +26,14 @@ export interface UseVoiceTurnOptions {
   brain?: string | null;
   /** Profile passed to the agent (default "chat"). */
   profile?: string;
+  /**
+   * Master switch for the voice agent. When false (the default behaviour
+   * is opt-in via the dashboard toggle) the hook never requests the
+   * microphone — so the browser shows no permission prompt — and PTT is
+   * inert. Flipping this to true lazily acquires the mic; flipping back to
+   * false tears the capture pipeline down and stops the mic track.
+   */
+  enabled?: boolean;
   /** True while the user holds the PTT key. */
   pttActive: boolean;
   /** Optional thread_id; if omitted, persisted under `disease360.thread`. */
@@ -152,6 +161,7 @@ export function useVoiceTurn(opts: UseVoiceTurnOptions): UseVoiceTurnReturn {
     page = "dashboard",
     brain,
     profile = "chat",
+    enabled = true,
     pttActive,
     threadId: threadIdProp,
     onToolCall,
@@ -221,6 +231,15 @@ export function useVoiceTurn(opts: UseVoiceTurnOptions): UseVoiceTurnReturn {
   // -------------------------------------------------------------------------
 
   useEffect(() => {
+    // Voice is opt-in: when disabled we never touch the microphone, so the
+    // browser raises no permission prompt and no capture pipeline exists.
+    if (!enabled) {
+      setMicReady(false);
+      return;
+    }
+    // Now that voice is active, ask the server to warm TTS (shared client +
+    // cue cache) so the first spoken turn isn't slow. Fire-and-forget.
+    void warmVoice();
     let cancelled = false;
     (async () => {
       try {
@@ -295,7 +314,7 @@ export function useVoiceTurn(opts: UseVoiceTurnOptions): UseVoiceTurnReturn {
       micCtxRef.current = null;
       setMicReady(false);
     };
-  }, []);
+  }, [enabled]);
 
   // -------------------------------------------------------------------------
   // Playback helpers.

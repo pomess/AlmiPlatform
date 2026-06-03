@@ -169,9 +169,13 @@ function playIntroOnce(): () => void {
 export function DashboardNewsPanel({
   selectedCompetitor,
   onDismissCompetitor,
+  voiceEnabled = false,
 }: {
   selectedCompetitor?: string | null;
   onDismissCompetitor?: () => void;
+  /** When false (default), the spoken daily intro is suppressed — voice is
+   * opt-in via the dashboard's Voice Activation toggle. */
+  voiceEnabled?: boolean;
 }) {
   const { data, loading, error } = useDailyNews();
   const [collapsed, setCollapsed] = useState<boolean>(() => {
@@ -197,10 +201,15 @@ export function DashboardNewsPanel({
   useEffect(() => {
     if (introArmed.current) return;
     if (collapsed || !data) return;
+    // Voice is opt-in: don't speak the daily intro unless the user has
+    // activated the voice agent. Marking it armed would also be wrong here
+    // (we want it to fire later if they enable voice this session), so we
+    // simply bail without latching when voice is off.
+    if (!voiceEnabled) return;
     introArmed.current = true;
     const stop = playIntroOnce();
     return stop;
-  }, [collapsed, data]);
+  }, [collapsed, data, voiceEnabled]);
 
   // Build competitor-filtered items when a pin is selected
   const competitorItems = (() => {

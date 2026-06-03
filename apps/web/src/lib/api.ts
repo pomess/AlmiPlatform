@@ -336,6 +336,18 @@ export async function postVoiceToolResult(
   );
 }
 
+// Ask the harness to warm the shared genai client + pre-render TTS cue
+// phrases. Called only when the user activates voice, so an idle dashboard
+// never triggers the warm. Fire-and-forget: failures are non-fatal (the
+// first turn just pays the normal cost), so we swallow errors.
+export async function warmVoice(): Promise<void> {
+  try {
+    await fetch("/api/harness/voice/warm", { method: "POST" });
+  } catch {
+    /* non-fatal — warming is a latency optimisation, not a requirement */
+  }
+}
+
 // --- streaming STT (Gemini Live, WebSocket) -------------------------------
 //
 // The browser opens this socket at PTT-down and forwards 16 kHz Int16
