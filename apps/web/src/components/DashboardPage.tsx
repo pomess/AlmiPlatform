@@ -13,7 +13,43 @@ import {
 } from "../lib/pharma";
 import { attachHologramLayer, type HologramController } from "../lib/hologram";
 
-const STYLE_URL = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+type Theme = "dark" | "light";
+
+// Theme-aware basemap. CARTO positron is the light counterpart to the
+// dark-matter style; both share the same vector schema so layers/pins/
+// hologram install identically against either.
+const STYLE_URLS: Record<Theme, string> = {
+  dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+  light: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+};
+
+// Sky/fog tuned per theme so the globe horizon reads correctly on each basemap.
+const SKY_SETTINGS: Record<Theme, Record<string, unknown>> = {
+  dark: {
+    "sky-color": "#05070b",
+    "horizon-color": "#0a0d14",
+    "fog-color": "#05070b",
+    "sky-horizon-blend": 0.6,
+    "horizon-fog-blend": 0.6,
+    "fog-ground-blend": 0.2,
+    "atmosphere-blend": 0.5,
+  },
+  light: {
+    "sky-color": "#cfe0f2",
+    "horizon-color": "#e8eef6",
+    "fog-color": "#eef3f9",
+    "sky-horizon-blend": 0.6,
+    "horizon-fog-blend": 0.6,
+    "fog-ground-blend": 0.2,
+    "atmosphere-blend": 0.5,
+  },
+};
+
+// Route flyover line colors per theme (glow + crisp inner stroke).
+const ROUTE_COLORS: Record<Theme, { glow: string; line: string }> = {
+  dark: { glow: "#7a9cd9", line: "#a8bfe7" },
+  light: { glow: "#3b6fb0", line: "#2d5a96" },
+};
 
 // Match an arbitrary lat/lng (e.g. one the voice agent passed to
 // fly_to_location) against the known competitor list, within ~150 m, so
@@ -64,8 +100,9 @@ const EMPTY_ROUTE: GeoJSON.FeatureCollection = {
 // glow and a crisp inner stroke) on top of whatever basemap MapLibre rendered.
 // Idempotent so a hot-reload that keeps the map alive doesn't crash on a
 // duplicate source ID.
-function installRouteLayer(map: maplibregl.Map): void {
+function installRouteLayer(map: maplibregl.Map, theme: Theme): void {
   if (map.getSource(ROUTE_SOURCE_ID)) return;
+  const colors = ROUTE_COLORS[theme];
   map.addSource(ROUTE_SOURCE_ID, { type: "geojson", data: EMPTY_ROUTE });
   map.addLayer({
     id: ROUTE_GLOW_LAYER_ID,
@@ -73,7 +110,7 @@ function installRouteLayer(map: maplibregl.Map): void {
     source: ROUTE_SOURCE_ID,
     layout: { "line-cap": "round", "line-join": "round" },
     paint: {
-      "line-color": "#7a9cd9",
+      "line-color": colors.glow,
       "line-width": 8,
       "line-opacity": 0.25,
       "line-blur": 6,
@@ -85,7 +122,7 @@ function installRouteLayer(map: maplibregl.Map): void {
     source: ROUTE_SOURCE_ID,
     layout: { "line-cap": "round", "line-join": "round" },
     paint: {
-      "line-color": "#a8bfe7",
+      "line-color": colors.line,
       "line-width": 2.5,
       "line-opacity": 0.95,
     },
@@ -257,7 +294,7 @@ function writeVoiceEnabled(enabled: boolean): void {
   }
 }
 
-export function DashboardPage() {
+export function DashboardPage({ theme = "dark" }: { theme?: Theme }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const coordsRef = useRef<{ lat: number; lon: number } | null>(null);
@@ -279,7 +316,7 @@ export function DashboardPage() {
 
     const map = new maplibregl.Map({
       container: hostRef.current,
-      style: STYLE_URL,
+      style: STYLE_URLS[theme],
       // Boot already framed on Almirall HQ so the entry flyTo is a short
       // slide, not a globe-to-city plunge. Start one zoom step out from
       // the destination so there's still a perceptible move on load.
@@ -299,21 +336,21 @@ export function DashboardPage() {
     map.touchZoomRotate.disableRotation();
     map.on("load", () => {
       map.setProjection({ type: "globe" });
-      installRouteLayer(map);
+      installRouteLayer(map, theme);
       installPharmaPins();
-      hologramRef.current = attachHologramLayer(map);
+      hologramRef.current = attachHologramLayer(map, theme);
       flyHome();
     });
     map.on("style.load", () => {
-      map.setSky?.({
-        "sky-color": "#05070b",
-        "horizon-color": "#0a0d14",
-        "fog-color": "#05070b",
-        "sky-horizon-blend": 0.6,
-        "horizon-fog-blend": 0.6,
-        "fog-ground-blend": 0.2,
-        "atmosphere-blend": 0.5,
-      });
+      map.setSky?.(SKY_SETTINGS[theme]);
+    });
+
+    // When the map is (re)created — notably on a theme toggle that remounts
+    // it into an already-laid-out container — the GL drawing buffer can come
+    // up mis-sized, leaving the canvas blank until the next resize. Force a
+    // resize on the next frame so it always paints.
+    requestAnimationFrame(() => {
+      if (!cancelled) map.resize();
     });
 
     // Drop Almirall HQ + competitor pins on the globe. The competitor
@@ -356,7 +393,10 @@ export function DashboardPage() {
       map.remove();
       mapRef.current = null;
     };
-  }, []);
+    // Recreate the whole map when the theme flips so the basemap, sky/fog,
+    // route layers, pins and hologram all install against the active style.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [theme]);
 
   // Re-fly to a competitor regardless of whether it was already selected.
   // Lifting this out of the selectedCompetitor effect lets a re-click on

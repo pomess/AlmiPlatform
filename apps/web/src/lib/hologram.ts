@@ -10,9 +10,48 @@ import { COMPETITORS } from "./pharma";
 import staticFootprints from "../data/footprints.json";
 
 const LAYER_ID = "competitor-hologram";
-const HOLOGRAM_COLOR = 0x7be3ff;
 const FALLBACK_FOOTPRINT_M = { width: 60, depth: 40, height: 80 };
 const SEARCH_RADIUS_M = 200;
+
+type HologramTheme = "dark" | "light";
+
+// Hologram palette per cockpit theme. On the dark basemap the cyan wireframe
+// uses additive blending for a neon glow. Additive blending is invisible on a
+// light basemap (adding colour to white stays white), so light mode uses a
+// darker blue with normal alpha blending so the buildings read as solid lines.
+type HologramPalette = {
+  fill: number;
+  rim: number;
+  wire: number;
+  wireGlow: number;
+  base: number;
+  blending: THREE.Blending;
+  fillAlphaScale: number;
+  wireGlowOpacity: number;
+};
+
+const HOLOGRAM_PALETTES: Record<HologramTheme, HologramPalette> = {
+  dark: {
+    fill: 0x7be3ff,
+    rim: 0xb8f4ff,
+    wire: 0x7be3ff,
+    wireGlow: 0xc6f4ff,
+    base: 0x7be3ff,
+    blending: THREE.AdditiveBlending,
+    fillAlphaScale: 1,
+    wireGlowOpacity: 0.35,
+  },
+  light: {
+    fill: 0x3b4656,
+    rim: 0x64748b,
+    wire: 0x334155,
+    wireGlow: 0x64748b,
+    base: 0x475569,
+    blending: THREE.NormalBlending,
+    fillAlphaScale: 1.5,
+    wireGlowOpacity: 0.5,
+  },
+};
 
 type OsmNode = { type: "node"; id: number; lat: number; lon: number };
 type OsmWay = {
@@ -36,9 +75,44 @@ type Footprint = {
 
 const footprintCache = new Map<string, Footprint[]>();
 
+// Per-competitor footprint curation. Overpass returns every building inside
+// the search radius, including neighbours that aren't part of the target
+// campus. For sites where we know the real extent we constrain it here. The
+// predicate runs on the footprint centroid offset (meters east/north of the
+// site anchor), which is stable whether the data came from the static cache
+// or a live Overpass fetch — so the curation can't be undone by a later
+// background refresh.
+type CentroidOffset = { xE: number; yN: number; dist: number };
+const FOOTPRINT_CURATION: Record<string, (c: CentroidOffset) => boolean> = {
+  // Roche · Sant Cugat: keep the three campus buildings near the pin; drop the
+  // two south of Avinguda de la Generalitat and the north-west outlier.
+  Roche: (c) => c.yN > -30 && c.dist < 180,
+};
+
+function centroidOffset(ring: { x: number; y: number }[]): CentroidOffset {
+  let cx = 0;
+  let cy = 0;
+  for (const p of ring) {
+    cx += p.x;
+    cy += p.y;
+  }
+  cx /= ring.length;
+  cy /= ring.length;
+  return { xE: cx, yN: cy, dist: Math.hypot(cx, cy) };
+}
+
+function curateFootprints(name: string, fps: Footprint[]): Footprint[] {
+  const pred = FOOTPRINT_CURATION[name];
+  if (!pred) return fps;
+  const kept = fps.filter((fp) => pred(centroidOffset(fp.ringMeters)));
+  // Never curate down to nothing — fall back to the full set if the predicate
+  // somehow excludes everything (e.g. unexpected data).
+  return kept.length ? kept : fps;
+}
+
 // 1) Hydrate from the static JSON shipped with the build (always available).
 for (const [name, fps] of Object.entries(staticFootprints)) {
-  footprintCache.set(name, fps as Footprint[]);
+  footprintCache.set(name, curateFootprints(name, fps as Footprint[]));
 }
 
 // 2) Override with localStorage (has real Overpass data from previous sessions).
@@ -48,7 +122,7 @@ try {
   if (stored) {
     const parsed = JSON.parse(stored) as Record<string, Footprint[]>;
     for (const [name, fps] of Object.entries(parsed)) {
-      footprintCache.set(name, fps);
+      footprintCache.set(name, curateFootprints(name, fps));
     }
   }
 } catch { /* non-fatal */ }
@@ -71,7 +145,11 @@ export type HologramController = {
   dispose(): void;
 };
 
-export function attachHologramLayer(map: maplibregl.Map): HologramController {
+export function attachHologramLayer(
+  map: maplibregl.Map,
+  theme: HologramTheme = "dark",
+): HologramController {
+  const palette = HOLOGRAM_PALETTES[theme];
   let renderer: THREE.WebGLRenderer | null = null;
   const scene = new THREE.Scene();
   const camera = new THREE.Camera();
@@ -149,7 +227,7 @@ export function attachHologramLayer(map: maplibregl.Map): HologramController {
   function paintFootprints(list: Footprint[]) {
     clearGroup(root);
     for (const fp of list) {
-      const meshes = buildBuildingMeshes(fp);
+      const meshes = buildBuildingMeshes(fp, palette);
       meshes.forEach((mesh) => root.add(mesh));
     }
     map.triggerRepaint();
@@ -227,7 +305,7 @@ export function attachHologramLayer(map: maplibregl.Map): HologramController {
 // Geometry
 // ---------------------------------------------------------------------------
 
-function buildBuildingMeshes(fp: Footprint): THREE.Object3D[] {
+function buildBuildingMeshes(fp: Footprint, palette: HologramPalette): THREE.Object3D[] {
   const shape = new THREE.Shape();
   const ring = fp.ringMeters;
   shape.moveTo(ring[0].x, ring[0].y);
@@ -246,9 +324,10 @@ function buildBuildingMeshes(fp: Footprint): THREE.Object3D[] {
   const fillMaterial = new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uColor: { value: new THREE.Color(HOLOGRAM_COLOR) },
-      uRim:   { value: new THREE.Color(0xb8f4ff) },
+      uColor: { value: new THREE.Color(palette.fill) },
+      uRim:   { value: new THREE.Color(palette.rim) },
       uHeight: { value: fp.heightM },
+      uAlphaScale: { value: palette.fillAlphaScale },
     },
     vertexShader: `
       varying vec3 vLocal;
@@ -267,6 +346,7 @@ function buildBuildingMeshes(fp: Footprint): THREE.Object3D[] {
       uniform vec3 uColor;
       uniform vec3 uRim;
       uniform float uHeight;
+      uniform float uAlphaScale;
       varying vec3 vLocal;
       varying vec3 vNormal;
       varying vec3 vViewDir;
@@ -304,24 +384,24 @@ function buildBuildingMeshes(fp: Footprint): THREE.Object3D[] {
         col += band * 0.6;
         col += streakLine * 0.4;
 
-        gl_FragColor = vec4(col, clamp(alpha, 0.0, 0.95));
+        gl_FragColor = vec4(col, clamp(alpha * uAlphaScale, 0.0, 0.95));
       }
     `,
     transparent: true,
     depthWrite: false,
     side: THREE.DoubleSide,
-    blending: THREE.AdditiveBlending,
+    blending: palette.blending,
   });
   const fill = new THREE.Mesh(geom, fillMaterial);
 
   // ── Crisp neon wireframe ────────────────────────────────────────────
   const edges = new THREE.EdgesGeometry(geom, 1);
   const lineMaterial = new THREE.LineBasicMaterial({
-    color: HOLOGRAM_COLOR,
+    color: palette.wire,
     transparent: true,
     opacity: 1.0,
     depthWrite: false,
-    blending: THREE.AdditiveBlending,
+    blending: palette.blending,
   });
   const wire = new THREE.LineSegments(edges, lineMaterial);
 
@@ -329,11 +409,11 @@ function buildBuildingMeshes(fp: Footprint): THREE.Object3D[] {
   const wireGlow = new THREE.LineSegments(
     edges,
     new THREE.LineBasicMaterial({
-      color: 0xc6f4ff,
+      color: palette.wireGlow,
       transparent: true,
-      opacity: 0.35,
+      opacity: palette.wireGlowOpacity,
       depthWrite: false,
-      blending: THREE.AdditiveBlending,
+      blending: palette.blending,
     }),
   );
   wireGlow.scale.set(1.015, 1.015, 1.005);
@@ -345,11 +425,11 @@ function buildBuildingMeshes(fp: Footprint): THREE.Object3D[] {
   const base = new THREE.LineLoop(
     baseGeom,
     new THREE.LineBasicMaterial({
-      color: HOLOGRAM_COLOR,
+      color: palette.base,
       transparent: true,
       opacity: 0.9,
       depthWrite: false,
-      blending: THREE.AdditiveBlending,
+      blending: palette.blending,
     }),
   );
 
@@ -417,7 +497,7 @@ async function loadFootprints(c: Competitor): Promise<Footprint[]> {
     }
   }
 
-  const selected = pickTargetBuilding(out);
+  const selected = curateFootprints(c.name, pickTargetBuilding(out));
   footprintCache.set(c.name, selected);
   persistCache();
   return selected;

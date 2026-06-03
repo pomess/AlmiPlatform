@@ -215,7 +215,7 @@ export function Cockpit() {
 
         {route === "dashboard" && (
           <div className="page">
-            <DashboardPage />
+            <DashboardPage theme={theme} />
           </div>
         )}
         {route === "bullseye" && (

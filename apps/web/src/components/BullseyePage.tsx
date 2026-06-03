@@ -148,11 +148,18 @@ export function BullseyePage() {
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isPanning) return;
+    // Clamp the pan to the chart bounds (widened with zoom so you can still
+    // reach the edges when zoomed in) so the chart can never be dragged off
+    // into empty space — and so the page itself never needs to scroll.
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const limitX = rect.width * 0.4 * zoom;
+    const limitY = rect.height * 0.4 * zoom;
+    const clamp = (v: number, m: number) => Math.max(-m, Math.min(m, v));
     setPan({
-      x: panOrigin.current.x + e.clientX - panStart.current.x,
-      y: panOrigin.current.y + e.clientY - panStart.current.y,
+      x: clamp(panOrigin.current.x + e.clientX - panStart.current.x, limitX),
+      y: clamp(panOrigin.current.y + e.clientY - panStart.current.y, limitY),
     });
-  }, [isPanning]);
+  }, [isPanning, zoom]);
 
   const handleMouseUp = useCallback(() => {
     setIsPanning(false);

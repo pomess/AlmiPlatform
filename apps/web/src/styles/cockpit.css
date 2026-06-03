@@ -3250,7 +3250,9 @@ body { overflow: hidden; }
 
 .bullseye-page {
   padding: 16px 24px 24px;
-  overflow-y: auto;
+  /* The chart pans via a CSS transform; clip at the page so a pan never
+     adds page scroll. Layout is viewport-bounded, so nothing is lost. */
+  overflow: hidden;
   height: 100%;
 }
 
@@ -3349,6 +3351,8 @@ body { overflow: hidden; }
   aspect-ratio: 1;
   overflow: visible;
   cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .bull-chart-wrap.is-panning {
   cursor: grabbing;
@@ -3960,17 +3964,64 @@ body { overflow: hidden; }
 }
 .theme-toggle svg { width: 16px; height: 16px; }
 
-/* Dashboard globe imagery is authored white-on-dark, so it stays pinned to the
-   dark palette in light mode. Bullseye and Graph receive their own light SVG
-   palettes below. */
-.app[data-theme="light"] .dashboard-page {
+/* Dashboard light mode: the basemap switches to CARTO positron (handled in
+   DashboardPage.tsx), so the page and on-map chrome (scrim, eyebrow, pins,
+   locating text) follow the light palette. The floating control panels stay
+   as dark glass chips so their dense mint-on-dark styling reads cleanly over
+   the light map -- a standard maps-UI pattern. */
+
+/* Light scrim behind the top-left eyebrow (dark radial would blotch the map). */
+.app[data-theme="light"] .dashboard-page::before {
+  background: radial-gradient(
+    ellipse 420px 400px at 0% 0%,
+    oklch(0.99 0.004 240 / 0.86),
+    transparent 70%
+  );
+}
+
+/* On-map pin callouts: darken the mint/red lines + labels so they read on the
+   light basemap. The saturated anchor dots and rings stay as-is. */
+.app[data-theme="light"] .dashboard-pharma-pin--home .pharma-pin-line,
+.app[data-theme="light"] .dashboard-pharma-pin--home .pharma-pin-tick {
+  stroke: oklch(0.50 0.12 175 / 0.95);
+}
+.app[data-theme="light"] .dashboard-pharma-pin--home .pharma-pin-label {
+  fill: oklch(0.42 0.11 175);
+}
+.app[data-theme="light"] .dashboard-pharma-pin--home .pharma-pin-home-ring {
+  stroke: oklch(0.55 0.13 175 / 0.8);
+}
+.app[data-theme="light"] .dashboard-pharma-pin--rival .pharma-pin-line,
+.app[data-theme="light"] .dashboard-pharma-pin--rival .pharma-pin-tick {
+  stroke: oklch(0.55 0.20 25 / 0.95);
+}
+.app[data-theme="light"] .dashboard-pharma-pin--rival .pharma-pin-label {
+  fill: oklch(0.52 0.21 25);
+}
+.app[data-theme="light"] .dashboard-pharma-pin--rival .pharma-pin-home-ring {
+  stroke: oklch(0.58 0.22 25 / 0.8);
+}
+
+/* Keep the floating panels on the dark cockpit palette in light mode so all
+   their nested accents/text stay legible as glass chips over the light map.
+   Bump glass opacity a touch for contrast against the bright basemap. */
+.app[data-theme="light"] .dashboard-news-panel,
+.app[data-theme="light"] .dashboard-news-pill,
+.app[data-theme="light"] .dashboard-activity,
+.app[data-theme="light"] .dashboard-photo-card,
+.app[data-theme="light"] .dashboard-composer,
+.app[data-theme="light"] .dashboard-voice-toggle,
+.app[data-theme="light"] .dashboard-recenter,
+.app[data-theme="light"] .dashboard-mic,
+.app[data-theme="light"] .dashboard-ptt-bar,
+.app[data-theme="light"] .dashboard-ptt-hint {
   --bg-void: oklch(0.13 0.012 240);
   --bg-base: oklch(0.155 0.014 240);
   --bg-surface: oklch(0.185 0.014 240);
   --bg-surface-hover: oklch(0.215 0.016 240);
   --bg-elevated: oklch(0.235 0.018 240);
-  --bg-glass: oklch(0.18 0.014 240 / 0.66);
-  --bg-glass-strong: oklch(0.20 0.016 240 / 0.86);
+  --bg-glass: oklch(0.17 0.014 240 / 0.82);
+  --bg-glass-strong: oklch(0.20 0.016 240 / 0.92);
   --border-hairline: oklch(1 0 0 / 0.06);
   --border-subtle: oklch(1 0 0 / 0.09);
   --border-medium: oklch(1 0 0 / 0.16);
