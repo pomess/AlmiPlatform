@@ -140,7 +140,7 @@ export function CompetitorAnalysis({ slug, onClose }: { slug: string; onClose: (
       })
       .finally(() => {
         setUpdating(false);
-        setTimeout(() => setUpdateStatus(null), 4000);
+        setTimeout(() => setUpdateStatus(null), 2500);
       });
   }
 
@@ -186,7 +186,7 @@ export function CompetitorAnalysis({ slug, onClose }: { slug: string; onClose: (
         {(updating || updateStatus) && (
           <span className={`az-update-badge${updating ? " is-loading" : ""}`}>
             {updating && <span className="az-spinner-sm" />}
-            {updateStatus}
+            <span>{updateStatus}</span>
           </span>
         )}
         <button className="az-tabs-close" onClick={onClose} aria-label="Close analysis">

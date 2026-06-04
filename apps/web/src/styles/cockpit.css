@@ -4375,27 +4375,29 @@ body { overflow: hidden; }
   color: var(--text-primary);
 }
 
-/* Update badge in tab bar */
+/* Update status indicator */
 .az-update-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   margin-left: auto;
   margin-right: 8px;
-  padding: 4px 10px;
-  border-radius: var(--r-full);
+  padding: 0;
   font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--accent);
-  background: var(--accent-faint);
-  border: 1px solid var(--border-accent);
-  letter-spacing: 0.02em;
-  animation: azFadeIn 300ms var(--ease-cinema) both;
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  opacity: 1;
+  transition: opacity 600ms var(--ease-cinema);
+  animation: azBadgeFadeIn 300ms var(--ease-cinema) both;
+}
+@keyframes azBadgeFadeIn {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 .az-update-badge.is-loading {
   color: var(--text-muted);
-  background: oklch(var(--wash) / 0.04);
-  border-color: var(--border-subtle);
 }
 
 /* Spinners */
