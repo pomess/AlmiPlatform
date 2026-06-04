@@ -310,6 +310,7 @@ export function DashboardPage({ theme = "dark" }: { theme?: Theme }) {
   const [voiceEnabled, setVoiceEnabled] = useState<boolean>(() =>
     readVoiceEnabled(),
   );
+  const [showAzAnalysis, setShowAzAnalysis] = useState(false);
 
   useEffect(() => {
     if (!hostRef.current) return;
@@ -410,8 +411,6 @@ export function DashboardPage({ theme = "dark" }: { theme?: Theme }) {
     if (!map) return;
     const c = COMPETITORS.find((x) => x.name === company);
     if (!c) return;
-    // No map.stop() — MapLibre chains a fresh flyTo cleanly. Stopping
-    // mid-flight produced visible camera jerks.
     map.flyTo({
       center: [c.lng, c.lat],
       zoom: 17,
@@ -459,7 +458,8 @@ export function DashboardPage({ theme = "dark" }: { theme?: Theme }) {
       } else if (
         !target.closest(".dashboard-news-panel") &&
         !target.closest(".dashboard-composer") &&
-        !target.closest(".dashboard-activity")
+        !target.closest(".dashboard-activity") &&
+        !target.closest(".dashboard-photo-card")
       ) {
         setSelectedCompetitor(null);
       }
@@ -659,7 +659,12 @@ export function DashboardPage({ theme = "dark" }: { theme?: Theme }) {
         onDismissCompetitor={() => setSelectedCompetitor(null)}
         voiceEnabled={voiceEnabled}
       />
-      <CompetitorPhotoCard selectedCompetitor={selectedCompetitor} />
+      <CompetitorPhotoCard
+        selectedCompetitor={selectedCompetitor}
+        analysisExpanded={showAzAnalysis}
+        onExpandAnalysis={() => setShowAzAnalysis(true)}
+        onCollapseAnalysis={() => setShowAzAnalysis(false)}
+      />
       {voiceEnabled && (
         <div
           className={`dashboard-ptt-bar${pttHeld ? " is-active" : ""}`}
