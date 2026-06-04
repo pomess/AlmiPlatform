@@ -1,0 +1,83 @@
+{
+  "company": "AstraZeneca",
+  "slug": "astrazeneca",
+  "lastFullResearch": "2026-06-04T16:00:00Z",
+  "lastLightweightUpdate": null,
+  "meta": {
+    "hq": "Cambridge, UK",
+    "localOffice": "Barcelona, Spain",
+    "ticker": "LSE: AZN",
+    "marketCap": "~$300B",
+    "employees": "~96,100",
+    "logoUrl": "/competitors/astrazeneca-logo.png"
+  },
+  "overview": {
+    "summary": "AstraZeneca is in the midst of a catalyst-rich period, with four positive Phase III readouts in Q1 2026 alone (tozorakimab, eplontersen, efzimfotase alfa, Ultomiris in IgAN). The company's 2030 ambition targets $80B+ revenue, driven by its oncology ADC franchise (Enhertu/Datroway with Daiichi Sankyo), respiratory biologics expansion, and new modalities.",
+    "keyStrengths": [
+      "Category-defining ADC platform with Daiichi Sankyo",
+      "Tezspire/Fasenra biologics expanding across Type 2 inflammation",
+      "First-mover in aldosterone synthase (Baxdrostat)",
+      "14 regulatory approvals in Q1 2026 alone"
+    ],
+    "threatLevel": "moderate",
+    "threatRationale": "Not a direct competitor in Almirall's core AD/PSO space today, but building a dermatology-from-immunology approach via Fasenra (benralizumab) in atopic dermatitis (HILLIER, Phase II) and bullous pemphigoid (FJORD, Phase III). Their anti-TSLP (Tezspire) mechanism is adjacent to the IL-4Rα/IL-13 axis where Ebglyss competes."
+  },
+  "financials": {
+    "quarter": "Q1 2026",
+    "revenue": "$15.3B",
+    "revenueGrowth": "+8% CER",
+    "coreEps": "$2.58",
+    "coreEpsGrowth": "+5% CER",
+    "segments": [
+      { "name": "Oncology", "revenue": "$6.8B", "growth": "+16%", "pctOfTotal": 55 },
+      { "name": "Resp & Immunology", "revenue": "$2.3B", "growth": "+7%", "pctOfTotal": 19 },
+      { "name": "Rare Disease", "revenue": "$1.9B", "growth": "+15%", "pctOfTotal": 15 },
+      { "name": "CV/Renal/Metab", "revenue": "$1.3B", "growth": "+3%", "pctOfTotal": 11 }
+    ],
+    "guidance": "Mid-to-high single-digit revenue growth (CER); low double-digit Core EPS growth (CER)",
+    "topDrugs": [
+      { "name": "Tagrisso", "revenue": "$5.4B" },
+      { "name": "Imfinzi", "revenue": "$4.7B" },
+      { "name": "Enhertu", "revenue": "$4.0B" },
+      { "name": "Ultomiris", "revenue": "$2.6B" },
+      { "name": "Farxiga", "revenue": "$2.3B" },
+      { "name": "Breztri", "revenue": "$1.4B" },
+      { "name": "Tezspire", "revenue": "$1.2B" },
+      { "name": "Fasenra", "revenue": "$1.2B" }
+    ]
+  },
+  "pipeline": [
+    { "drug": "Enhertu", "target": "HER2", "indication": "Breast / Lung / Gastric", "phase": "Approved", "partner": "Daiichi Sankyo", "revenue": "$4.0B+", "notes": "Expanding into early-stage breast (DB-09, DB-11) and lung (DESTINY-Lung04/06)" },
+    { "drug": "Imfinzi", "target": "PD-L1", "indication": "NSCLC / SCLC / HCC / BTC", "phase": "Approved", "partner": null, "revenue": "$4.7B+", "notes": "PACIFIC backbone. Expanding into earlier stages (PACIFIC-9, VOLGA, AVANZAR)" },
+    { "drug": "Tagrisso", "target": "EGFR", "indication": "NSCLC", "phase": "Approved", "partner": null, "revenue": "$5.4B+", "notes": "Adjuvant standard-of-care. LAURA + FLAURA2 cement dominance" },
+    { "drug": "Tezspire", "target": "TSLP", "indication": "Asthma / CRSwNP / EoE / COPD", "phase": "Approved + LCM", "partner": "Amgen", "revenue": "$1.2B+", "notes": "WAYPOINT positive for nasal polyps. CROSSING (EoE) and EMBARK/JOURNEY (COPD) in Ph III" },
+    { "drug": "Fasenra", "target": "IL-5Rα", "indication": "Asthma / EGPA / BP / AD / CSU", "phase": "Approved + LCM", "partner": null, "revenue": "$1.2B+", "notes": "Expanding into dermatology: FJORD (BP, Ph III), HILLIER (AD, Ph II), ARROYO (CSU, Ph II)" },
+    { "drug": "Breztri", "target": "ICS/LAMA/LABA", "indication": "COPD / Asthma", "phase": "Approved + LCM", "partner": null, "revenue": "$1.4B+", "notes": "Triple inhaler. KALOS/LOGOS trials expanding into asthma" },
+    { "drug": "Datroway", "target": "TROP2-ADC", "indication": "TNBC / NSCLC", "phase": "Approved", "partner": "Daiichi Sankyo", "revenue": "Launch", "notes": "TROPION-Breast02: doubled PFS vs chemo in 1L TNBC. Filing in lung cancer" },
+    { "drug": "Tozorakimab", "target": "IL-33", "indication": "COPD", "phase": "Phase III", "partner": null, "revenue": null, "notes": "LUNA program (4 trials). First biologic to work across eosinophil levels in COPD" },
+    { "drug": "Baxdrostat", "target": "Ald. Synthase", "indication": "Resistant HTN", "phase": "Phase III (PDUFA Q2 2026)", "partner": "CinCor (acq.)", "revenue": null, "notes": "First aldosterone synthase inhibitor. Unmet need: ~10M patients globally" },
+    { "drug": "Camizestrant", "target": "SERD (oral)", "indication": "HR+ Breast Cancer", "phase": "Phase III", "partner": null, "revenue": null, "notes": "SERENA-4 adjuvant readout H2 2026. Could replace tamoxifen" },
+    { "drug": "Wainua (eplontersen)", "target": "TTR (ASO)", "indication": "ATTR-CM", "phase": "Phase III", "partner": "Ionis", "revenue": null, "notes": "CardioTransform positive. Convenient SC dosing vs competitors" },
+    { "drug": "Saphnelo", "target": "IFNAR1", "indication": "SLE", "phase": "Approved + expanding", "partner": null, "revenue": "$0.4B+", "notes": "First targeted biologic for lupus to gain broad adoption" }
+  ],
+  "dermRelevance": [
+    { "program": "Fasenra in Atopic Dermatitis", "trial": "HILLIER", "phase": "Phase II", "mechanism": "Anti-IL-5Rα (eosinophil depletion)", "threatLevel": "medium", "notes": "Different MOA from Ebglyss (IL-13). Targets eosinophil-high AD subset. If positive, Phase III by 2027" },
+    { "program": "Fasenra in Bullous Pemphigoid", "trial": "FJORD", "phase": "Phase III", "mechanism": "Anti-IL-5Rα", "threatLevel": "low", "notes": "Adjacent derm space — AZ building a dermatology-from-eosinophils franchise" },
+    { "program": "Fasenra in Chronic Spontaneous Urticaria", "trial": "ARROYO", "phase": "Phase II", "mechanism": "Anti-IL-5Rα", "threatLevel": "low", "notes": "CSU is adjacent but distinct from Almirall's AD/PSO focus" },
+    { "program": "Tezspire in Eosinophilic Esophagitis", "trial": "CROSSING", "phase": "Phase III", "mechanism": "Anti-TSLP", "threatLevel": "low", "notes": "Not derm, but signals AZ ambition to expand anti-TSLP broadly into Type 2 inflammation" },
+    { "program": "Saphnelo in SLE", "trial": "TULIP / AZALEA", "phase": "Approved", "mechanism": "Anti-IFNAR1", "threatLevel": "low", "notes": "Lupus-adjacent skin manifestations. Distinct from Almirall's competitive space" }
+  ],
+  "catalysts": [
+    { "event": "Baxdrostat PDUFA", "timeline": "Q2 2026", "significance": "high", "detail": "First aldosterone synthase inhibitor approval — large hypertension market" },
+    { "event": "Datroway TNBC approval", "timeline": "Q2 2026", "significance": "high", "detail": "TROPION-Breast02 data supports 1L mTNBC filing" },
+    { "event": "Camizestrant SERENA-4", "timeline": "H2 2026", "significance": "high", "detail": "Adjuvant breast cancer readout — could define next-gen endocrine therapy" },
+    { "event": "Enhertu DB-05/DB-11 adjuvant", "timeline": "2026", "significance": "high", "detail": "Moving HER2 ADC into early breast cancer" },
+    { "event": "Tozorakimab LUNA full data", "timeline": "2026", "significance": "high", "detail": "First biologic for COPD independent of eosinophils" },
+    { "event": "Imfinzi VOLGA (bladder)", "timeline": "2026", "significance": "medium", "detail": "Neo-adjuvant IO combo in muscle-invasive bladder cancer" },
+    { "event": "Imfinzi PACIFIC-9", "timeline": "2026", "significance": "medium", "detail": "Next-gen IO combo in unresectable Stage III NSCLC" },
+    { "event": "Wainua CardioTransform", "timeline": "2026", "significance": "medium", "detail": "Full data presentation at medical meeting; filing expected" },
+    { "event": "Fasenra FJORD (BP)", "timeline": "2026-2027", "significance": "medium", "detail": "Phase III readout in bullous pemphigoid (derm-relevant)" },
+    { "event": "Ultomiris IgAN accelerated filing", "timeline": "2026", "significance": "medium", "detail": "Week 34 proteinuria data supports filing" }
+  ],
+  "updates": []
+}

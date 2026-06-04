@@ -1,0 +1,74 @@
+{
+  "company": "Boehringer Ingelheim",
+  "slug": "boehringer-ingelheim",
+  "lastFullResearch": "2026-06-04T16:00:00Z",
+  "lastLightweightUpdate": null,
+  "meta": {
+    "hq": "Ingelheim am Rhein, Germany",
+    "localOffice": "Sant Cugat del Valles, Spain",
+    "ticker": "Private (family-owned)",
+    "marketCap": "Private (~€28B revenue)",
+    "employees": "~53,500",
+    "logoUrl": "/competitors/boehringer-ingelheim-logo.png"
+  },
+  "overview": {
+    "summary": "Boehringer Ingelheim is a privately held pharma company with historic strength in respiratory (Spiriva franchise), cardiometabolic (Jardiance with Lilly), and animal health. Their immunology/derm pivot centers on spesolimab (Spevigo), the first approved biologic for generalized pustular psoriasis (GPP), representing a niche but meaningful derm entry. The company is building out inflammation/immunology as a growth pillar alongside oncology expansion.",
+    "keyStrengths": [
+      "Spesolimab (Spevigo): first-in-class anti-IL-36R for GPP — unique niche dominance",
+      "Jardiance ($8B+ with Lilly): largest SGLT2 franchise providing stable cash flow",
+      "Private ownership enables long-term R&D investment cycles without quarterly pressure",
+      "Strong respiratory heritage (Spiriva) transitioning into immunology/inflammation"
+    ],
+    "threatLevel": "moderate",
+    "threatRationale": "Boehringer's spesolimab (Spevigo) in pustular psoriasis is adjacent to Almirall's Ilumetri (plaque psoriasis) space. While GPP is a distinct, rare subtype, Boehringer's IL-36R mechanism and expanding derm presence (BI 764532 in CSU/AD, tozorakimab exploration) signal growing ambition in inflammatory skin diseases. Their private ownership and immunology pipeline expansion make them a rising threat to watch."
+  },
+  "financials": {
+    "quarter": "FY 2025",
+    "revenue": "€28.2B",
+    "revenueGrowth": "+9% CER",
+    "coreEps": "N/A (private)",
+    "coreEpsGrowth": "N/A",
+    "segments": [
+      { "name": "Human Pharma", "revenue": "€21.8B", "growth": "+11%", "pctOfTotal": 77 },
+      { "name": "Animal Health", "revenue": "€5.0B", "growth": "+4%", "pctOfTotal": 18 },
+      { "name": "Biopharmaceuticals (CDMO)", "revenue": "€1.4B", "growth": "+6%", "pctOfTotal": 5 }
+    ],
+    "guidance": "Mid-to-high single-digit net sales growth; continued R&D investment at 23%+ of revenue",
+    "topDrugs": [
+      { "name": "Jardiance (empagliflozin)", "revenue": "€8.3B (FY2025, with Lilly)" },
+      { "name": "Ofev (nintedanib)", "revenue": "€3.8B (FY2025)" },
+      { "name": "Spiriva (tiotropium)", "revenue": "€2.1B (FY2025, declining)" },
+      { "name": "Spevigo (spesolimab)", "revenue": "€0.6B (FY2025)" },
+      { "name": "Pradaxa (dabigatran)", "revenue": "€1.2B (FY2025, declining)" },
+      { "name": "Stiolto/Spiolto", "revenue": "€1.0B" }
+    ]
+  },
+  "pipeline": [
+    { "drug": "Spesolimab (Spevigo)", "target": "IL-36R", "indication": "GPP (flares + prevention) / PPP / Pediatric GPP", "phase": "Approved + LCM", "partner": null, "revenue": "€0.6B+", "notes": "First approved biologic for GPP flares. Effisayil-2 positive for flare prevention. Expanding into palmoplantar pustulosis (PPP) and pediatric" },
+    { "drug": "Spesolimab in PPP", "target": "IL-36R", "indication": "Palmoplantar Pustulosis", "phase": "Phase III", "partner": null, "revenue": null, "notes": "Expanding spesolimab into broader pustular disease — PPP is more prevalent than GPP" },
+    { "drug": "BI 764532", "target": "IL-31RA", "indication": "Prurigo Nodularis / AD / CSU", "phase": "Phase II", "partner": null, "revenue": null, "notes": "Anti-itch biologic targeting IL-31 receptor — could compete in pruritus-dominant AD subset" },
+    { "drug": "Survodutide", "target": "GLP-1/Glucagon dual agonist", "indication": "Obesity / MASH / T2D", "phase": "Phase III", "partner": "Zealand", "revenue": null, "notes": "Dual agonist in obesity (SYNCHRONIZE program) and MASH. Major commercial opportunity" },
+    { "drug": "Nerandomilast", "target": "PDE4B", "indication": "IPF / PPF", "phase": "Phase III", "partner": null, "revenue": null, "notes": "Next-gen anti-fibrotic to succeed Ofev. FIBRONEER program" },
+    { "drug": "Jardiance (empagliflozin)", "target": "SGLT2", "indication": "T2D / HF / CKD", "phase": "Approved + LCM", "partner": "Eli Lilly", "revenue": "€8.3B+", "notes": "Expanding into CKD (EMPA-KIDNEY) and HFpEF. Franchise peak approaching" },
+    { "drug": "BI 1823911", "target": "KRAS G12C", "indication": "NSCLC / CRC / Pancreatic", "phase": "Phase I/II", "partner": null, "revenue": null, "notes": "Next-gen covalent KRAS inhibitor — oncology entry" },
+    { "drug": "Anitocabtagene autoleucel", "target": "BCMA CAR-T", "indication": "Multiple Myeloma", "phase": "Phase III", "partner": null, "revenue": null, "notes": "In-house CAR-T manufacturing approach" },
+    { "drug": "Spesolimab pediatric GPP", "target": "IL-36R", "indication": "Pediatric GPP", "phase": "Phase III", "partner": null, "revenue": null, "notes": "Extending GPP franchise into children — unmet need" }
+  ],
+  "dermRelevance": [
+    { "program": "Spesolimab in GPP prevention", "trial": "Effisayil-2", "phase": "Approved (2024-2025)", "mechanism": "Anti-IL-36R", "threatLevel": "medium", "notes": "Pustular psoriasis is a distinct subtype from plaque PSO (Ilumetri), but establishes Boehringer as a derm player and builds dermatologist relationships" },
+    { "program": "Spesolimab in PPP", "trial": "Phase III", "phase": "Phase III", "mechanism": "Anti-IL-36R", "threatLevel": "medium", "notes": "Palmoplantar pustulosis expansion broadens Boehringer's psoriasis franchise. More prevalent than GPP" },
+    { "program": "BI 764532 in Prurigo Nodularis", "trial": "Phase II", "phase": "Phase II", "mechanism": "Anti-IL-31RA (anti-pruritus)", "threatLevel": "medium", "notes": "IL-31 is a key itch mediator — if positive, competes in pruritus-dominant AD/PN space where Ebglyss also plays" },
+    { "program": "BI 764532 in AD (pruritus)", "trial": "Phase II", "phase": "Phase II", "mechanism": "Anti-IL-31RA", "threatLevel": "medium", "notes": "Targets itch component of AD specifically — could be used in combination with IL-13 inhibitors or as alternative for itch-predominant patients" },
+    { "program": "Spesolimab pediatric GPP", "trial": "Phase III", "phase": "Phase III", "mechanism": "Anti-IL-36R", "threatLevel": "low", "notes": "Niche pediatric GPP — limited overlap with Almirall but demonstrates derm commitment" }
+  ],
+  "catalysts": [
+    { "event": "Survodutide obesity Phase III (SYNCHRONIZE)", "timeline": "H2 2026", "significance": "high", "detail": "Dual GLP-1/glucagon agonist in obesity — massive market opportunity" },
+    { "event": "Spesolimab PPP Phase III readout", "timeline": "H1 2026", "significance": "high", "detail": "Palmoplantar pustulosis data — expands psoriasis franchise beyond rare GPP" },
+    { "event": "BI 764532 Phase II AD/PN data", "timeline": "H2 2026", "significance": "medium", "detail": "Anti-IL-31 in atopic dermatitis/prurigo nodularis — derm-relevant readout" },
+    { "event": "Nerandomilast IPF Phase III", "timeline": "2026", "significance": "high", "detail": "Next-gen anti-fibrotic to replace Ofev — critical for respiratory franchise" },
+    { "event": "Survodutide MASH Phase III", "timeline": "2026-2027", "significance": "high", "detail": "Metabolic liver disease indication expansion" },
+    { "event": "Spesolimab pediatric GPP approval", "timeline": "2026", "significance": "medium", "detail": "Label expansion into pediatric population" },
+    { "event": "Jardiance CKD market share trajectory", "timeline": "2026", "significance": "medium", "detail": "SGLT2 expansion vs dapagliflozin in chronic kidney disease" }
+  ],
+  "updates": []
+}

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { COMPETITORS, type Competitor } from "../lib/pharma";
 import { fetchWikipediaSummary } from "../lib/wikipediaPhoto";
-import { AstraZenecaAnalysis } from "./AstraZenecaAnalysis";
+import { CompetitorAnalysis } from "./CompetitorAnalysis";
 
 type Props = {
   selectedCompetitor: string | null;
@@ -29,7 +29,8 @@ export function CompetitorPhotoCard({
     ? COMPETITORS.find((c) => c.name === selectedCompetitor) ?? null
     : null;
 
-  const hasAnalysis = selectedCompetitor === "AstraZeneca";
+  const BARCELONA_SLUGS = ["sanofi", "novartis", "leo-pharma", "roche", "bayer", "boehringer-ingelheim", "astrazeneca"];
+  const hasAnalysis = competitor ? BARCELONA_SLUGS.includes(competitor.slug) : false;
 
   useEffect(() => {
     if (!competitor) {
@@ -141,22 +142,29 @@ export function CompetitorPhotoCard({
                 )}
               </div>
               <div className="az-expanded-meta">
-                <img
-                  className="az-brand-logo"
-                  src="/competitors/astrazeneca-logo.png"
-                  alt="AstraZeneca"
-                />
+                {competitor.slug === "astrazeneca" && (
+                  <img
+                    className="az-brand-logo"
+                    src="/competitors/astrazeneca-logo.png"
+                    alt={competitor.name}
+                  />
+                )}
+                {competitor.slug !== "astrazeneca" && (
+                  <div className="az-brand-logo az-brand-logo--text">
+                    {competitor.name.slice(0, 2).toUpperCase()}
+                  </div>
+                )}
                 <div className="az-expanded-meta__text">
-                  <div className="az-expanded-meta__name">AstraZeneca</div>
+                  <div className="az-expanded-meta__name">{competitor.name}</div>
                   <div className="az-expanded-meta__sub">
-                    <span className="az-expanded-meta__location">BARCELONA · SPAIN</span>
-                    <span className="az-expanded-meta__ticker">LSE: AZN · ~$300B Market Cap</span>
+                    <span className="az-expanded-meta__location">{competitor.city.toUpperCase()} · {competitor.country.toUpperCase()}</span>
+                    <span className="az-expanded-meta__ticker">{competitor.therapyAreas.join(" · ")}</span>
                   </div>
                 </div>
               </div>
             </aside>
             <div className="az-expanded-analysis">
-              <AstraZenecaAnalysis onClose={() => onCollapseAnalysis?.()} />
+              <CompetitorAnalysis slug={competitor.slug} onClose={() => onCollapseAnalysis?.()} />
             </div>
           </div>
         </>,

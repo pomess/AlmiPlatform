@@ -593,6 +593,73 @@ async def vera_stream(req: VeraRequest):
     )
 
 
+class CompetitorUpdateRequest(BaseModel):
+    company: str
+
+
+@app.post("/competitor-update")
+async def competitor_update(req: CompetitorUpdateRequest):
+    """Lightweight competitor intel update using deep research + BioMCP.
+
+    Fires a quick research pass and returns structured update entries.
+    Does NOT persist — the frontend merges into its in-memory state.
+    """
+    now = asyncio.get_event_loop().time()
+    entries: list[dict[str, Any]] = []
+
+    # BioMCP trial search (non-blocking, best-effort)
+    try:
+        from biomcp.individual_tools import trial_searcher
+
+        result = await trial_searcher(
+            query=f"{req.company} dermatology", status="RECRUITING"
+        )
+        text = result if isinstance(result, str) else str(result)
+        if "NCT" in text:
+            entries.append({
+                "type": "trial_update",
+                "title": f"Active trials for {req.company}",
+                "detail": text[:500],
+            })
+    except Exception as e:
+        log.debug("BioMCP trial search failed for %s: %s", req.company, e)
+
+    # Quick deep research (standard depth, narrow query)
+    try:
+        from disease360_runtime.research.runner import run_research
+
+        query = (
+            f"Latest {req.company} pharma news pipeline updates 2026 "
+            f"dermatology immunology in the last 30 days"
+        )
+        report = await asyncio.wait_for(
+            run_research(query=query, depth="standard"),
+            timeout=60.0,
+        )
+        markdown = getattr(report, "markdown", report) if report else ""
+        if markdown and len(str(markdown)) > 100:
+            lines = [l.strip() for l in str(markdown).split("\n")
+                     if l.strip() and not l.startswith("#")]
+            summary = " ".join(lines[:3])[:400]
+            entries.append({
+                "type": "news",
+                "title": f"Research update for {req.company}",
+                "detail": summary,
+            })
+    except asyncio.TimeoutError:
+        log.warning("Deep research timed out for %s", req.company)
+    except Exception as e:
+        log.debug("Deep research failed for %s: %s", req.company, e)
+
+    from datetime import datetime as dt, timezone
+
+    return {
+        "timestamp": dt.now(tz=timezone.utc).isoformat(),
+        "source": "deep_research+biomcp",
+        "entries": entries,
+    }
+
+
 def _configure_logging() -> None:
     """Route INFO logs from our packages to stdout so the harness console
     shows what the agent + deep-research pipeline are doing in real time.

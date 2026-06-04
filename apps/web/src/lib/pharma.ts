@@ -24,6 +24,7 @@ export const ALMIRALL_PIN = {
 
 export type Competitor = {
   name: string;
+  slug: string;
   city: string;
   country: string;
   lat: number;
@@ -45,37 +46,37 @@ export type Competitor = {
 };
 
 export const COMPETITORS: Competitor[] = [
-  { name: "Sanofi", city: "Barcelona", country: "Spain", lat: 41.4366649, lng: 2.1807982,
+  { name: "Sanofi", slug: "sanofi", city: "Barcelona", country: "Spain", lat: 41.4366649, lng: 2.1807982,
     photoUrl: "/competitors/sanofi.jpg", wikipedia: "Sanofi", therapyAreas: ["Immunology", "Vaccines", "Rare disease"] },
-  { name: "Novartis", city: "Barcelona", country: "Spain", lat: 41.3981834, lng: 2.1806575,
+  { name: "Novartis", slug: "novartis", city: "Barcelona", country: "Spain", lat: 41.3981834, lng: 2.1806575,
     photoUrl: "/competitors/novartis.jpg", wikipedia: "Novartis", therapyAreas: ["Cardiovascular", "Oncology", "Immunology"] },
-  { name: "LEO Pharma", city: "Sant Cugat del Vallès", country: "Spain", lat: 41.4710, lng: 2.0879,
+  { name: "LEO Pharma", slug: "leo-pharma", city: "Sant Cugat del Vallès", country: "Spain", lat: 41.4710, lng: 2.0879,
     photoUrl: null, wikipedia: "LEO Pharma", therapyAreas: ["Dermatology", "Thrombosis"] },
-  { name: "AbbVie", city: "Madrid", country: "Spain", lat: 40.4769, lng: -3.6792,
+  { name: "AbbVie", slug: "abbvie", city: "Madrid", country: "Spain", lat: 40.4769, lng: -3.6792,
     photoUrl: null, wikipedia: "AbbVie", therapyAreas: ["Immunology", "Oncology", "Aesthetics"] },
-  { name: "Pfizer", city: "Alcobendas", country: "Spain", lat: 40.5366, lng: -3.6307,
+  { name: "Pfizer", slug: "pfizer", city: "Alcobendas", country: "Spain", lat: 40.5366, lng: -3.6307,
     photoUrl: null, wikipedia: "Pfizer", therapyAreas: ["Vaccines", "Oncology", "Inflammation"] },
-  { name: "Eli Lilly", city: "Alcobendas", country: "Spain", lat: 40.5398, lng: -3.6359,
+  { name: "Eli Lilly", slug: "eli-lilly", city: "Alcobendas", country: "Spain", lat: 40.5398, lng: -3.6359,
     photoUrl: null, wikipedia: "Eli Lilly and Company", therapyAreas: ["Diabetes", "Oncology", "Immunology"] },
-  { name: "Johnson & Johnson", city: "Madrid", country: "Spain", lat: 40.4574, lng: -3.6105,
+  { name: "Johnson & Johnson", slug: "johnson-johnson", city: "Madrid", country: "Spain", lat: 40.4574, lng: -3.6105,
     photoUrl: null, wikipedia: "Johnson & Johnson", therapyAreas: ["Immunology", "Oncology", "Neuroscience"] },
-  { name: "UCB", city: "Madrid", country: "Spain", lat: 40.4419, lng: -3.6809,
+  { name: "UCB", slug: "ucb", city: "Madrid", country: "Spain", lat: 40.4419, lng: -3.6809,
     photoUrl: null, wikipedia: "UCB (company)", therapyAreas: ["Immunology", "Neurology", "Bone"] },
-  { name: "Galderma", city: "Madrid", country: "Spain", lat: 40.4360, lng: -3.6784,
+  { name: "Galderma", slug: "galderma", city: "Madrid", country: "Spain", lat: 40.4360, lng: -3.6784,
     photoUrl: null, wikipedia: "Galderma", therapyAreas: ["Dermatology", "Aesthetics"] },
-  { name: "Incyte", city: "Madrid", country: "Spain", lat: 40.4279, lng: -3.7032,
+  { name: "Incyte", slug: "incyte", city: "Madrid", country: "Spain", lat: 40.4279, lng: -3.7032,
     photoUrl: null, wikipedia: "Incyte", therapyAreas: ["Oncology", "Dermatology", "MPN"] },
-  { name: "Roche", city: "Sant Cugat del Vallès", country: "Spain", lat: 41.4924849, lng: 2.0582393,
+  { name: "Roche", slug: "roche", city: "Sant Cugat del Vallès", country: "Spain", lat: 41.4924849, lng: 2.0582393,
     photoUrl: "/competitors/roche.jpg", wikipedia: "Hoffmann-La Roche", therapyAreas: ["Oncology", "Immunology", "Ophthalmology"] },
-  { name: "Merck", city: "Madrid", country: "Spain", lat: 40.4361, lng: -3.6755,
+  { name: "Merck", slug: "merck", city: "Madrid", country: "Spain", lat: 40.4361, lng: -3.6755,
     photoUrl: null, wikipedia: "Merck Group", therapyAreas: ["Oncology", "Neurology", "Fertility"] },
-  { name: "GSK", city: "Tres Cantos", country: "Spain", lat: 40.6056, lng: -3.7113,
+  { name: "GSK", slug: "gsk", city: "Tres Cantos", country: "Spain", lat: 40.6056, lng: -3.7113,
     photoUrl: null, wikipedia: "GSK plc", therapyAreas: ["Vaccines", "HIV", "Respiratory"] },
-  { name: "Bayer", city: "Sant Joan Despí", country: "Spain", lat: 41.3696066, lng: 2.0777182,
+  { name: "Bayer", slug: "bayer", city: "Sant Joan Despí", country: "Spain", lat: 41.3696066, lng: 2.0777182,
     photoUrl: "/competitors/bayer.jpg", wikipedia: "Bayer", therapyAreas: ["Cardiovascular", "Oncology", "Women's health"] },
-  { name: "Boehringer Ingelheim", city: "Sant Cugat del Vallès", country: "Spain", lat: 41.4760, lng: 2.0723,
+  { name: "Boehringer Ingelheim", slug: "boehringer-ingelheim", city: "Sant Cugat del Vallès", country: "Spain", lat: 41.4760, lng: 2.0723,
     photoUrl: null, wikipedia: "Boehringer Ingelheim", therapyAreas: ["Cardiometabolic", "Oncology", "Respiratory"] },
-  { name: "AstraZeneca", city: "Barcelona", country: "Spain", lat: 41.3840812, lng: 2.1505114,
+  { name: "AstraZeneca", slug: "astrazeneca", city: "Barcelona", country: "Spain", lat: 41.3840812, lng: 2.1505114,
     photoUrl: "/competitors/astrazeneca.jpg", wikipedia: "AstraZeneca", therapyAreas: ["Oncology", "Cardiorenal", "Respiratory"] },
 ];
 

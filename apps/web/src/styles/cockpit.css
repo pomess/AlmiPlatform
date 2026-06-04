@@ -4233,6 +4233,17 @@ body { overflow: hidden; }
   border-radius: var(--r-sm);
   object-fit: cover;
 }
+.az-brand-logo--text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
 .az-expanded-meta__text {
   flex: 1;
   min-width: 0;
@@ -4362,6 +4373,60 @@ body { overflow: hidden; }
 .az-tabs-close:hover {
   background: var(--bg-surface-hover);
   color: var(--text-primary);
+}
+
+/* Update badge in tab bar */
+.az-update-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  margin-right: 8px;
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent);
+  background: var(--accent-faint);
+  border: 1px solid var(--border-accent);
+  letter-spacing: 0.02em;
+  animation: azFadeIn 300ms var(--ease-cinema) both;
+}
+.az-update-badge.is-loading {
+  color: var(--text-muted);
+  background: oklch(var(--wash) / 0.04);
+  border-color: var(--border-subtle);
+}
+
+/* Spinners */
+.az-spinner {
+  width: 24px; height: 24px;
+  border: 2px solid var(--border-subtle);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: azSpin 800ms linear infinite;
+}
+.az-spinner-sm {
+  width: 12px; height: 12px;
+  border: 1.5px solid var(--border-subtle);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: azSpin 800ms linear infinite;
+}
+@keyframes azSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Loading state */
+.az-analysis-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-size: 13px;
 }
 
 .az-analysis-body {

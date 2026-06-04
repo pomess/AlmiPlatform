@@ -1,0 +1,68 @@
+{
+  "company": "Bayer",
+  "slug": "bayer",
+  "lastFullResearch": "2026-06-04T16:00:00Z",
+  "lastLightweightUpdate": null,
+  "meta": {
+    "hq": "Leverkusen, Germany",
+    "localOffice": "Sant Joan Despi, Spain",
+    "ticker": "ETR: BAYN",
+    "marketCap": "~$25B",
+    "employees": "~100,000",
+    "logoUrl": "/competitors/bayer-logo.png"
+  },
+  "overview": {
+    "summary": "Bayer is navigating a deep corporate transformation following the Roundup (glyphosate) litigation crisis that decimated its market cap. The pharma division is focused on cardiovascular (Xarelto replacement via asundexian), oncology, and cell/gene therapy. Their 2025-2026 strategy prioritizes pipeline execution and cost restructuring. Dermatology presence is negligible — Bayer has no meaningful AD/PSO programs and their Spain presence is primarily crop science and consumer health.",
+    "keyStrengths": [
+      "Cardiovascular legacy: Xarelto franchise experience, Factor XIa pipeline (asundexian)",
+      "Cell & gene therapy platform (BlueRock — iPSC-derived therapies for Parkinson's)",
+      "Strong European/Spanish commercial infrastructure across all divisions",
+      "Consumer Health portfolio provides cash flow (Bepanthen derm-adjacent topicals)"
+    ],
+    "threatLevel": "low",
+    "threatRationale": "Bayer has virtually no overlap with Almirall's core AD/PSO biologic space. Their pharma portfolio is cardiovascular and oncology-focused. The only derm-adjacent asset is Bepanthen (OTC topical) in consumer health and Vitrakvi/Nubeqa in oncology (not derm-immunology). No pipeline programs threaten Ebglyss or Ilumetri."
+  },
+  "financials": {
+    "quarter": "Q1 2026",
+    "revenue": "€11.8B",
+    "revenueGrowth": "-3% CER",
+    "coreEps": "€1.52",
+    "coreEpsGrowth": "-8% CER",
+    "segments": [
+      { "name": "Pharmaceuticals", "revenue": "€4.2B", "growth": "-5%", "pctOfTotal": 36 },
+      { "name": "Consumer Health", "revenue": "€1.5B", "growth": "+2%", "pctOfTotal": 13 },
+      { "name": "Crop Science", "revenue": "€6.1B", "growth": "-2%", "pctOfTotal": 51 }
+    ],
+    "guidance": "Group sales flat to low-single-digit decline (CER); restructuring savings €2B+ by 2026",
+    "topDrugs": [
+      { "name": "Eylea (aflibercept)", "revenue": "€2.4B (FY2025)" },
+      { "name": "Nubeqa (darolutamide)", "revenue": "€1.8B (FY2025)" },
+      { "name": "Kerendia (finerenone)", "revenue": "€1.2B (FY2025)" },
+      { "name": "Xarelto (rivaroxaban)", "revenue": "€1.5B (FY2025, declining)" },
+      { "name": "Vitrakvi (larotrectinib)", "revenue": "€0.3B" }
+    ]
+  },
+  "pipeline": [
+    { "drug": "Asundexian", "target": "Factor XIa", "indication": "AF stroke prevention / Secondary stroke prevention", "phase": "Phase III", "partner": null, "revenue": null, "notes": "Next-gen anticoagulant replacing Xarelto — lower bleeding risk. OCEANIC program" },
+    { "drug": "Nubeqa (darolutamide)", "target": "Androgen receptor", "indication": "Prostate cancer (mCSPC + nmCRPC)", "phase": "Approved + LCM", "partner": "Orion", "revenue": "€1.8B+", "notes": "Growing prostate franchise. Earlier-line expansions ongoing" },
+    { "drug": "Kerendia (finerenone)", "target": "nsMRA", "indication": "CKD + T2D / Heart Failure", "phase": "Approved + LCM", "partner": null, "revenue": "€1.2B+", "notes": "Non-steroidal MRA expanding from diabetic kidney disease into heart failure (FINEARTS-HF positive)" },
+    { "drug": "Elinzanetant", "target": "NK1/3R antagonist", "indication": "Vasomotor symptoms (menopause)", "phase": "Approved (2025)", "partner": null, "revenue": "Launch", "notes": "Non-hormonal menopause symptom relief — women's health focus" },
+    { "drug": "BeVas (iPSC dopamine neurons)", "target": "iPSC cell therapy", "indication": "Parkinson's Disease", "phase": "Phase I/II", "partner": "BlueRock (subsidiary)", "revenue": null, "notes": "First-in-class iPSC-derived cell therapy for neurodegeneration" },
+    { "drug": "Aflibercept 8mg (Eylea HD)", "target": "VEGF", "indication": "wAMD / DME", "phase": "Approved", "partner": "Regeneron", "revenue": "Part of Eylea total", "notes": "Higher-dose formulation extends dosing intervals — competing with Vabysmo" },
+    { "drug": "BAY 2927088", "target": "HER2 TKI", "indication": "HER2-mutant NSCLC", "phase": "Phase II/III", "partner": null, "revenue": null, "notes": "Oral TKI for HER2-mutant lung cancer" }
+  ],
+  "dermRelevance": [
+    { "program": "Bepanthen (Consumer Health)", "trial": "N/A (OTC)", "phase": "Marketed OTC", "mechanism": "Dexpanthenol topical", "threatLevel": "negligible", "notes": "OTC wound healing / skin care cream — not in prescription derm or biologic space. No competitive overlap with Almirall Rx" },
+    { "program": "Vitrakvi in skin cancers", "trial": "Various basket trials", "phase": "Approved (NTRK+ tumors)", "mechanism": "TRK inhibitor", "threatLevel": "negligible", "notes": "Tumor-agnostic oncology — rare NTRK-fusion skin cancers only. No overlap with AD/PSO" },
+    { "program": "No active derm-immunology pipeline", "trial": "N/A", "phase": "N/A", "mechanism": "N/A", "threatLevel": "negligible", "notes": "Bayer has no IL-13, IL-17, IL-4R, IL-23, or JAK programs in dermatology" }
+  ],
+  "catalysts": [
+    { "event": "Asundexian OCEANIC Phase III readouts", "timeline": "H2 2026", "significance": "high", "detail": "Critical for post-Xarelto cardiovascular franchise — Factor XIa anticoagulation" },
+    { "event": "Kerendia heart failure expansion", "timeline": "2026", "significance": "high", "detail": "FINEARTS-HF positive data — filing for HFmrEF/HFpEF expected" },
+    { "event": "Glyphosate litigation resolution progress", "timeline": "2026", "significance": "high", "detail": "Ongoing litigation overhang — any settlement progress moves stock significantly" },
+    { "event": "Elinzanetant launch trajectory", "timeline": "2026", "significance": "medium", "detail": "First-year uptake of non-hormonal menopause therapy" },
+    { "event": "Nubeqa mCSPC market share gains", "timeline": "2026", "significance": "medium", "detail": "Competing with Xtandi/Erleada in prostate — share trajectory matters" },
+    { "event": "Corporate restructuring milestones", "timeline": "2026", "significance": "medium", "detail": "Cost savings and potential division separation (CropScience) — unlocks value" }
+  ],
+  "updates": []
+}

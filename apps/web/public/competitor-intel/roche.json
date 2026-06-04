@@ -1,0 +1,71 @@
+{
+  "company": "Roche",
+  "slug": "roche",
+  "lastFullResearch": "2026-06-04T16:00:00Z",
+  "lastLightweightUpdate": null,
+  "meta": {
+    "hq": "Basel, Switzerland",
+    "localOffice": "Sant Cugat del Valles, Spain",
+    "ticker": "SIX: ROG",
+    "marketCap": "~$240B",
+    "employees": "~103,000",
+    "logoUrl": "/competitors/roche-logo.png"
+  },
+  "overview": {
+    "summary": "Roche remains the world's largest biotech by revenue, anchored on oncology (Tecentriq, Polivy, Phesgo), ophthalmology (Vabysmo), neuroscience (Ocrevus), and diagnostics. Their 2025-2026 strategy centers on replacing legacy biosimilar-exposed revenue (Herceptin/Avastin/Rituxan cliff absorbed) with new launches. Derm is minimal — limited to some oncology-adjacent skin cancers and early immunology exploration.",
+    "keyStrengths": [
+      "Integrated pharma + diagnostics model (companion diagnostics, personalized medicine)",
+      "Vabysmo ($5B+): fastest-growing ophthalmology biologic",
+      "Ocrevus dominance in MS ($7B+ franchise)",
+      "Deep antibody engineering capabilities (bispecifics, ADCs, recycling antibodies)"
+    ],
+    "threatLevel": "low",
+    "threatRationale": "Roche has minimal overlap with Almirall's core AD/PSO dermatology space. Their focus is oncology, ophthalmology, and neuroscience. The only derm-adjacent areas are some early immunology programs and skin cancer assets. Not a competitive threat to Ebglyss or Ilumetri in the foreseeable future."
+  },
+  "financials": {
+    "quarter": "Q1 2026",
+    "revenue": "CHF 16.1B",
+    "revenueGrowth": "+7% CER",
+    "coreEps": "CHF 5.82",
+    "coreEpsGrowth": "+9% CER",
+    "segments": [
+      { "name": "Pharma", "revenue": "CHF 12.3B", "growth": "+9%", "pctOfTotal": 76 },
+      { "name": "Diagnostics", "revenue": "CHF 3.8B", "growth": "+3%", "pctOfTotal": 24 }
+    ],
+    "guidance": "Mid-single digit sales growth (CER); core EPS growth ahead of sales",
+    "topDrugs": [
+      { "name": "Ocrevus", "revenue": "CHF 7.2B (FY2025)" },
+      { "name": "Vabysmo", "revenue": "CHF 5.4B (FY2025)" },
+      { "name": "Tecentriq", "revenue": "CHF 3.8B (FY2025)" },
+      { "name": "Phesgo", "revenue": "CHF 3.6B (FY2025)" },
+      { "name": "Polivy", "revenue": "CHF 2.4B (FY2025)" },
+      { "name": "Hemlibra", "revenue": "CHF 4.1B (FY2025)" },
+      { "name": "Evrysdi", "revenue": "CHF 1.5B (FY2025)" }
+    ]
+  },
+  "pipeline": [
+    { "drug": "Vabysmo", "target": "VEGF-A + Ang-2 (bispecific)", "indication": "wAMD / DME / RVO / GA", "phase": "Approved + LCM", "partner": null, "revenue": "CHF 5.4B+", "notes": "Expanding into geographic atrophy and retinal vein occlusion. Extended dosing intervals" },
+    { "drug": "Tecentriq", "target": "PD-L1", "indication": "NSCLC / TNBC / HCC / Bladder", "phase": "Approved + LCM", "partner": null, "revenue": "CHF 3.8B+", "notes": "Tiragolumab combo (SKYSCRAPER) mixed results. Subcutaneous formulation filed" },
+    { "drug": "Columvi", "target": "CD20xCD3 bispecific", "indication": "DLBCL / FL / CLL", "phase": "Approved + expanding", "partner": null, "revenue": "Launch (~CHF 0.8B)", "notes": "First-line DLBCL combo studies. Fixed-duration treatment advantage" },
+    { "drug": "Ocrevus SC", "target": "CD20", "indication": "MS (subcutaneous)", "phase": "Approved (2025)", "partner": null, "revenue": "Part of Ocrevus total", "notes": "Subcutaneous formulation for patient convenience. Rapid market uptake" },
+    { "drug": "Gazyva/Obinutuzumab", "target": "CD20", "indication": "CLL / FL / Lupus Nephritis", "phase": "Approved + LCM", "partner": null, "revenue": "CHF 1.2B+", "notes": "Expanding into lupus nephritis — immunology adjacent" },
+    { "drug": "Trontinemab", "target": "Anti-amyloid (brain shuttle)", "indication": "Alzheimer's Disease", "phase": "Phase III", "partner": null, "revenue": null, "notes": "Brain-shuttle anti-amyloid biologic — differentiated CNS delivery" },
+    { "drug": "Inavolisib", "target": "PI3Kα", "indication": "HR+ Breast Cancer", "phase": "Approved (2024)", "partner": null, "revenue": "Launch", "notes": "PIK3CA-mutant breast cancer — companion diagnostic driven" },
+    { "drug": "CT-996 (oral GLP-1)", "target": "GLP-1R (oral small molecule)", "indication": "Obesity", "phase": "Phase II", "partner": "Carmot (acq.)", "revenue": null, "notes": "Oral obesity pill — highly competitive space vs Lilly/Novo" },
+    { "drug": "Astegolimab", "target": "IL-33", "indication": "Asthma (non-eosinophilic)", "phase": "Phase III (discontinued)", "partner": null, "revenue": null, "notes": "SOLSTICE missed primary endpoint — program discontinued. Shows Roche exiting respiratory" }
+  ],
+  "dermRelevance": [
+    { "program": "Tiragolumab in skin cancers", "trial": "SKYSCRAPER-17 (melanoma)", "phase": "Phase II/III", "mechanism": "Anti-TIGIT + Tecentriq", "threatLevel": "low", "notes": "IO combination in melanoma — oncology-derm overlap but entirely different from Almirall's AD/PSO space" },
+    { "program": "Gazyva in Lupus Nephritis", "trial": "NOBILITY", "phase": "Phase III", "mechanism": "Anti-CD20", "threatLevel": "low", "notes": "Lupus has skin manifestations but this is renal-focused — minimal derm relevance" },
+    { "program": "General immunology exploration", "trial": "Early pipeline", "phase": "Phase I", "mechanism": "Various", "threatLevel": "low", "notes": "Roche's antibody engineering could theoretically enter derm-immunology, but no current programs target AD/PSO" }
+  ],
+  "catalysts": [
+    { "event": "Vabysmo geographic atrophy data", "timeline": "H1 2026", "significance": "high", "detail": "Expansion into GA market currently dominated by Apellis (Syfovre)" },
+    { "event": "Trontinemab Phase III Alzheimer's readout", "timeline": "2026-2027", "significance": "high", "detail": "Brain-shuttle platform validation — could differentiate from Lecanemab/Donanemab" },
+    { "event": "CT-996 oral GLP-1 Phase II obesity data", "timeline": "H2 2026", "significance": "high", "detail": "Oral obesity mechanism — massive TAM if successful" },
+    { "event": "Columvi 1L DLBCL Phase III", "timeline": "2026", "significance": "medium", "detail": "First-line diffuse large B-cell lymphoma — expands bispecific franchise" },
+    { "event": "Tecentriq SC formulation launch", "timeline": "2026", "significance": "medium", "detail": "Convenience upgrade for IO backbone — competitive with Keytruda SC" },
+    { "event": "Ocrevus biosimilar preparedness", "timeline": "2026-2027", "significance": "medium", "detail": "LOE approaching — lifecycle management critical for MS franchise" }
+  ],
+  "updates": []
+}

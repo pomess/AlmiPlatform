@@ -1,0 +1,77 @@
+{
+  "company": "Novartis",
+  "slug": "novartis",
+  "lastFullResearch": "2026-06-04T16:00:00Z",
+  "lastLightweightUpdate": null,
+  "meta": {
+    "hq": "Basel, Switzerland",
+    "localOffice": "Barcelona, Spain",
+    "ticker": "SIX: NOVN",
+    "marketCap": "~$250B",
+    "employees": "~78,000",
+    "logoUrl": "/competitors/novartis-logo.png"
+  },
+  "overview": {
+    "summary": "Novartis has transformed into a focused innovative medicines company post-Sandoz spinoff. Cosentyx (secukinumab) remains their immunology anchor at $6B+, now expanding into hidradenitis suppurativa and axial spondyloarthritis. The company's strategy combines IL-17 franchise depth (Cosentyx + ixekizumab successor planning) with cardiovascular (Entresto/Leqvio), oncology (Kisqali, Pluvicto), and next-gen platforms (radioligand therapy, RNA therapeutics).",
+    "keyStrengths": [
+      "Cosentyx: $6B+ franchise dominating PSO/PsA/axSpA/HS with deep indication portfolio",
+      "Radioligand therapy leadership (Pluvicto) — first-mover in precision oncology",
+      "Entresto ($7B+) cardiovascular anchor provides cash flow stability",
+      "Strong European/Spanish market presence with dedicated derm sales force"
+    ],
+    "threatLevel": "high",
+    "threatRationale": "Novartis's Cosentyx is the primary competitive threat to Almirall's Ilumetri (tildrakizumab) in psoriasis. Cosentyx's superior efficacy data (PASI 90/100 rates), broader label (PSO + PsA + axSpA + HS), and massive promotional spend make it the incumbent biologic in moderate-to-severe PSO. Additionally, Novartis is developing next-gen IL-17 assets that could further pressure the psoriasis space."
+  },
+  "financials": {
+    "quarter": "Q1 2026",
+    "revenue": "$13.2B",
+    "revenueGrowth": "+11% CER",
+    "coreEps": "$2.12",
+    "coreEpsGrowth": "+14% CER",
+    "segments": [
+      { "name": "Immunology", "revenue": "$2.3B", "growth": "+9%", "pctOfTotal": 17 },
+      { "name": "Oncology", "revenue": "$4.1B", "growth": "+18%", "pctOfTotal": 31 },
+      { "name": "Cardiovascular", "revenue": "$3.8B", "growth": "+8%", "pctOfTotal": 29 },
+      { "name": "Neuroscience", "revenue": "$1.7B", "growth": "+12%", "pctOfTotal": 13 },
+      { "name": "Other", "revenue": "$1.3B", "growth": "+4%", "pctOfTotal": 10 }
+    ],
+    "guidance": "Low double-digit net sales growth (CER); mid-teens core operating income growth",
+    "topDrugs": [
+      { "name": "Entresto", "revenue": "$7.4B (FY2025)" },
+      { "name": "Cosentyx", "revenue": "$6.3B (FY2025)" },
+      { "name": "Kisqali", "revenue": "$4.2B (FY2025)" },
+      { "name": "Pluvicto", "revenue": "$1.6B (FY2025)" },
+      { "name": "Kesimpta", "revenue": "$3.5B (FY2025)" },
+      { "name": "Leqvio", "revenue": "$0.8B (FY2025)" }
+    ]
+  },
+  "pipeline": [
+    { "drug": "Cosentyx", "target": "IL-17A", "indication": "PSO / PsA / axSpA / HS / Enthesitis", "phase": "Approved + LCM", "partner": null, "revenue": "$6.3B+", "notes": "Expanding into HS (SUNNY data positive), pediatric PSO, and IV formulation for rapid onset" },
+    { "drug": "Ixekizumab (Taltz)", "target": "IL-17A", "indication": "PSO / PsA / axSpA", "phase": "Approved (via Lilly license considerations)", "partner": null, "revenue": null, "notes": "Class competitor context — Novartis dominates IL-17 class positioning" },
+    { "drug": "Remibrutinib", "target": "BTK", "indication": "CSU / SLE / Sjögren's", "phase": "Phase III (filed for CSU)", "partner": null, "revenue": null, "notes": "Oral BTK inhibitor for chronic spontaneous urticaria. Filed 2025, PDUFA 2026" },
+    { "drug": "Iptacopan", "target": "Factor B", "indication": "PNH / C3G / IgAN", "phase": "Approved (PNH) + Phase III", "partner": null, "revenue": "Launch", "notes": "First oral complement inhibitor. Expanding into C3G and IgA nephropathy" },
+    { "drug": "Pluvicto", "target": "PSMA RLT", "indication": "mCRPC / earlier-line prostate", "phase": "Approved + LCM", "partner": null, "revenue": "$1.6B+", "notes": "Radioligand therapy pioneer. PSMAfore and PSMAddition trials in earlier prostate" },
+    { "drug": "Kisqali", "target": "CDK4/6", "indication": "HR+ Breast Cancer (early + metastatic)", "phase": "Approved + LCM", "partner": null, "revenue": "$4.2B+", "notes": "NATALEE established adjuvant setting. Category leader trajectory" },
+    { "drug": "Leqvio", "target": "PCSK9 (siRNA)", "indication": "Hypercholesterolemia / ASCVD", "phase": "Approved + LCM", "partner": "Alnylam", "revenue": "$0.8B+", "notes": "Twice-yearly injection. VICTORION-2P CV outcomes data 2026" },
+    { "drug": "Pelabresib", "target": "BET", "indication": "Myelofibrosis", "phase": "Filed (PDUFA 2026)", "partner": "MorphoSys", "revenue": null, "notes": "First-in-class BET inhibitor + ruxolitinib combo in myelofibrosis" },
+    { "drug": "Cosentyx IV", "target": "IL-17A (IV formulation)", "indication": "PSO / PsA rapid onset", "phase": "Phase III", "partner": null, "revenue": null, "notes": "IV loading dose for rapid PASI improvement in severe flares" },
+    { "drug": "NVA237 / next-gen IL-17", "target": "IL-17A/F or IL-17C", "indication": "Psoriasis / AD", "phase": "Phase I/II", "partner": null, "revenue": null, "notes": "Next-generation IL-17 franchise to extend Cosentyx lifecycle" }
+  ],
+  "dermRelevance": [
+    { "program": "Cosentyx in Psoriasis", "trial": "CLEAR / FIXTURE / ERASURE / PURE", "phase": "Approved", "mechanism": "Anti-IL-17A", "threatLevel": "critical", "notes": "Market-leading biologic in moderate-to-severe PSO. Directly competes with Ilumetri (tildrakizumab). Superior PASI 90/100 vs Ilumetri but different dosing convenience profile" },
+    { "program": "Cosentyx in Hidradenitis Suppurativa", "trial": "SUNNY 1&2", "phase": "Approved (2024)", "mechanism": "Anti-IL-17A", "threatLevel": "high", "notes": "HS is adjacent to Almirall's derm franchise. Establishes Cosentyx as a pan-inflammatory derm biologic" },
+    { "program": "Cosentyx IV rapid onset", "trial": "Phase III", "phase": "Phase III", "mechanism": "Anti-IL-17A (IV load)", "threatLevel": "medium", "notes": "IV loading dose could capture severe PSO flare patients who need rapid clearance — differentiates from Ilumetri's slower onset" },
+    { "program": "Remibrutinib in CSU", "trial": "REMIX 1&2", "phase": "Filed", "mechanism": "BTK inhibitor (oral)", "threatLevel": "low", "notes": "CSU space is adjacent to derm. First oral option could reshape treatment paradigm" },
+    { "program": "Next-gen IL-17 (early pipeline)", "trial": "Phase I/II", "phase": "Phase I/II", "mechanism": "IL-17A/F or IL-17C", "threatLevel": "medium", "notes": "Lifecycle strategy to maintain IL-17 franchise dominance post-Cosentyx LOE (~2030)" }
+  ],
+  "catalysts": [
+    { "event": "Remibrutinib CSU PDUFA", "timeline": "H1 2026", "significance": "high", "detail": "First oral BTK inhibitor for chronic spontaneous urticaria — adjacent derm market" },
+    { "event": "Pelabresib PDUFA (myelofibrosis)", "timeline": "Q2 2026", "significance": "high", "detail": "First-in-class BET inhibitor approval in hematology" },
+    { "event": "Leqvio VICTORION-2P CVOT", "timeline": "H2 2026", "significance": "high", "detail": "Cardiovascular outcomes trial — could transform Leqvio adoption" },
+    { "event": "Cosentyx HS market uptake data", "timeline": "2026", "significance": "medium", "detail": "Real-world HS share data will signal Novartis's derm franchise ambition" },
+    { "event": "Pluvicto PSMAfore/PSMAddition readouts", "timeline": "2026", "significance": "high", "detail": "Earlier-line prostate cancer expansion for RLT franchise" },
+    { "event": "Cosentyx biosimilar timeline clarity", "timeline": "2026", "significance": "medium", "detail": "Patent cliff ~2030 — lifecycle management signals (IV formulation, next-gen IL-17)" },
+    { "event": "Kisqali adjuvant long-term follow-up", "timeline": "H2 2026", "significance": "medium", "detail": "NATALEE OS data could further cement adjuvant breast standard-of-care" }
+  ],
+  "updates": []
+}

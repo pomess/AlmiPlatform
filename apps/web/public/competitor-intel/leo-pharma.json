@@ -1,0 +1,71 @@
+{
+  "company": "LEO Pharma",
+  "slug": "leo-pharma",
+  "lastFullResearch": "2026-06-04T16:00:00Z",
+  "lastLightweightUpdate": null,
+  "meta": {
+    "hq": "Ballerup, Denmark",
+    "localOffice": "Sant Cugat del Valles, Spain",
+    "ticker": "Private (LEO Foundation)",
+    "marketCap": "Private (~$8B revenue)",
+    "employees": "~6,000",
+    "logoUrl": "/competitors/leo-pharma-logo.png"
+  },
+  "overview": {
+    "summary": "LEO Pharma is the only pure-play dermatology pharma company among Almirall's competitors. Their strategy is anchored on tralokinumab (Adtralza/Adbry), an anti-IL-13 biologic that directly competes with Almirall's Ebglyss (lebrikizumab) in atopic dermatitis. LEO is investing heavily in derm-immunology pipeline expansion (delgocitinib, anti-IL-13 next-gen) while maintaining their legacy topical portfolio (Enstilar, Protopic). As a foundation-owned company, they can take longer-term R&D bets without quarterly earnings pressure.",
+    "keyStrengths": [
+      "Pure derm focus: 100% of R&D and commercial org dedicated to skin diseases",
+      "Tralokinumab (Adtralza): first-to-market anti-IL-13 in AD in Europe",
+      "Foundation ownership allows long-term derm investment without short-term earnings pressure",
+      "Deep dermatology KOL relationships and specialized sales force across Europe"
+    ],
+    "threatLevel": "high",
+    "threatRationale": "LEO Pharma is Almirall's most direct competitor in mechanism and positioning. Tralokinumab (anti-IL-13) and lebrikizumab (anti-IL-13) share the same target, making this a head-to-head commercial battle in AD. LEO's pure-derm focus, earlier EU launch, and topical portfolio synergies give them commercial leverage in dermatologist offices where Almirall also competes."
+  },
+  "financials": {
+    "quarter": "FY 2025",
+    "revenue": "DKK 14.8B (~$2.1B)",
+    "revenueGrowth": "+9% CER",
+    "coreEps": "N/A (private)",
+    "coreEpsGrowth": "N/A",
+    "segments": [
+      { "name": "Tralokinumab (Adtralza/Adbry)", "revenue": "DKK 4.2B", "growth": "+45%", "pctOfTotal": 28 },
+      { "name": "Topicals (Enstilar, Protopic, etc.)", "revenue": "DKK 6.1B", "growth": "-2%", "pctOfTotal": 41 },
+      { "name": "Thrombosis (Innohep)", "revenue": "DKK 2.8B", "growth": "-5%", "pctOfTotal": 19 },
+      { "name": "Other/Pipeline", "revenue": "DKK 1.7B", "growth": "+15%", "pctOfTotal": 12 }
+    ],
+    "guidance": "Tralokinumab to reach DKK 6B+ in 2026; total revenue growth mid-single digits",
+    "topDrugs": [
+      { "name": "Adtralza/Adbry (tralokinumab)", "revenue": "DKK 4.2B (FY2025)" },
+      { "name": "Enstilar (calcipotriol/betamethasone foam)", "revenue": "DKK 2.1B" },
+      { "name": "Protopic (tacrolimus)", "revenue": "DKK 1.4B" },
+      { "name": "Innohep (tinzaparin)", "revenue": "DKK 2.8B" },
+      { "name": "Kyntheum (brodalumab, ex-EU)", "revenue": "DKK 0.6B" }
+    ]
+  },
+  "pipeline": [
+    { "drug": "Tralokinumab (Adtralza/Adbry)", "target": "IL-13", "indication": "AD (adult + adolescent + pediatric)", "phase": "Approved + LCM", "partner": null, "revenue": "DKK 4.2B+", "notes": "Expanding into adolescents (EU approved 2025), pediatric filing 2026, and combination studies with TCS" },
+    { "drug": "Tralokinumab + TCS combo", "target": "IL-13 + topical", "indication": "Moderate AD (combo regimen)", "phase": "Phase III", "partner": null, "revenue": null, "notes": "ECZTRA 3/7: combo with TCS for broader moderate AD population — expands addressable market vs monotherapy" },
+    { "drug": "Tralokinumab in Prurigo Nodularis", "target": "IL-13", "indication": "Prurigo Nodularis", "phase": "Phase III", "partner": null, "revenue": null, "notes": "Direct competition with Dupixent's PN approval. Validates IL-13 mechanism beyond AD" },
+    { "drug": "Delgocitinib (topical JAK)", "target": "Pan-JAK (topical)", "indication": "Chronic Hand Eczema / AD", "phase": "Phase III", "partner": "Japan Tobacco", "revenue": null, "notes": "Topical JAK inhibitor for chronic hand eczema — first-in-class for this indication. Filed in EU" },
+    { "drug": "Tralokinumab in Alopecia Areata", "target": "IL-13", "indication": "Alopecia Areata", "phase": "Phase II", "partner": null, "revenue": null, "notes": "Exploring IL-13 blockade in hair loss — early data mixed" },
+    { "drug": "LEO 190406", "target": "Undisclosed (next-gen derm)", "indication": "Atopic Dermatitis", "phase": "Phase I", "partner": null, "revenue": null, "notes": "Next-generation biologic for AD — details undisclosed, likely OX40L or TSLP" },
+    { "drug": "Kyntheum (brodalumab)", "target": "IL-17RA", "indication": "Psoriasis", "phase": "Approved (select markets)", "partner": "Viatris (US)", "revenue": "DKK 0.6B", "notes": "Anti-IL-17 receptor in PSO. Limited commercial push as LEO focuses on AD" }
+  ],
+  "dermRelevance": [
+    { "program": "Tralokinumab in AD", "trial": "ECZTRA 1-8", "phase": "Approved", "mechanism": "Anti-IL-13 (same target as Ebglyss)", "threatLevel": "critical", "notes": "Most direct competitor to Ebglyss — identical mechanism (anti-IL-13), same patient population. First-to-market in EU gives LEO an incumbent advantage. Head-to-head positioning battle on dosing convenience and efficacy maintenance" },
+    { "program": "Tralokinumab in Prurigo Nodularis", "trial": "Phase III", "phase": "Phase III", "mechanism": "Anti-IL-13", "threatLevel": "high", "notes": "Expanding IL-13 blockade into PN directly competes with potential Ebglyss lifecycle extensions" },
+    { "program": "Delgocitinib topical in Hand Eczema", "trial": "Phase III (filed EU)", "phase": "Filed", "mechanism": "Pan-JAK inhibitor (topical)", "threatLevel": "medium", "notes": "Novel topical for chronic hand eczema — adjacent to AD, could capture mild-moderate patients before biologic escalation" },
+    { "program": "Tralokinumab + TCS combination", "trial": "ECZTRA 3/7", "phase": "Phase III", "mechanism": "Anti-IL-13 + TCS", "threatLevel": "high", "notes": "Combo regimen targets moderate AD — broader population than monotherapy, could position tralokinumab earlier in treatment algorithm" },
+    { "program": "Kyntheum in Psoriasis", "trial": "AMAGINE", "phase": "Approved", "mechanism": "Anti-IL-17RA", "threatLevel": "medium", "notes": "LEO's PSO asset — limited commercial push but validates their presence in psoriasis alongside Ilumetri competition" }
+  ],
+  "catalysts": [
+    { "event": "Tralokinumab pediatric AD filing", "timeline": "H1 2026", "significance": "high", "detail": "Pediatric label expansion — critical for full lifecycle coverage vs Dupixent and Ebglyss" },
+    { "event": "Delgocitinib EU approval (hand eczema)", "timeline": "H1 2026", "significance": "high", "detail": "First-in-class topical JAK for chronic hand eczema — new market entry" },
+    { "event": "Tralokinumab PN Phase III readout", "timeline": "H2 2026", "significance": "high", "detail": "Prurigo nodularis pivotal data — direct lifecycle competition with Dupixent and Ebglyss potential" },
+    { "event": "Tralokinumab real-world AD data (ECZTEND)", "timeline": "2026", "significance": "medium", "detail": "Long-term safety/efficacy data strengthens positioning vs Ebglyss in AD" },
+    { "event": "LEO annual results & pipeline day", "timeline": "Q1 2026", "significance": "medium", "detail": "Foundation-owned company's strategic direction signals for derm investment" },
+    { "event": "Tralokinumab market share data (EU5)", "timeline": "Ongoing 2026", "significance": "high", "detail": "Head-to-head commercial battle with Ebglyss — monthly Rx share tracking" }
+  ],
+  "updates": []
+}

@@ -1,0 +1,77 @@
+{
+  "company": "Sanofi",
+  "slug": "sanofi",
+  "lastFullResearch": "2026-06-04T16:00:00Z",
+  "lastLightweightUpdate": null,
+  "meta": {
+    "hq": "Paris, France",
+    "localOffice": "Barcelona, Spain",
+    "ticker": "EURONEXT: SAN",
+    "marketCap": "~$145B",
+    "employees": "~91,000",
+    "logoUrl": "/competitors/sanofi-logo.png"
+  },
+  "overview": {
+    "summary": "Sanofi's strategy centers on Dupixent dominance across Type 2 inflammation (AD, asthma, CRSwNP, COPD, EoE, prurigo nodularis) while building a next-gen immunology pipeline (amlitelimab, itepekimab). The company is executing a portfolio transformation—divesting its Consumer Healthcare unit (Opella) and doubling down on specialty immunology and rare disease. Dupixent alone accounts for ~30% of pharma revenue and is Almirall's single largest competitive threat in atopic dermatitis.",
+    "keyStrengths": [
+      "Dupixent franchise: $16B+ blockbuster expanding into 10+ indications",
+      "Amlitelimab (anti-OX40L): next-gen biologic positioned as Dupixent successor",
+      "Market-leading KOL network in dermatology and allergology",
+      "Deep real-world evidence base across all Dupixent indications"
+    ],
+    "threatLevel": "high",
+    "threatRationale": "Sanofi is Almirall's most direct and dangerous competitor. Dupixent dominates the moderate-to-severe AD biologic market where Ebglyss (lebrikizumab) competes. Sanofi's sales force, payer relationships, and indication breadth create switching inertia that Ebglyss must overcome. Additionally, amlitelimab (anti-OX40L) targets the same AD population with a potentially differentiated profile."
+  },
+  "financials": {
+    "quarter": "Q1 2026",
+    "revenue": "€11.4B",
+    "revenueGrowth": "+12% CER",
+    "coreEps": "€2.45",
+    "coreEpsGrowth": "+15% CER",
+    "segments": [
+      { "name": "Dupixent", "revenue": "€4.2B", "growth": "+22%", "pctOfTotal": 37 },
+      { "name": "Vaccines", "revenue": "€1.8B", "growth": "+5%", "pctOfTotal": 16 },
+      { "name": "General Medicines", "revenue": "€2.5B", "growth": "-3%", "pctOfTotal": 22 },
+      { "name": "Specialty Care (ex-Dupixent)", "revenue": "€2.9B", "growth": "+9%", "pctOfTotal": 25 }
+    ],
+    "guidance": "Low double-digit business EPS growth (CER); Dupixent sales guidance €18B+ for FY2026",
+    "topDrugs": [
+      { "name": "Dupixent", "revenue": "€16.2B (FY2025)" },
+      { "name": "Aubagio/Tolebrutinib", "revenue": "€1.9B" },
+      { "name": "Kevzara", "revenue": "€1.1B" },
+      { "name": "Altuviiio", "revenue": "€1.6B" },
+      { "name": "Sarclisa", "revenue": "€0.8B" },
+      { "name": "Nexviazyme", "revenue": "€1.2B" }
+    ]
+  },
+  "pipeline": [
+    { "drug": "Dupixent", "target": "IL-4Rα (blocks IL-4/IL-13)", "indication": "AD / Asthma / CRSwNP / EoE / COPD / PN / BP / CSU", "phase": "Approved + LCM", "partner": "Regeneron", "revenue": "€16.2B+", "notes": "Expanding into COPD (BOREAS/NOTUS positive), bullous pemphigoid, CSU, and food allergy" },
+    { "drug": "Amlitelimab", "target": "OX40L", "indication": "Atopic Dermatitis", "phase": "Phase III", "partner": null, "revenue": null, "notes": "STREAM trials in moderate-to-severe AD. Non-immunosuppressive biologic positioned as next-gen post-Dupixent" },
+    { "drug": "Itepekimab", "target": "IL-33", "indication": "Asthma / COPD", "phase": "Phase III", "partner": "Regeneron", "revenue": null, "notes": "Dual anti-IL-33 for uncontrolled asthma. ECLIPSE program" },
+    { "drug": "Tolebrutinib", "target": "BTK", "indication": "Multiple Sclerosis", "phase": "Filed (PDUFA 2026)", "partner": null, "revenue": null, "notes": "First brain-penetrant BTK inhibitor for non-relapsing secondary progressive MS" },
+    { "drug": "Fitusiran", "target": "Antithrombin (siRNA)", "indication": "Hemophilia A/B", "phase": "Approved", "partner": "Alnylam", "revenue": "€0.5B+", "notes": "SC dosing advantage. Expanding market share vs emicizumab" },
+    { "drug": "Rilzabrutinib", "target": "BTK", "indication": "ITP / Pemphigus / CSU", "phase": "Phase III", "partner": null, "revenue": null, "notes": "Oral BTK inhibitor in autoimmune diseases including dermatology-adjacent pemphigus" },
+    { "drug": "Dupixent in COPD", "target": "IL-4Rα", "indication": "COPD (Type 2 high)", "phase": "Approved (2024)", "partner": "Regeneron", "revenue": "Included in Dupixent total", "notes": "First biologic approved for COPD. Expands Dupixent's TAM significantly" },
+    { "drug": "SAR443820", "target": "RIPK1", "indication": "ALS / MS", "phase": "Phase II/III", "partner": null, "revenue": null, "notes": "Novel neuro-inflammation target" },
+    { "drug": "Dupixent in CSU", "target": "IL-4Rα", "indication": "Chronic Spontaneous Urticaria", "phase": "Phase III", "partner": "Regeneron", "revenue": null, "notes": "LIBERTY-CSU CUPID. Competing with omalizumab and ligelizumab" },
+    { "drug": "Amlitelimab in other derm", "target": "OX40L", "indication": "Hidradenitis Suppurativa / Alopecia", "phase": "Phase II", "partner": null, "revenue": null, "notes": "Exploring broad derm application beyond AD" }
+  ],
+  "dermRelevance": [
+    { "program": "Dupixent in Atopic Dermatitis", "trial": "LIBERTY AD (multiple)", "phase": "Approved", "mechanism": "Anti-IL-4Rα (blocks IL-4 + IL-13)", "threatLevel": "critical", "notes": "Market leader with >$10B in AD alone. Direct head-to-head competitor to Ebglyss. Extensive RWE, broad label, pediatric approval" },
+    { "program": "Amlitelimab in AD", "trial": "STREAM-AD Phase III", "phase": "Phase III", "mechanism": "Anti-OX40L (non-depleting)", "threatLevel": "high", "notes": "Next-gen biologic with potential best-in-class profile: non-immunosuppressive, Q4W dosing. Could cannibalize both Dupixent and Ebglyss" },
+    { "program": "Dupixent in Prurigo Nodularis", "trial": "LIBERTY-PN PRIME/PRIME2", "phase": "Approved", "mechanism": "Anti-IL-4Rα", "threatLevel": "medium", "notes": "Establishes Dupixent as a pan-itch/derm biologic. Adjacent to AD patient population" },
+    { "program": "Rilzabrutinib in Pemphigus", "trial": "PEGASUS", "phase": "Phase III", "mechanism": "BTK inhibitor (oral)", "threatLevel": "low", "notes": "Autoimmune blistering—adjacent derm but not Almirall's core space" },
+    { "program": "Dupixent in Bullous Pemphigoid", "trial": "LIBERTY-BP", "phase": "Phase III", "mechanism": "Anti-IL-4Rα", "threatLevel": "low", "notes": "Further expanding Dupixent's derm footprint into rare autoimmune skin diseases" }
+  ],
+  "catalysts": [
+    { "event": "Amlitelimab STREAM-AD Phase III topline", "timeline": "H2 2026", "significance": "high", "detail": "Pivotal data for next-gen anti-OX40L in AD — direct threat to Ebglyss's market window" },
+    { "event": "Dupixent COPD expanded label (NOTUS-2)", "timeline": "Q2 2026", "significance": "high", "detail": "Further COPD penetration expands Dupixent franchise revenue" },
+    { "event": "Tolebrutinib PDUFA", "timeline": "Q3 2026", "significance": "high", "detail": "First brain-penetrant BTK inhibitor — major MS franchise catalyst" },
+    { "event": "Dupixent CSU Phase III readout", "timeline": "H2 2026", "significance": "medium", "detail": "New indication entry into urticaria" },
+    { "event": "Rilzabrutinib pemphigus Phase III", "timeline": "2026", "significance": "medium", "detail": "Oral BTK in autoimmune derm — novel mechanism" },
+    { "event": "Opella Consumer Health spin-off completion", "timeline": "H1 2026", "significance": "medium", "detail": "Portfolio simplification — more R&D capital for immunology" },
+    { "event": "Dupixent food allergy Phase III", "timeline": "2026-2027", "significance": "medium", "detail": "New TAM expansion into allergology" },
+    { "event": "Itepekimab ECLIPSE Phase III data", "timeline": "H2 2026", "significance": "medium", "detail": "Anti-IL-33 for asthma — validates respiratory franchise depth" }
+  ],
+  "updates": []
+}
