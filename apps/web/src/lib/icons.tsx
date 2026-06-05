@@ -1,4 +1,4 @@
-// Verbatim port of JARVIS/app/icons.jsx — same SVGs, same keys.
+// Verbatim port of D360/app/icons.jsx — same SVGs, same keys.
 import type { ReactNode } from "react";
 
 export const I: Record<string, ReactNode> = {

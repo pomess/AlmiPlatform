@@ -1,5 +1,5 @@
 /* ============================================================
-   JARVIS cockpit — shared chrome + page styles
+   D360 cockpit — shared chrome + page styles
    ============================================================ */
 
 body { overflow: hidden; }
@@ -305,7 +305,7 @@ body { overflow: hidden; }
   color: var(--text-faint);
 }
 .msg .meta .who { color: var(--text-muted); }
-.msg .meta .who.jarvis { color: var(--accent); letter-spacing: 0.22em; }
+.msg .meta .who.d360 { color: var(--accent); letter-spacing: 0.22em; }
 .msg .body {
   font-size: 14.5px; line-height: 1.6;
   color: var(--text-primary);

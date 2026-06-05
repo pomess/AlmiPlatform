@@ -1,0 +1,100 @@
+# Disease360 Atlas — Azure DevOps CI/CD Pipeline
+# Follows the same pattern as LakeHouse-Comm.GenAI_MCM_D360_Assistant
+
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: 'GenAI - D360'
+  - group: 'GenAI - D360 Atlas'
+  - name: pythonVersion
+    value: '3.11'
+  - name: nodeVersion
+    value: '20'
+
+stages:
+  - stage: Build
+    displayName: 'Build'
+    jobs:
+      - job: BuildApp
+        displayName: 'Build Frontend + Package'
+        steps:
+          - task: UseNode@1
+            inputs:
+              version: $(nodeVersion)
+            displayName: 'Use Node.js $(nodeVersion)'
+
+          - script: |
+              cd apps/web
+              npm ci
+              npm run build
+            displayName: 'Build React frontend'
+
+          - script: |
+              cp -r apps/web/dist static
+            displayName: 'Copy dist to static/'
+
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: $(pythonVersion)
+            displayName: 'Use Python $(pythonVersion)'
+
+          - script: |
+              pip install databricks-cli
+            displayName: 'Install Databricks CLI'
+
+          - script: |
+              databricks bundle validate --target dev
+            displayName: 'Validate DABs bundle'
+            env:
+              DATABRICKS_HOST: $(DATABRICKS_HOST_DEV)
+              DATABRICKS_TOKEN: $(DATABRICKS_TOKEN_DEV)
+
+          - publish: $(Build.SourcesDirectory)
+            artifact: atlas-bundle
+            displayName: 'Publish bundle artifact'
+
+  - stage: DeployDev
+    displayName: 'Deploy to DEV'
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - template: templates/deploy-job.yml
+        parameters:
+          environment: 'dev'
+          databricksHost: $(DATABRICKS_HOST_DEV)
+          databricksToken: $(DATABRICKS_TOKEN_DEV)
+
+  - stage: DeployTst
+    displayName: 'Deploy to TST'
+    dependsOn: DeployDev
+    condition: succeeded()
+    jobs:
+      - template: templates/deploy-job.yml
+        parameters:
+          environment: 'tst'
+          databricksHost: $(DATABRICKS_HOST_TST)
+          databricksToken: $(DATABRICKS_TOKEN_TST)
+
+  - stage: DeployProd
+    displayName: 'Deploy to PROD'
+    dependsOn: DeployTst
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployProd
+        displayName: 'Deploy to Production'
+        environment: 'production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: templates/deploy-steps.yml
+                  parameters:
+                    environment: 'prod'
+                    databricksHost: $(DATABRICKS_HOST_PROD)
+                    databricksToken: $(DATABRICKS_TOKEN_PROD)

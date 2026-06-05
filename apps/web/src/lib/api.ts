@@ -610,12 +610,7 @@ export async function fetchGraph(brain: string): Promise<{
 
 const LS_BRAIN = "disease360.activeBrain";
 export function getActiveBrain(): string {
-  const legacy = localStorage.getItem("jarvis.activeBrain");
-  if (legacy && !localStorage.getItem(LS_BRAIN)) {
-    localStorage.setItem(LS_BRAIN, legacy);
-    localStorage.removeItem("jarvis.activeBrain");
-  }
-  return localStorage.getItem(LS_BRAIN) || "Bruno's Brain";
+  return localStorage.getItem(LS_BRAIN) || "BioMCP Brain";
 }
 export function setActiveBrain(b: string) {
   localStorage.setItem(LS_BRAIN, b);

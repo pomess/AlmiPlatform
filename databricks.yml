@@ -1,0 +1,88 @@
+# Disease360 Atlas — Databricks Asset Bundle definition
+# Follows the same pattern as LakeHouse-Comm.GenAI_MCM_D360_Assistant
+
+bundle:
+  name: disease360-atlas
+
+variables:
+  warehouse_id:
+    description: "SQL Warehouse ID for Platinum table queries"
+  vera_endpoint:
+    description: "Vera Model Serving endpoint URL"
+  atlas_catalog:
+    description: "Unity Catalog name (e.g. dev_gold_commercial)"
+
+artifacts:
+  atlas-frontend:
+    type: files
+    path: ./apps/web/dist
+    build: npm run build
+    files:
+      - source: ./apps/web/dist/**
+
+resources:
+  apps:
+    disease360-atlas:
+      name: disease360-atlas
+      description: "Competitive intelligence cockpit for Almirall's dermatology franchise"
+      source_code_path: .
+      config:
+        command:
+          - python
+          - atlas_app.py
+        env:
+          - name: DATABRICKS_HTTP_PATH
+            valueFrom: sql-warehouse
+          - name: ATLAS_CATALOG
+            value: ${var.atlas_catalog}
+          - name: DATABRICKS_VERA_ENDPOINT
+            value: ${var.vera_endpoint}
+      resources:
+        - name: sql-warehouse
+          sql_warehouse:
+            id: ${var.warehouse_id}
+            permission: CAN_USE
+      permissions:
+        - service_principal_name: ${bundle.target}.disease360-atlas
+          level: CAN_MANAGE
+
+  jobs:
+    refresh-platinum:
+      name: "D360 Atlas - Refresh Platinum Layer"
+      description: "Daily refresh of platinum_* tables from Gold layer"
+      schedule:
+        quartz_cron_expression: "0 0 6 * * ?"
+        timezone_id: "UTC"
+      tasks:
+        - task_key: refresh_platinum
+          notebook_task:
+            notebook_path: ./jobs/refresh_platinum.py
+            base_parameters:
+              atlas.catalog: ${var.atlas_catalog}
+          existing_cluster_id: ${var.warehouse_id}
+
+targets:
+  dev:
+    default: true
+    workspace:
+      host: https://adb-3337810075168014.14.azuredatabricks.net
+    variables:
+      warehouse_id: ""  # Fill from Azure DevOps variable group
+      vera_endpoint: "https://adb-3337810075168014.14.azuredatabricks.net/serving-endpoints/genai-d360-assistant/invocations"
+      atlas_catalog: "dev_gold_commercial"
+
+  tst:
+    workspace:
+      host: https://adb-4237284272006097.17.azuredatabricks.net
+    variables:
+      warehouse_id: ""
+      vera_endpoint: "https://adb-4237284272006097.17.azuredatabricks.net/serving-endpoints/genai-d360-assistant/invocations"
+      atlas_catalog: "tst_gold_commercial"
+
+  prod:
+    workspace:
+      host: https://adb-553647200544729.9.azuredatabricks.net
+    variables:
+      warehouse_id: ""
+      vera_endpoint: "https://adb-553647200544729.9.azuredatabricks.net/serving-endpoints/genai-d360-assistant/invocations"
+      atlas_catalog: "gold_commercial"

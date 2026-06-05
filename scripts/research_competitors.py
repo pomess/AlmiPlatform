@@ -1,6 +1,6 @@
 """Batch research Barcelona-area pharma competitors and output structured JSON.
 
-Uses open_deep_research (via disease360_runtime) + BioMCP for clinical trial data.
+Uses open_deep_research (via atlas_runtime) + BioMCP for clinical trial data.
 Outputs to apps/web/public/competitor-intel/{slug}.json.
 
 Usage:
@@ -164,7 +164,7 @@ async def _research_company(comp: dict, dry_run: bool = False) -> dict:
     # Deep research via disease360 runtime (if available)
     typer.echo("  [2/2] Deep research query...")
     try:
-        from disease360_runtime.research.runner import run_research
+        from atlas_runtime.research.runner import run_research
 
         query = (
             f"{comp['name']} pharmaceutical company 2026 pipeline financials "
@@ -178,7 +178,7 @@ async def _research_company(comp: dict, dry_run: bool = False) -> dict:
             intel["overview"]["summary"] = _extract_summary(report)
             typer.echo(f"  Got research report ({len(report)} chars)")
     except ImportError:
-        typer.echo("  [warn] disease360_runtime not available, using fallback")
+        typer.echo("  [warn] atlas_runtime not available, using fallback")
     except Exception as e:
         typer.echo(f"  [warn] Deep research failed: {e}")
 

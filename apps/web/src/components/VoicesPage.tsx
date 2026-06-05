@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 type Voice = {
   name: string;
   character: string;
-  jarvis_candidate: boolean;
+  d360_candidate: boolean;
 };
 
 type VoicesResponse = {
@@ -24,7 +24,7 @@ export function VoicesPage() {
   const [playing, setPlaying] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
-  const [onlyJarvis, setOnlyJarvis] = useState(false);
+  const [onlyD360, setOnlyD360] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const cacheRef = useRef<Map<string, string>>(new Map());
@@ -115,9 +115,9 @@ export function VoicesPage() {
     };
   }, []);
 
-  const shown = onlyJarvis ? voices.filter((v) => v.jarvis_candidate) : voices;
-  const jarvis = shown.filter((v) => v.jarvis_candidate);
-  const others = shown.filter((v) => !v.jarvis_candidate);
+  const shown = onlyD360 ? voices.filter((v) => v.d360_candidate) : voices;
+  const D360 = shown.filter((v) => v.d360_candidate);
+  const others = shown.filter((v) => !v.d360_candidate);
 
   return (
     <div className="voices-page page">
@@ -134,10 +134,10 @@ export function VoicesPage() {
           <label className="voices-toggle">
             <input
               type="checkbox"
-              checked={onlyJarvis}
-              onChange={(e) => setOnlyJarvis(e.target.checked)}
+              checked={onlyD360}
+              onChange={(e) => setOnlyD360(e.target.checked)}
             />
-            JARVIS-like only
+            D360 voice only
           </label>
         </div>
       </div>
@@ -170,11 +170,11 @@ export function VoicesPage() {
 
       {error && <div className="voices-error">{error}</div>}
 
-      {!onlyJarvis && jarvis.length > 0 && (
+      {!onlyD360 && D360.length > 0 && (
         <>
-          <h3 className="voices-section-title">JARVIS shortlist</h3>
+          <h3 className="voices-section-title">D360 shortlist</h3>
           <div className="voices-grid">
-            {jarvis.map((v) => (
+            {D360.map((v) => (
               <VoiceCard
                 key={v.name}
                 voice={v}
@@ -191,7 +191,7 @@ export function VoicesPage() {
       )}
 
       <div className="voices-grid">
-        {(onlyJarvis ? jarvis : others).map((v) => (
+        {(onlyD360 ? D360 : others).map((v) => (
           <VoiceCard
             key={v.name}
             voice={v}
@@ -240,7 +240,7 @@ function VoiceCard({
     >
       <div className="voice-card-head">
         <div className="voice-card-name">{voice.name}</div>
-        {voice.jarvis_candidate && <span className="voice-tag">JARVIS-like</span>}
+        {voice.d360_candidate && <span className="voice-tag">D360 voice</span>}
       </div>
       <div className="voice-card-char">{voice.character}</div>
       <button

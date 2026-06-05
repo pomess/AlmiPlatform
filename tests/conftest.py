@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from disease360_runtime import config as runtime_config
+from atlas_runtime import config as runtime_config
 
 
 @pytest.fixture
@@ -32,19 +32,19 @@ def disease360_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
     # Reset caches that pin paths from a previous repo_root().
     runtime_config.load_env.cache_clear()
-    from disease360_runtime.research import store as research_store
+    from atlas_runtime.research import store as research_store
 
     research_store._DB_PATH = None
     research_store._ACTIVE_TASKS.clear()
 
     # Reset atlas cache, which is keyed by brain id and outlives test runs.
-    from disease360_memory import atlas as atlas_mod
+    from atlas_memory import atlas as atlas_mod
 
     atlas_mod.invalidate(None)
 
     # Reset audit module's cached path so it re-resolves under the new
     # DISEASE360_HOME instead of writing to a previous test's tmp dir.
-    from disease360_harness import audit as audit_mod
+    from atlas_harness import audit as audit_mod
 
     audit_mod._PATH = None
 
@@ -60,7 +60,7 @@ def vault_root(disease360_home: Path) -> Path:
 @pytest.fixture
 def tenant_root(vault_root: Path) -> Path:
     """Default-tenant directory under the test vault."""
-    from disease360_memory.registry import DEFAULT_TENANT_ID
+    from atlas_memory.registry import DEFAULT_TENANT_ID
 
     p = vault_root / DEFAULT_TENANT_ID
     p.mkdir(parents=True, exist_ok=True)
@@ -70,7 +70,7 @@ def tenant_root(vault_root: Path) -> Path:
 @pytest.fixture
 def make_brain(tenant_root: Path):
     """Factory that builds a brain folder with the standard layout under the default tenant."""
-    from disease360_memory.registry import DEFAULT_TENANT_ID, Brain
+    from atlas_memory.registry import DEFAULT_TENANT_ID, Brain
 
     def _make(brain_id: str = "Test Brain") -> Brain:
         b = Brain(id=brain_id, root=tenant_root / brain_id, tenant_id=DEFAULT_TENANT_ID)

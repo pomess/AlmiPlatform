@@ -1,4 +1,4 @@
-// Cockpit shell — read-only port of JARVIS/app/main.jsx App, wired live.
+// Cockpit shell — read-only port of D360/app/main.jsx App, wired live.
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";

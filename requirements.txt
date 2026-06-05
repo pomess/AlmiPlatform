@@ -1,0 +1,22 @@
+# Disease360 Atlas — Production dependencies for Databricks Apps
+# Generated from pyproject.toml
+
+# HTTP / web
+fastapi>=0.115
+uvicorn[standard]>=0.32
+httpx>=0.27
+sse-starlette>=2.1
+python-multipart>=0.0.9
+
+# Databricks
+databricks-sql-connector>=3.0
+databricks-sdk>=0.30
+
+# Data / parsing
+pydantic>=2.8
+python-frontmatter>=1.1
+feedparser>=6.0
+
+# Misc
+python-dotenv>=1.0
+PyYAML>=6.0

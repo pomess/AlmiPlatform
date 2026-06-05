@@ -1,0 +1,18 @@
+# Disease360 Atlas — Databricks App runtime configuration
+# This file tells the Databricks Apps platform how to start the app.
+
+command:
+  - python
+  - atlas_app.py
+
+env:
+  - name: DATABRICKS_SERVER_HOSTNAME
+    value: "${DATABRICKS_HOST}"
+  - name: DATABRICKS_HTTP_PATH
+    valueFrom: sql-warehouse
+  - name: DATABRICKS_VERA_ENDPOINT
+    value: "${VERA_SERVING_ENDPOINT}"
+  - name: ATLAS_CATALOG
+    value: "${ATLAS_CATALOG}"
+  - name: ATLAS_SCHEMA
+    value: "genai_mcm_d360"

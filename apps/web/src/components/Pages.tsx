@@ -1,4 +1,4 @@
-// Read-only port of JARVIS/app/pages.jsx — Brains / BrainDetail.
+// Read-only port of D360/app/pages.jsx — Brains / BrainDetail.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";

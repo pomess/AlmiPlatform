@@ -1,4 +1,4 @@
-// Verbatim port of JARVIS/app/header.jsx. Same DOM, same classes.
+// Verbatim port of D360/app/header.jsx. Same DOM, same classes.
 import { useEffect, useRef, useState } from "react";
 import type { DisplayBrain } from "../hooks/useBrains";
 

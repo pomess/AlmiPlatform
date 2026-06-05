@@ -1,49 +1,40 @@
 [project]
-name = "disease360"
-version = "0.1.0"
-description = "Disease360 — Almirall competitive-intel cockpit. LangChain 1.x + Deep Agents."
+name = "disease360-atlas"
+version = "0.2.0"
+description = "Disease360 Atlas — Almirall competitive-intelligence cockpit. Databricks App + Unity Catalog."
 requires-python = ">=3.11"
 readme = "README.md"
 license = { text = "Proprietary" }
 authors = [{ name = "Bruno" }]
 
 dependencies = [
-    # LangChain 1.0 + Deep Agents
-    "langchain>=1.0,<2.0",
-    "langchain-core>=1.0,<2.0",
-    "langgraph>=0.6,<2.0",
-    "langgraph-checkpoint-sqlite>=2.0",
-    "deepagents>=0.5.3",
-    "langsmith>=0.3.0",
-    # Models
-    "langchain-google-genai>=2.1.0",
-    "langchain-ollama>=0.3.0",
-    # Google GenAI SDK (used directly for grounding in deep research)
-    "google-genai>=1.0",
-    # DuckDuckGo search fallback for when Google grounding is unavailable
-    "ddgs>=9.0",
     # HTTP / web
     "fastapi>=0.115",
     "uvicorn[standard]>=0.32",
     "httpx>=0.27",
     "sse-starlette>=2.1",
     "python-multipart>=0.0.9",
+    # Databricks
+    "databricks-sql-connector>=3.0",
+    "databricks-sdk>=0.30",
     # Storage / parsing
     "pydantic>=2.8",
     "python-frontmatter>=1.1",
-    "watchfiles>=0.24",
     "feedparser>=6.0",
-    # CLI
-    "typer>=0.13",
-    "rich>=13.9",
+    # LangChain (for Vera proxy + research pipeline)
+    "langchain>=1.0,<2.0",
+    "langchain-core>=1.0,<2.0",
+    "langgraph>=0.6,<2.0",
+    "langchain-google-genai>=2.1.0",
+    # Google GenAI SDK (grounding in deep research)
+    "google-genai>=1.0",
+    # DuckDuckGo search fallback
+    "ddgs>=9.0",
     # Misc
     "python-dotenv>=1.0",
     "PyYAML>=6.0",
     "tzdata>=2024.2",
-    "aiosqlite>=0.22.1",
-    # Postgres-canonical vault (phase 2 of ADR 0001)
-    "asyncpg>=0.30",
-    # BioMCP data pipeline (fetch_biomcp.py) — pinned to final Python release
+    # BioMCP data pipeline
     "biomcp-python==0.7.3",
 ]
 
@@ -56,9 +47,8 @@ dev = [
 ]
 
 [project.scripts]
-disease360 = "disease360_cli.main:app"
-disease360-memory = "disease360_memory.main:run"
-disease360-harness = "disease360_harness.api:run"
+atlas-memory = "atlas_memory.main:run"
+atlas-harness = "atlas_harness.api:run"
 
 [build-system]
 requires = ["hatchling"]
@@ -66,10 +56,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = [
-    "services/runtime/disease360_runtime",
-    "services/memory/disease360_memory",
-    "services/harness/disease360_harness",
-    "services/channels/cli/disease360_cli",
+    "services/runtime/atlas_runtime",
+    "services/memory/atlas_memory",
+    "services/harness/atlas_harness",
 ]
 
 [tool.ruff]

@@ -1,4 +1,4 @@
-// Live port of JARVIS/app/rail.jsx — fetches hot cache, derives pinned pages
+// Live port of D360/app/rail.jsx — fetches hot cache, derives pinned pages
 // from wikilinks in hot.md, lists recent tool activity.
 import { useEffect, useState, type CSSProperties } from "react";
 import { api } from "../lib/api";

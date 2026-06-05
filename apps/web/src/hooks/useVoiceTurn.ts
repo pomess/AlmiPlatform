@@ -89,7 +89,7 @@ const THREAD_KEY = "disease360.thread";
 // Mechanical playback speedup. We do this in the client (instead of
 // asking Gemini for `[fast]` prosody) because the audio-tag approach
 // makes the model act faster -- it raises pitch and adds urgency, which
-// kills the smooth-baritone JARVIS feel. A flat playbackRate preserves
+// kills the smooth-baritone D360 feel. A flat playbackRate preserves
 // vocal character and only nudges pitch up by ~1.3 semitones at 1.08,
 // which is essentially imperceptible.
 const PLAYBACK_SPEED = 1.08;

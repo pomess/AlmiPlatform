@@ -1,0 +1,40 @@
+# Template: Deploy job for non-production environments
+
+parameters:
+  - name: environment
+    type: string
+  - name: databricksHost
+    type: string
+  - name: databricksToken
+    type: string
+
+jobs:
+  - job: Deploy_${{ parameters.environment }}
+    displayName: 'Deploy to ${{ parameters.environment }}'
+    steps:
+      - download: current
+        artifact: atlas-bundle
+
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.11'
+
+      - script: |
+          pip install databricks-cli
+        displayName: 'Install Databricks CLI'
+
+      - script: |
+          cd $(Pipeline.Workspace)/atlas-bundle
+          databricks bundle deploy --target ${{ parameters.environment }}
+        displayName: 'Deploy bundle'
+        env:
+          DATABRICKS_HOST: ${{ parameters.databricksHost }}
+          DATABRICKS_TOKEN: ${{ parameters.databricksToken }}
+
+      - script: |
+          cd $(Pipeline.Workspace)/atlas-bundle
+          databricks bundle run disease360-atlas --target ${{ parameters.environment }}
+        displayName: 'Run app'
+        env:
+          DATABRICKS_HOST: ${{ parameters.databricksHost }}
+          DATABRICKS_TOKEN: ${{ parameters.databricksToken }}

@@ -1,4 +1,4 @@
-// Read-only port of JARVIS/app/chat.jsx (Thinking, ToolCallout, ChatStream,
+// Read-only port of D360/app/chat.jsx (Thinking, ToolCallout, ChatStream,
 // SkeletonAnswer, Composer). Live-wired via useStreamChat: the streaming
 // hook drives messages + toolActivity, and tool callouts render between
 // the current user message and the in-progress assistant.
@@ -274,7 +274,7 @@ function SkeletonAnswer({ assistantLabel = "DISEASE360" }: { assistantLabel?: st
   return (
     <div className="msg">
       <div className="meta">
-        <span className="who jarvis">{assistantLabel}</span>
+        <span className="who d360">{assistantLabel}</span>
         <span>·</span>
       </div>
       <div style={{ display: "grid", gap: 8, maxWidth: 520 }}>
@@ -366,7 +366,7 @@ export function ChatStream({
     rendered.push(
       <div className="msg" key={i}>
         <div className="meta">
-          <span className="who jarvis">{assistantLabel}</span>
+          <span className="who d360">{assistantLabel}</span>
           <span>{m.ts}</span>
         </div>
         <div className="body">{renderMarkdown(m.content)}</div>

@@ -1,8 +1,8 @@
 """Launch all Disease360 services in one terminal.
 
 Starts:
-  - disease360_memory   (FastAPI)  http://127.0.0.1:8001
-  - disease360_harness  (FastAPI)  http://127.0.0.1:8002
+  - atlas_memory   (FastAPI)  http://127.0.0.1:8001
+  - atlas_harness  (FastAPI)  http://127.0.0.1:8002
   - apps/web        (Vite)     http://127.0.0.1:5173
 
 Output from every process is streamed to this terminal with a colored prefix.
@@ -88,10 +88,10 @@ def main() -> int:
     py = sys.executable
     # `-u` keeps child stdout unbuffered so logs stream live through our pipes.
     procs: dict[str, subprocess.Popen] = {}
-    procs["memory"] = _spawn("memory",  [py, "-u", "-m", "disease360_memory.main"], ROOT)
+    procs["memory"] = _spawn("memory",  [py, "-u", "-m", "atlas_memory.main"], ROOT)
     # Slight stagger so the harness can hit memory if it wants to on boot.
     time.sleep(0.5)
-    procs["harness"] = _spawn("harness", [py, "-u", "-m", "disease360_harness.api"], ROOT)
+    procs["harness"] = _spawn("harness", [py, "-u", "-m", "atlas_harness.api"], ROOT)
     procs["web"] = _spawn("web", [npm, "run", "dev"], WEB)
 
     _say("sys", "all services launched. URLs:")
