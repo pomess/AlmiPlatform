@@ -1,0 +1,80 @@
+Issue Type,Summary,Description,Story Points,Epic Link,Parent
+Epic,Disease360 Atlas Platform Construction,"Build a competitive intelligence cockpit for Almirall's dermatology franchise. A Databricks App (FastAPI + React SPA) that visualizes pharma landscape data from Unity Catalog and provides AI-powered research via streaming chat, voice interaction, and an interactive 3D globe.",,,
+Story,Project Setup & Backend Data Services,"As a developer, I want a well-structured backend with a data adapter layer so that the frontend can consume competitive intelligence data from Unity Catalog via REST endpoints.
+
+Acceptance Criteria:
+- Monorepo with three Python service packages (memory, harness, runtime)
+- Memory Service exposes 12+ GET endpoints reading from Platinum tables
+- Runtime library provides config management, LLM factory, and prompt caching
+- Dev launcher (run.py) starts all services with colored output",1,Disease360 Atlas Platform Construction,
+Story,AI Agent Voice & News Services,"As a user, I want to interact with an AI agent via text and voice, receive streaming responses, and get a daily pharma news briefing so that I can research the competitive landscape hands-free.
+
+Acceptance Criteria:
+- LangGraph agent with tools (wiki search, map control, deep research)
+- SSE streaming endpoint with structured event types
+- Full voice pipeline: push-to-talk STT, agent turn, TTS playback
+- News RSS aggregation from 24+ pharma feeds with 24h caching
+- Vera proxy endpoint forwarding to Databricks Model Serving",1,Disease360 Atlas Platform Construction,
+Story,Frontend Cockpit Visualizations,"As an Almirall analyst, I want an interactive cockpit with a 3D globe, radial drug chart, and knowledge graph so that I can visually explore the competitive landscape and drill into any entity.
+
+Acceptance Criteria:
+- React 19 SPA with Vite 6, dark/light theme, glassmorphism design system
+- Dashboard: MapLibre globe with competitor pins + Three.js hologram shader
+- Bullseye: SVG radial chart with 47 drugs across AD/HS/PSO + timeline slider
+- Knowledge Graph: hand-rolled force simulation, SVG rendering, flashcards on click",1,Disease360 Atlas Platform Construction,
+Story,Frontend AI Integration & Deployment,"As a user, I want to chat with the AI agent via text and voice directly in the cockpit, and as a DevOps engineer I want the app deployed on Databricks with automated data refresh so that the platform is production-ready.
+
+Acceptance Criteria:
+- Chat UI with SSE streaming, typewriter effect, tool call visualization
+- Voice agent: AudioWorklet capture, WebSocket STT, TTS playback via AudioContext
+- Landing page with product showcase and animated transitions
+- Databricks App deployment with DABs bundle and daily Lakeflow Job",1,Disease360 Atlas Platform Construction,
+Sub-task,Monorepo scaffolding runtime library & dev tooling,"- pyproject.toml with hatchling build (3 packages: atlas_memory, atlas_harness, atlas_runtime)
+- Runtime: env/config loader, LLM factory (Gemini cloud + Ollama local), Gemini context-cache helper
+- scripts/run.py multi-process dev launcher (memory + harness + Vite)
+- run.ps1 / stop.ps1 convenience scripts
+- pytest config, ruff/mypy setup",,Disease360 Atlas Platform Construction,Project Setup & Backend Data Services
+Sub-task,Memory Service — Unity Catalog REST adapter,"- FastAPI app on port 8001 with databricks-sql-connector
+- Endpoints: /graph, /bullseye, /news, /kols, /trials, /node/{id}
+- Tenant-scoped brain routes: /tenant/{id}/brain/{brain_id}/hot|index|graph|page|search
+- Pydantic response schemas for all endpoints
+- SQL queries against platinum_* tables (nodes, edges, bullseye, news_events, kols, trials)",,Disease360 Atlas Platform Construction,Project Setup & Backend Data Services
+Sub-task,LangGraph chat agent + SSE streaming + deep research,"- create_deep_agent() with AsyncSqliteSaver checkpointer
+- Tools: search_wiki, read_page, fly_to_location, show_route, clear_map
+- SSE event types: meta, tool, tool_done, tool_progress, token, done, error
+- Deep research pipeline: supervisor -> parallel sub-agents -> compression -> synthesis
+- SQLite run store, per-turn budget enforcement, query classifier",,Disease360 Atlas Platform Construction,AI Agent Voice & News Services
+Sub-task,Voice pipeline (Gemini STT/TTS WebSocket),"- WebSocket /voice/stream/stt — streaming STT via Gemini Live API
+- POST /voice/turn — multipart audio in, SSE response with text + audio frames
+- TTS via gemini-3.1-flash-tts-preview, sentence-splitting for low-latency first audio
+- Pre-rendered PCM cache for cue phrases, language detection (EN/ES/CA)
+- Client tool bridge (agent -> SSE -> browser executes -> HTTP result back)",,Disease360 Atlas Platform Construction,AI Agent Voice & News Services
+Sub-task,News RSS aggregator & Vera proxy endpoint,"- 24+ RSS feeds (pharma, derm, competitors, YouTube)
+- feedparser ingestion with 24h response caching
+- POST /vera/stream — proxy to Databricks MLflow ResponsesAgent endpoint
+- POST /competitor-update — BioMCP trial search + deep research per company
+- scripts/fetch_biomcp.py and scripts/research_competitors.py batch utilities",,Disease360 Atlas Platform Construction,AI Agent Voice & News Services
+Sub-task,React SPA scaffold routing & design system,"- Vite 6 + React 19 + TypeScript 5.7, react-router-dom v7
+- Two-level routing: / (landing) and /app/* (cockpit shell with tabs)
+- Design tokens in oklch (tokens.css), ~5000 lines cockpit CSS
+- Glassmorphism header, HUD bracket frames, aurora blobs, dot-pulse animations
+- View Transitions API for landing -> cockpit crossfade
+- Dark/light theme via [data-theme], localStorage persistence",,Disease360 Atlas Platform Construction,Frontend Cockpit Visualizations
+Sub-task,Dashboard — MapLibre globe Three.js hologram competitor pins,"- MapLibre GL 5.x with globe projection, CARTO basemaps (theme-aware)
+- 16 competitor HQ pins with custom SVG markers
+- Three.js custom MapLibre layer: cyan wireframe hologram buildings with GLSL shader (scanline, fresnel, data-rain)
+- OSM Overpass building footprint fetch + static JSON fallback
+- Daily news panel component with expandable competitor photo cards",,Disease360 Atlas Platform Construction,Frontend Cockpit Visualizations
+Sub-task,Bullseye chart + Knowledge Graph visualization,"- Bullseye: Pure SVG radial chart, concentric phase rings, 47 drugs, color-coded by modality (mAb, small molecule, nanobody, bispecific), timeline slider (2001-2026), zoom/pan, drug dossier sidebar
+- Knowledge Graph: custom force simulation (N-body repulsion, spring edges, center gravity), SVG with zoom/pan/drag, node coloring by layer, neighborhood highlighting, flashcard popover via Memory API",,Disease360 Atlas Platform Construction,Frontend Cockpit Visualizations
+Sub-task,Chat + voice UI (SSE streaming push-to-talk typewriter),"- useStreamChat hook: ReadableStream reader, data: frame parsing, typewriter drain via requestAnimationFrame
+- Tool call visualization: collapsible ToolGroup, deep-research progress steps
+- useVeraChat hook: separate Vera agent (full history, no server thread)
+- useVoiceTurn hook (~740 LOC): AudioWorklet mic capture at 16kHz mono, WebSocket streaming STT, TTS AudioContext playback, fly_to_location client tool execution
+- Thread persistence in localStorage, research mode toggle",,Disease360 Atlas Platform Construction,Frontend AI Integration & Deployment
+Sub-task,Landing page competitor intel cards & Databricks deployment,"- Landing page: multi-section marketing with parallax, IntersectionObserver fade-ups, static bullseye snapshot, mock globe, mock graph SVG
+- Competitor photo cards: Wikipedia/curated photos, therapy areas, expandable deep analysis
+- app.yaml: Databricks App entry point, env vars, SQL Warehouse resource binding
+- databricks.yml: DABs bundle with dev/tst/prod targets, React SPA artifact upload
+- Lakeflow Job: refresh-platinum daily cron at 06:00 UTC
+- atlas_app.py: production FastAPI serving static SPA + mounting memory/harness routers",,Disease360 Atlas Platform Construction,Frontend AI Integration & Deployment
